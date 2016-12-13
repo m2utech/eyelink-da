@@ -30,12 +30,12 @@ sql = "SELECT * FROM tb_node_raw where event_time = '2016-11-30 22:31:12'"
 pd_sql.execute(sql,conn)
 df = pd_sql.read_sql(sql,conn,index_col = None)
 df.convert_objects(convert_numeric=True)
-
-print(df['als_level'])
+pd.set_option('display.max_columns', 80)
+print(df.head(3))
+#print(df['als_level'])
 #print(df['als_level'].convert_objects(convert_numeric=True))
 
-print(df.dtypes)
-
+#print(df.dtypes)
 
 
 
