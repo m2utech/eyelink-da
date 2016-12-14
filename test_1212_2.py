@@ -28,22 +28,32 @@ cur = conn.cursor()
 sql = "SELECT * FROM tb_node_raw where event_time = '2016-11-30 22:31:12'"
 
 pd_sql.execute(sql,conn)
-df = pd_sql.read_sql(sql,conn,index_col = None)
-df.convert_objects(convert_numeric=True)
-pd.set_option('display.max_columns', 80)
-print(df.head(3))
+df = pd_sql.read_sql(sql,conn, index_col = None)
+#df = pd_sql.read_sql(sql,conn, pd.to_datetime, index_col = None)
+df['event_time'] = pd.to_datetime(df['event_time'])
+df.info()
+print(df.columns.tolist())
+
+df['event_time'] = df['event_time'].dt.date
+
+#df['event_time'] = df['event_time'].dt.date   # key error !!
+print(df['event_time'])
+
+
+
+#df.convert_objects(convert_numeric=True)
+#pd.set_option('display.max_columns', 80)
+#print(df.head(3))
+
+
 #print(df['als_level'])
 #print(df['als_level'].convert_objects(convert_numeric=True))
 
 #print(df.dtypes)
 
-
-
-
 #df.info()
 
 #print(df.head())
-
 
 #dataset = pd.read_sql(sql,conn)
 #dataset.info()
