@@ -38,20 +38,31 @@ import Parstream_conn as pc
 #
 
 #data = pd.read_excel("NODE_RAW_1213_ET_1.xlsx", index_col=0)
-data = pd.read_csv("NODE_RAW_1213_ET_1.csv", parse_dates=[2,3])
+#data = pd.read_csv("NODE_RAW_1215_ET_1.csv", parse_dates=[2,3])
+data = pd.read_csv("../data/NODE_RAW_1215_ET_1.csv", parse_dates=[2,3])
 
 #print(data['NODE_ID'])
 df = pd.DataFrame(data)
 
-print(df.columns.tolist())
-df[' EVENT_TIME'] = df[' EVENT_TIME'].dt.date   # key error !!
-print(df[' EVENT_TIME'])
+print(df.columns.tolist()) #컬럼 데이터타입 확인
+
+#df[' EVENT_TIME'] = df[' EVENT_TIME'].dt.date   # key error !!
+#print(df[' EVENT_TIME'])
 df.info()
 
 #df['EVENT_TIME'].date_time.map(lambda x: x.strftime('%Y-%m-%d'))
 
-print(df.pivot_table(index='NODE_ID', columns=' EVENT_TYPE', values='VOLTAGE', aggfunc='first'))
+#print(df['VOLTAGE'])
+#print(df.pivot_table(index='EVENT_TIME', columns='NODE_ID', values='VOLTAGE', aggfunc='first'))
+df1 = df.pivot_table(index=['EVENT_TIME'], columns='NODE_ID', values=['ACTIVE_POWER', 'POWER_FACTOR'])
 
+df2 = df1.resample('15T').mean()
+#df2 = df1.groupby(df1.TimeGroup(freq='10Min')).aggregate(numpy.sum)
+df3 = df2.T
+print(df3)
+df3.to_csv('test.csv', sep=',', encoding='utf-8')
+#df2 = df1.T
+#print(df2)
 
 #print(df)
 

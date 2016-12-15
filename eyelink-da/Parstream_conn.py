@@ -6,7 +6,7 @@ import pandas as pd
 import pandas.io.sql as pd_sql
 
 # jdbc 파일 경로 및 class 경로 설정
-JDBC_DRIVER = 'C:/dev/jdbc-4.2.9.jar'
+JDBC_DRIVER = '../drivers/jdbc-4.2.9.jar'
 
 # parstream 접근
 conn = jp.connect('com.parstream.ParstreamDriver',
