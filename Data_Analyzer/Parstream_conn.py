@@ -4,6 +4,7 @@ import jpype
 import jaydebeapi as jp
 import pandas as pd
 import pandas.io.sql as pd_sql
+import matplotlib
 
 # jdbc 파일 경로 및 class 경로 설정
 JDBC_DRIVER = '../drivers/jdbc-4.2.9.jar'
