@@ -27,11 +27,11 @@ import Parstream_conn as pc
 #	print(x,y)
 
 #print(type(each[1]))
+sql = "SELECT * FROM tb_node_raw where event_type = 1"
+pd_sql.execute(sql,pc.conn)
+df = pd_sql.read_sql(sql,pc.conn)
 
-#pd_sql.execute(sql,pc.conn)
-#df = pd_sql.read_sql(sql,pc.conn)
-
-#print(df)
+print(df)
 # df = df.T 	#행렬 전치(transpose)
 #print(df.axes)
 #df.info()
@@ -39,6 +39,7 @@ import Parstream_conn as pc
 
 #data = pd.read_excel("NODE_RAW_1213_ET_1.xlsx", index_col=0)
 #data = pd.read_csv("NODE_RAW_1215_ET_1.csv", parse_dates=[2,3])
+'''
 data = pd.read_csv("../data/NODE_RAW_1215_ET_1.csv", parse_dates=[2,3])
 
 #print(data['NODE_ID'])
@@ -66,5 +67,5 @@ df3.to_csv('test.csv', sep=',', encoding='utf-8')
 
 #print(df)
 
-
+'''
 #pd.pivot_table(df, index=["NODE_ID"], values=["VOLTAGE"])
