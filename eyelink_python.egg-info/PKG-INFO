@@ -1,0 +1,12 @@
+Metadata-Version: 1.1
+Name: eyelink-python
+Version: 1.0.0
+Summary: Data Analyzer of eyelink for parstream
+Home-page: UNKNOWN
+Author: Hyeongsoo Kim
+Author-email: hyeongsoo.kim@m2utech.com
+License: UNKNOWN
+Description: UNKNOWN
+Keywords: eyelink data analyzer
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.5
