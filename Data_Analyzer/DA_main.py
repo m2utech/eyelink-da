@@ -23,7 +23,7 @@ data = pd_sql.read_sql(sql,pc.conn)
 df_list = data.values.tolist()
 print(data)
 """
-
+"""
 # csv파일 열기
 df = pd.read_csv("../data/NODE_RAW_1215_ET_1.csv", parse_dates=[2,3])
 
@@ -44,6 +44,9 @@ df.rename(columns = {'APPARENT_POWER' : 'apparent_power'}, inplace = True)
 df.rename(columns = {'AMOUNT_OF_ACTIVE_POWER' : 'amount_of_active_power'}, inplace = True)
 
 print(df.columns.tolist()) #컬럼 데이터타입 확인
+"""
+
+
 
 
 #days = data['EVENT_TIME']
@@ -61,7 +64,8 @@ print(df.axes)
 #
 '''
 #data = pd.read_csv("NODE_RAW_1215_ET_1.csv", parse_dates=[2,3])
-'''
+
+
 data = pd.read_csv("../data/NODE_RAW_1215_ET_1.csv", parse_dates=[2,3])
 
 #print(data['NODE_ID'])
@@ -90,5 +94,5 @@ df3.to_csv('test.csv', sep=',', encoding='utf-8')
 
 #print(df)
 
-'''
+
 #pd.pivot_table(df, index=["NODE_ID"], values=["VOLTAGE"])
