@@ -1,9 +1,0 @@
-MANIFEST.in
-README.rst
-setup.py
-DA_Lib/__init__.py
-eyelink_python.egg-info/PKG-INFO
-eyelink_python.egg-info/SOURCES.txt
-eyelink_python.egg-info/dependency_links.txt
-eyelink_python.egg-info/requires.txt
-eyelink_python.egg-info/top_level.txt
