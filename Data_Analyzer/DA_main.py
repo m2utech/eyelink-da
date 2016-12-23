@@ -1,3 +1,4 @@
+# coding: utf-8
 import pandas as pd
 import pandas.io.sql as pd_sql
 from pandas import DataFrame
@@ -7,7 +8,7 @@ import matplotlib.pyplot as plt
 # Parstream_conn.py
 import Parstream_conn as pc
 
-""" 
+"""
 # Connection 클래스 이용  (datatype으로 인해 pandas 대체)
 cur = pc.conn.cursor()
 sql = "SELECT event_type, als_level, dimming_level FROM tb_node_raw where event_time = '2016-11-30 22:31:12'"

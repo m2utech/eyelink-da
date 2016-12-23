@@ -1,5 +1,8 @@
 data/
+build/
+dist/
+ELDA*/
 *.log
 *.pyc
 *.csv
-*.md
+

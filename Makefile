@@ -1,5 +1,5 @@
 init:
 	pip install -r requirements.txt
 
-aaa:
+run:
 	python matplotlib2.py
