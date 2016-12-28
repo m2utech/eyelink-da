@@ -11,7 +11,7 @@ JDBC_DRIVER = '../drivers/jdbc-4.2.9.jar'
 
 # parstream 접근
 conn = jp.connect('com.parstream.ParstreamDriver',
-                  'jdbc:parstream://m2u-parstream.eastus.cloudapp.azure.com:9043/eyelink?user=parstream&password=Rornfldkf!2',
+                  'jdbc:parstream://m2u-da.eastus.cloudapp.azure.com:9043/eyelink?user=parstream&password=Rornfldkf!2',
                   JDBC_DRIVER)
 
 #conn.close()
