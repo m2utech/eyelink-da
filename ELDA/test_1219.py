@@ -7,13 +7,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import preprocessing
 
-# csv파일 열기
-df = pd.read_csv("../data/NODE_RAW_1215_ET_1.csv", parse_dates=[2,3])
-
-df = DataFrame(df, columns=['AMPERE','VOLTAGE'])
-df = preprocessing.scale(df)
-
+"""
+##### Connection 클래스 이용  (datatype으로 인해 pandas 대체) #####
+cur = elda_pc.conn.cursor()
+sql = "SELECT event_time, voltage FROM tb_node_raw where event_type = 1"
+cur.execute(sql)
+df = DataFrame(cur.fetchall())
 print(df)
+"""
+
+##### csv파일 열기 #####
+#dataset = elda_rc.read_file()	#read_csvfile module
+
+# 원하는 기간 설정: test 11.18 ~ 11.18
+#targetdata = dataset
+#targetdata.index = targetdata.event_time
+
+#st = dt.datetime(2016,11,18,0,0,0)
+#en = dt.datetime(2016,12,13,10,30)
+#targetdata = targetdata.ix[st:en]
+
+
+########################
+
 
 #df = DataFrame(df)
 
