@@ -4,6 +4,7 @@ import pandas as pd
 import pandas.io.sql as pd_sql
 from pandas import DataFrame
 import datetime as dt
+from math import sqrt
 
 ### required eyelink modules ###
 import elda_parstream_conn as elda_pc
@@ -43,23 +44,102 @@ targetdata.index = targetdata.event_time
 #en = dt.datetime(2016,12,13,10,30)
 #targetdata = targetdata.ix[st:en]
 
+#원하는 데이터 속성 추출 피벗 및 클러스터링 
+voltage_data = DataFrame(targetdata, columns=['node_id', 'event_time', 'voltage'])
+# function (data, index, columns, values, default_value)
+voltage_data = elda_ed.extract_data(voltage_data, 'event_time', 'node_id', 'voltage', 200)
+
+print(len(voltage_data.columns))
+ts={}
+
+### divide time series variables
+for i in range(len(voltage_data.columns)):
+	ts[i] = voltage_data.ix[:,i]
+	ts[i].plot()
+	
+plt.legend(prop={'size':5})
+plt.show()
+
+
+
+### Calculation of Euclidean distance
+def euclid_dist(t1,t2):
+	return sqrt(sum((t1-t2)**2))
+
+print(euclid_dist(ts[0],ts[1]))
+
+
+##### Dynamic Time Warping
+def DTWDistance(s1, s2):
+    DTW={}
+    
+    for i in range(len(s1)):
+        DTW[(i, -1)] = float('inf')
+    for i in range(len(s2)):
+        DTW[(-1, i)] = float('inf')
+    DTW[(-1, -1)] = 0
+
+    for i in range(len(s1)):
+        for j in range(len(s2)):
+            dist= (s1[i]-s2[j])**2
+            DTW[(i, j)] = dist + min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
+		
+    return sqrt(DTW[len(s1)-1, len(s2)-1])
+
+print(DTWDistance(ts[0],ts[1]))
+
+
+
+
+'''
+for col_name in voltage_data.columns:
+	"ts_"+col_name = voltage_data.ix[:,col_name]
+	print("ts_"+col_name)
+'''
+'''
+
+for  in voltage_data:
+	ts{i} = voltage_data.ix[:,i]
+	print(ts{i})
+
+
+ts1 = voltage_data.ix[:,0]
+print(ts1)
+
+'''
+
+"""
+# 데이터 구간
 targetdata = targetdata.ix[targetdata.index.min():targetdata.index.max()]
 
-''' ###### 1229일 테스트 예정 #####
-targetdata.index = mdates.DateFormatter('%Y-%m-%d %H:%M:%S')
-print(targetdata.index)
 
-np.linspace(targetdata.index.min(), targetdata.index.max(), len(targetdata.index))
+coord = mdates.date2num(targetdata.index.to_pydatetime())
 
+np.linspace(coord.min(), coord.max(), len(coord))
 ts1=pd.Series(targetdata.voltage)
-ts2=pd.Series(2.2*np.sin(x/3.5+2.4)+3.2)
-ts3=pd.Series(0.04*x+3.0)
 
 ts1.plot()
-ts2.plot()
-ts3.plot()
 
-plt.ylim(-2,10)
-plt.legend(['ts1','ts2','ts3'])
+plt.ylim(0,250) #y축 min, max
 plt.show()
-'''
+"""
+""" # main 내용
+ts_ampere = pd.Series(data=ampere_data['0001.00000007'])
+ts_ampere.plot()
+plt.show()
+
+import pdb; pdb.set_trace()  # breakpoint cbcd1d1d //
+
+
+ts_x = pd.Series(data=vib_x_data['0001.00000007'])
+ts_y = pd.Series(data=vib_y_data['0001.00000007'])
+ts_z = pd.Series(data=vib_z_data['0001.00000007'])
+
+ts_x.plot()
+ts_y.plot()
+ts_z.plot()
+
+plt.show()
+
+# df3.to_csv('test.csv', sep=',', encoding='utf-8')
+"""
