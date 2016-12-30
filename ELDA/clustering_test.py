@@ -4,7 +4,7 @@ import pandas as pd
 import pandas.io.sql as pd_sql
 from pandas import DataFrame
 import datetime as dt
-from math import sqrt
+import math
 
 ### required eyelink modules ###
 import elda_parstream_conn as elda_pc
@@ -54,42 +54,37 @@ ts={}
 
 ### divide time series variables
 for i in range(len(voltage_data.columns)):
-	ts[i] = voltage_data.ix[:,i]
-	ts[i].plot()
-	
-plt.legend(prop={'size':5})
-plt.show()
+    ts[i] = voltage_data.ix[:,i]
+    ts[i].plot()
+
+#plt.legend(prop={'size':5})
+#plt.show()
 
 
 
 ### Calculation of Euclidean distance
-def euclid_dist(t1,t2):
-	return sqrt(sum((t1-t2)**2))
+def euclid_dist(t1, t2):
+    return math.sqrt(sum((t1-t2)**2))
 
-print(euclid_dist(ts[0],ts[1]))
+print(euclid_dist(ts[0], ts[1]))
 
 
 ##### Dynamic Time Warping
 def DTWDistance(s1, s2):
-    DTW={}
-    
+    DTW = {}
     for i in range(len(s1)):
-        DTW[(i, -1)] = float('inf')
+        DTW[(i, -1)] = np.float('inf')
     for i in range(len(s2)):
-        DTW[(-1, i)] = float('inf')
+        DTW[(-1, i)] = np.float('inf')
     DTW[(-1, -1)] = 0
 
     for i in range(len(s1)):
         for j in range(len(s2)):
-            dist= (s1[i]-s2[j])**2
-            DTW[(i, j)] = dist + min(DTW[(i-1, j)],DTW[(i, j-1)], DTW[(i-1, j-1)])
-		
-    return sqrt(DTW[len(s1)-1, len(s2)-1])
+            dist = (s1[i]-s2[j])**2
+            DTW[(i, j)] = dist + min(DTW[(i-1, j)], DTW[(i, j-1)], DTW[(i-1, j-1)])
+    return math.sqrt(DTW[len(s1)-1, len(s2)-1])
 
-print(DTWDistance(ts[0],ts[1]))
-
-
-
+print(DTWDistance(ts[0], ts[1]))
 
 '''
 for col_name in voltage_data.columns:

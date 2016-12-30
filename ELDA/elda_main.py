@@ -63,5 +63,3 @@ ts={}
 for i in range(len(voltage_data.columns)):
 	ts[i] = voltage_data.ix[:,i]
 	ts[i].plot()
-	
-
