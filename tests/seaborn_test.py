@@ -5,7 +5,7 @@ from scipy import stats
 import scipy.cluster.hierarchy as hac
 import matplotlib.pyplot as plt
 
-num_samples = 61
+num_samples = 600
 group_size = 10
 
 x = np.linspace(0, 15, num_samples)
