@@ -49,7 +49,10 @@ voltage_data = DataFrame(targetdata, columns=['node_id', 'event_time', 'voltage'
 # function (data, index, columns, values, default_value)
 voltage_data = elda_ed.extract_data(voltage_data, 'event_time', 'node_id', 'voltage', 200)
 
-print(len(voltage_data.columns))
+#voltage_data = voltage_data.T
+#print(voltage_data)
+#print(len(voltage_data.columns))
+
 ts={}
 
 ### divide time series variables
@@ -59,7 +62,6 @@ for i in range(len(voltage_data.columns)):
 
 #plt.legend(prop={'size':5})
 #plt.show()
-
 
 
 ### Calculation of Euclidean distance

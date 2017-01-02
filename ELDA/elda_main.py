@@ -57,9 +57,31 @@ voltage_data = elda_ed.extract_data(voltage_data, 'event_time', 'node_id', 'volt
 #vib_y_data = elda_ed.extract_data(vib_y_data, 'event_time', 'node_id', 'vibration_y', 0)
 #vib_z_data = elda_ed.extract_data(vib_z_data, 'event_time', 'node_id', 'vibration_z', 0)
 
-print(len(voltage_data.columns))
+#print(len(voltage_data.columns)) #number of columns
+
+voltage_data = voltage_data.T
+
+voltage_data = pd.DataFrame(voltage_data.values)
+
+print(voltage_data)
+
+
+import pdb; pdb.set_trace()  # breakpoint 2468d308 //
+
 ts={}
 
 for i in range(len(voltage_data.columns)):
 	ts[i] = voltage_data.ix[:,i]
-	ts[i].plot()
+	#ts[i].plot()
+
+print(ts)
+#plt.legend(prop={'size':5})
+#plt.show()
+
+#################################################
+#################################################
+
+
+import ts_cluster
+
+ts_cluster()
