@@ -12,23 +12,33 @@ import elda_extract_data as elda_ed
 import elda_read_csv as elda_rc
 import elda_preprocessing as elda_pre
 
+
 ### test library ###
 import numpy as np
 import matplotlib.pyplot as plt
 
 from pandasql import sqldf
 
-'''
+
 ##### parstream connection using pandas #####
 sql = """
 SELECT * 
 FROM tb_node_raw 
-WHERE event_time <= TIMESTAMP'2016-12-13 23:59:59' 
-ORDER BY event_time;
+WHERE event_time >= TIMESTAMP'2016-11-16 00:00:00' and event_time <= TIMESTAMP'2016-11-20 23:59:59' 
 """
 targetdata = pd_sql.read_sql(sql,elda_pc.conn,index_col='event_time')
-'''
+#WHERE event_type = 1
+#ORDER BY event_time;
 
+
+
+elda_pc.conn.close() #closed conn
+
+print(targetdata)
+
+import pdb; pdb.set_trace()  # breakpoint 71147eb1 //
+
+"""
 ##### csv파일 열기 #####
 dataset = elda_rc.read_file()	#read_csvfile module
 
@@ -41,7 +51,7 @@ targetdata.index = targetdata.event_time
 #targetdata = targetdata.ix[st:en]
 
 targetdata = targetdata.ix[targetdata.index.min():targetdata.index.max()]
-
+"""
 
 #원하는 데이터 속성 추출 피벗 및 클러스터링 
 voltage_data = DataFrame(targetdata, columns=['node_id', 'event_time', 'voltage'])
@@ -61,12 +71,25 @@ voltage_data = elda_ed.extract_data(voltage_data, 'event_time', 'node_id', 'volt
 
 voltage_data = voltage_data.T
 
-voltage_data = pd.DataFrame(voltage_data.values)
+
+voltage_data = voltage_data.values.tolist()
+print(voltage_data)
+
+import pdb; pdb.set_trace()  # breakpoint 02de47f7 //
+
+#voltage_data = pd.DataFrame(voltage_data.values)
+
+
+#test = voltage_data.tolist()
 
 print(voltage_data)
 
+import pdb; pdb.set_trace()  # breakpoint cd40a9db //
 
-import pdb; pdb.set_trace()  # breakpoint 2468d308 //
+import ts_cluster
+
+ts_cluster.k_means_clust(voltage_data,5,10,4)
+
 
 ts={}
 
@@ -82,6 +105,5 @@ print(ts)
 #################################################
 
 
-import ts_cluster
 
-ts_cluster()
+
