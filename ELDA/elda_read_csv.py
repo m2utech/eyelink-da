@@ -6,7 +6,7 @@ import pandas as pd
 
 def read_file():
 	# csv or text 파일, 구분자','
-	dataset = pd.read_csv("../data/busan_tb_node_raw_1215.txt", sep=',', parse_dates=[2,3])
+	dataset = pd.read_csv("../data/busan_tb_node_raw_1215_test.txt", sep=',', parse_dates=[2,3])
 	
 	# 파스트림 연동시를 위해 소문자로..
 	dataset.rename(columns = {'NODE_ID' : 'node_id'}, inplace = True)
@@ -53,8 +53,12 @@ def read_file():
 	dataset.reboot_time = pd.to_datetime(dataset.reboot_time)
 	#dataset.index = dataset.event_time
 
+	myJSON = dataset.reset_index().to_json("C:\\test.json", orient='records')
+
 	return dataset
 
+
+read_file()
 """
 # 데이터 타입 정의 
 # (DtypeWarning: Columns (xx) have mixed types.  방지
