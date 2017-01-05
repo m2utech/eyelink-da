@@ -22,7 +22,7 @@ from pandasql import sqldf
 
 ###### load json ######
 #rawdata = pd.read_json('C:\\test.json', typ='series') #series형태로 로드시
-rawdata = pd.read_json('C:\\test.json', typ='frame') #typ's default -> frame
+rawdata = pd.read_json('C:\\test.json') #typ's default -> frame
 
 #print(rawdata)
 
@@ -40,15 +40,42 @@ voltage_data = elda_ed.extract_data(voltage_data, 'event_time', 'node_id', 'volt
 
 
 #voltage_data = pd.DataFrame(voltage_data.values)
-voltage_data = voltage_data.unstack()
+#voltage_data = voltage_data.unstack()
+
+for i in voltage_data.columns:
+	df = voltage_data[i].values.tolist()
+	print(voltage_data.index.values)
+
+
+import pdb; pdb.set_trace()  # breakpoint 8df053f7 //
 
 print(voltage_data)
 
 print(type(voltage_data))
 
-#import ts_cluster
+print(voltage_data.ix[:,1])
+print(voltage_data.columns[1])
 
-#ts_cluster.k_means_clust(voltage_data,5,10,4)
+######### convert to series data ########
+ts={}
+
+for i in range(len(voltage_data.columns)):
+
+	ts[voltage_data.columns[i]] = voltage_data.ix[:,i]
+	ts[voltage_data.columns[i]].plot()
+
+plt.legend(prop={'size':5})
+plt.show()
+
+#print(ts)
+import ts_cluster
+
+centroids = ts_cluster.k_means_clust(ts,5,10,4)
+
+for i in centroids:
+    plt.plot(i)
+
+plt.show()
 
 
 #ts={}

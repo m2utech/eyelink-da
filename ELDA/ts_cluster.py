@@ -101,10 +101,11 @@ def LB_Keogh(s1, s2, r):
     return np.sqrt(LB_sum) 
 
 
-#test = pd.read_csv("../data/train.csv", sep=',')
-test = np.genfromtxt("../data/train.csv", delimiter=',')
+test = pd.read_csv("../data/train.csv", sep=',', index_col='E_index')
+#test = np.genfromtxt("../data/train.csv", delimiter=',', names=True, dtype=None)
 #test = test.T
-print(test)
+test = test.values.tolist()
+
 
 centroids = k_means_clust(test, 5, 10, 4)
 
