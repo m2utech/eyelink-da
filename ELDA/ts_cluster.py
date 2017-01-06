@@ -9,6 +9,12 @@ import random
 
 def k_means_clust(data, num_clust, num_iter, w):
     centroids = random.sample(list(data),num_clust) # 랜덤하게 중심점 선택
+    #centroids = random.sample(list(data),num_clust) # 랜덤하게 중심점 선택
+    #centroids = [0,0,0,0,0]
+    print(list(data))
+    import pdb; pdb.set_trace()  # breakpoint 82d50c1b //
+
+    print(centroids)
 
     counter = 0
 
@@ -22,9 +28,11 @@ def k_means_clust(data, num_clust, num_iter, w):
         for ind, i in enumerate(data):  #ex) ind: 0, i: ts_1
             min_dist = float('inf')
             closest_clust = None
+            print(ind, i, min_dist, closest_clust)##########################
 
             for c_ind, j in enumerate(centroids): #random centroid 
                 
+                print(c_ind, j) ###############
                 if LB_Keogh(i, j, 5) < min_dist:
                     cur_dist = float(DTWDistance(i, j, w))
                     if cur_dist < min_dist:
@@ -101,11 +109,12 @@ def LB_Keogh(s1, s2, r):
     return np.sqrt(LB_sum) 
 
 
-test = pd.read_csv("../data/train.csv", sep=',', index_col='E_index')
-#test = np.genfromtxt("../data/train.csv", delimiter=',', names=True, dtype=None)
+test = pd.read_csv("../data/train.csv", sep=',')
+#test = np.genfromtxt("../data/train.csv", delimiter=',')
 #test = test.T
-test = test.values.tolist()
-
+#test = test.values.tolist()
+#print(type(test))
+#print(list(test))
 
 centroids = k_means_clust(test, 5, 10, 4)
 
