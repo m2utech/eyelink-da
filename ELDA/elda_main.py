@@ -1,11 +1,11 @@
 # coding: utf-8
 ### required library ###
 import pandas as pd
-import pandas.io.sql as pd_sql
+#import pandas.io.sql as pd_sql
 from pandas import DataFrame
-import datetime as dt
-from math import sqrt
-import json
+#import datetime as dt
+#from math import sqrt
+import json, requests
 
 ### required eyelink modules ###
 #import elda_parstream_conn as elda_pc
@@ -22,14 +22,30 @@ from pandasql import sqldf
 
 ###### load json ######
 #rawdata = pd.read_json('C:\\test.json', typ='series') #series형태로 로드시
-rawdata = pd.read_json('C:\\test.json') #typ's default -> frame
+#rawdata = pd.read_json('C:\\test.json') #typ's default -> frame
 
-#print(rawdata)
+s_date = '2016-12-11'
+e_date = '2016-12-12'
+
+url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod?startDate={}&endDate={}".format(s_date,e_date)
+resp = requests.get(url=url)
+rawdata = json.loads(resp.text)
+
+testdata = DataFrame(rawdata['rtnData'])
+print(testdata)
+import pdb; pdb.set_trace()  # breakpoint 962cdf6a //
+
+#print(list(rawdata.keys()))
 
 #원하는 데이터 속성 추출 피벗 및 클러스터링 
-voltage_data = DataFrame(rawdata, columns=['node_id', 'event_time', 'voltage'])
+voltage_data = DataFrame(rawdata['rtnData'], columns=['node_id', 'event_time', 'voltage'])
+#voltage_data['node_id'] = voltage_data['node_id'].astype(str)
+#voltage_data = DataFrame(rawdata, columns=['node_id', 'event_time', 'voltage'])
 
-# function (data, index, columns, values, default_value)
+voltage_data['event_time'] = pd.to_datetime(voltage_data['event_time'], format='%Y-%m-%d %H:%M:%S.%f')
+#####################################
+
+##### function (data, index, columns, values, default_value) #####
 voltage_data = elda_ed.extract_data(voltage_data, 'event_time', 'node_id', 'voltage', 200)
 
 #print(len(voltage_data.columns)) #number of columns
@@ -53,17 +69,24 @@ for i in range(len(voltage_data.columns)):
 #plt.show()
 #ls=[]
 col_list = list(voltage_data.columns)
+#print(col_list)
 
 ls={}
 for i in range(len(voltage_data.columns)):
 	ls[str(col_list[i])] = ts[str(voltage_data.columns[i])].tolist()
 
+
 #print(ls.keys())
+
+from collections import OrderedDict
+ls = OrderedDict(sorted(ls.items(), key=lambda x:x[1], reverse=True))
+#print("--------------")
+#print(ls['0001.00000001'])
 
 
 import ts_cluster
 
-centroids = ts_cluster.k_means_clust(ls,5,10,4)
+centroids = ts_cluster.k_means_clust(ls,4,100,4)
 #centroids = ts_cluster.k_means_clust(list(ls.values()),5,10,4)
 
 for i in centroids:
