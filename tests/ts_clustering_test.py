@@ -8,35 +8,26 @@ import matplotlib.pyplot as plt
 import random
 
 def k_means_clust(data, num_clust, num_iter, w):
-    centroids = random.sample(list(data.values()),num_clust) # 랜덤하게 중심점 선택
+    centroids = random.sample(list(data),num_clust) # 랜덤하게 중심점 선택
     #centroids = random.sample(list(data),num_clust) # 랜덤하게 중심점 선택
     #centroids = [0,0,0,0,0]
-    ##print(list(data.values()))
-    ##print("-----------------")
-    ##print(centroids)
+##    print(list(data))
+##    print("-----------------")
+##    print(centroids)
 
     counter = 0
 
-    for n in range(num_iter):   # 10회 반복
+    for n in range(num_iter):   # num_iter: 반복횟수
         counter += 1
         #print(counter)
 
     #assign data points to clusters
         assignments = {}
 
-        for ind, i in enumerate(data.values()):  #ex) ind: 0, i: ts_1
-            ind = list(data)[ind]
-            
+        for ind, i in enumerate(data):  #ex) ind: 0, i: ts_1
             min_dist = float('inf')
             closest_clust = None
 
-            #print(ind)
-            #print("----------")
-            #print(type(i))
-            #print("----------")
-            #print(min_dist)
-            #print("----------")
-            #print(closest_clust)
 
             for c_ind, j in enumerate(centroids): #random centroid 
                 
@@ -51,21 +42,20 @@ def k_means_clust(data, num_clust, num_iter, w):
                 assignments[closest_clust].append(ind)
             else:
                 assignments[closest_clust] = []
-        print(assignments) #Result of Clustering
+        print(assignments)
         print(type(assignments))
+        print("-----------------")
 
         #recalculate centroids of clusters 
         for key in assignments:
-            #print(key)
-            #print("-------------")
-            #print(assignments[key])
-
             clust_sum = 0
 
             for k in assignments[key]:
-                clust_sum = clust_sum+np.asarray(data[k])
-                #print(clust_sum)
-                #print(data[k])
+                clust_sum = clust_sum+data[k]
+                print(clust_sum)
+                print("--------------")
+                print(type(data[k]))
+                import pdb; pdb.set_trace()  # breakpoint 1d63ec03 //
 
 
             centroids[key] = [m/len(assignments[key]) for m in clust_sum]
@@ -117,7 +107,6 @@ def LB_Keogh(s1, s2, r):
 #    print("-----------------------")
 #    print(s2)
 
-
     LB_sum = 0
     for ind, i in enumerate(s1):
           
@@ -135,7 +124,6 @@ def LB_Keogh(s1, s2, r):
 
 
 
-"""
 #test = pd.read_csv("../data/train.csv", sep=',')
 test = np.genfromtxt("../data/train.csv", delimiter=',')
 #test = test.T
@@ -143,10 +131,12 @@ test = np.genfromtxt("../data/train.csv", delimiter=',')
 #print(type(test))
 #print(list(test))
 
+#print(test)
+
+
 centroids = k_means_clust(test, 5, 10, 4)
 
 for i in centroids:
     plt.plot(i)
 
 plt.show()
-"""
