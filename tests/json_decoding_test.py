@@ -6,7 +6,11 @@ jsonString = '{"name": "강진수", "id": 152352, "history": [{"date": "2015-03-
 # JSON 디코딩
 dict = json.loads(jsonString)
  
+
 # Dictionary 데이타 체크
 print(dict['name'])
+
+import pdb; pdb.set_trace()  # breakpoint 12e645f5 //
+
 for h in dict['history']:
     print(h['date'], h['item'])
