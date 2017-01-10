@@ -1,11 +1,13 @@
-import pandas as pd
-import pandas.io.sql as pd_sql
-from pandas import DataFrame
+#import pandas as pd
+#import pandas.io.sql as pd_sql
+#from pandas import DataFrame
+#import datetime as dt
+#from math import sqrt
 
-import numpy as np
+#import numpy as np
 
-import matplotlib.pyplot as plt
-from sklearn import preprocessing
+#import matplotlib.pyplot as plt
+#from sklearn import preprocessing
 
 """
 ##### Connection 클래스 이용  (datatype으로 인해 pandas 대체) #####

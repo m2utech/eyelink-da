@@ -22,8 +22,8 @@ from pandasql import sqldf
 #rawdata = pd.read_json('C:\\test.json', typ='series') #series형태로 로드시
 #rawdata = pd.read_json('C:\\test.json') #typ's default -> frame
 
-s_date = '2016-12-01'
-e_date = '2016-12-07'
+s_date = '2016-11-16'
+e_date = '2016-11-18'
 
 url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod?startDate={}&endDate={}".format(s_date,e_date)
 resp = requests.get(url)
@@ -53,18 +53,6 @@ ampere_data = elda_ed.extract_data(dataset, 'event_time', 'node_id', 'ampere', 0
 active_power_data = elda_ed.extract_data(dataset, 'event_time', 'node_id', 'active_power', 170)
 power_factor_data = elda_ed.extract_data(dataset, 'event_time', 'node_id', 'power_factor', 0.9)
 
-
-#print(len(voltage_data.columns)) #number of columns
-
-#voltage_data = voltage_data.T
-
-#voltage_data = voltage_data.values.tolist()
-
-
-#voltage_data = pd.DataFrame(voltage_data.values)
-#voltage_data = voltage_data.unstack()
-#print(voltage_data.columns)
-
 ts={}
 
 for i in range(len(voltage_data.columns)):
@@ -88,116 +76,3 @@ from collections import OrderedDict
 ls = OrderedDict(sorted(ls.items(), key=lambda x:x[1], reverse=True))
 #print("--------------")
 #print(ls['0001.00000001'])
-
-
-import ts_cluster
-
-centroids = ts_cluster.k_means_clust(ls,4,10,4)
-#centroids = ts_cluster.k_means_clust(list(ls.values()),5,10,4)
-
-print(centroids)
-
-for i in centroids:
-    plt.plot(i)
-
-plt.legend(prop={'size':5})
-plt.show()
-
-"""#####################################
-print(ls["0001.00000001"])
-#print(ts['0001.00000001'])
-
-ls["0001.00000001"] = ts[str(voltage_data.columns[2])].tolist()
-
-print(ls['test'])
-
-for i in range(len(voltage_data.columns)):
-	i = 0
-
-print(ts[str(voltage_data.columns[2])])
-print(type(ts[str(voltage_data.columns[4])]))
-
-print(ts[str(voltage_data.columns[2])].tolist())
-print(type(ts[str(voltage_data.columns[2])].tolist()))
-
-
-
-ls = {}
-for i in range(len(voltage_data.columns)):
-#	ls["{0}".format(i)] = voltage_data.columns[i]
-	ls['{}'.format(voltage_data.columns[i])] = i
-
-print(ls) # dict type
-
-ts={}
-
-for i in range(len(voltage_data.columns)):
-
-	ts[voltage_data.columns[i]] = voltage_data.ix[:,i]
-	ts[voltage_data.columns[i]].plot()
-
-	#ts[i].plot()
-ls = ts['0001.00000001'].tolist()
-print(ls)
-
-
-for i in voltage_data.columns:
-	df = voltage_data[i].values.tolist()
-#	print(voltage_data.index.values)
-
-print(df)
-
-
-print(voltage_data)
-
-print(type(voltage_data))
-
-print(voltage_data.ix[:,1])
-print(voltage_data.columns[2])
-
-######### convert to series data ########
-ts={}
-
-for i in range(len(voltage_data.columns)):
-
-	ts[voltage_data.columns[i]] = voltage_data.ix[:,i]
-	ts[voltage_data.columns[i]].plot()
-
-
-print(ts[str(voltage_data.columns[2])])
-print(type(ts[str(voltage_data.columns[4])]))
-
-print(ts[str(voltage_data.columns[2])].tolist())
-print(type(ts[str(voltage_data.columns[2])].tolist()))
-
-
-plt.legend(prop={'size':5})
-plt.show()
-
-#print(ts)
-import ts_cluster
-
-centroids = ts_cluster.k_means_clust(ts,5,10,4)
-
-for i in centroids:
-    plt.plot(i)
-
-plt.show()
-
-
-#ts={}
-
-#for i in range(len(voltage_data.columns)):
-#	ts[i] = voltage_data.ix[:,i]
-	#ts[i].plot()
-
-#print(ts)
-#plt.legend(prop={'size':5})
-#plt.show()
-
-#################################################
-#################################################
-
-
-"""
-

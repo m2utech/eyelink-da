@@ -51,8 +51,8 @@ def k_means_clust(data, num_clust, num_iter, w):
                 assignments[closest_clust].append(ind)
             else:
                 assignments[closest_clust] = []
-        print(assignments) #Result of Clustering
-        print(type(assignments))
+        #print(assignments) #Result of Clustering
+        #print(type(assignments))
 
         #recalculate centroids of clusters 
         for key in assignments:
@@ -69,6 +69,9 @@ def k_means_clust(data, num_clust, num_iter, w):
 
 
             centroids[key] = [m/len(assignments[key]) for m in clust_sum]
+
+    print(assignments) #Result of Clustering
+    
     return centroids
 
 
