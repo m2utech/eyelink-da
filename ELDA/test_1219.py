@@ -67,3 +67,20 @@ print(df)
 
 #print(df)
 
+###################################
+
+#print(len(voltage_data.columns)) #number of columns
+
+#voltage_data = voltage_data.T
+
+#voltage_data = voltage_data.values.tolist()
+
+
+#voltage_data = pd.DataFrame(voltage_data.values)
+#voltage_data = voltage_data.unstack()
+#print(voltage_data.columns)
+
+#ts[voltage_data.columns[i]].plot()
+#plt.legend(prop={'size':5})
+#plt.show()
+#ls=[]
