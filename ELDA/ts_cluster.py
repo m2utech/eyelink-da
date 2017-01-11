@@ -62,16 +62,21 @@ def k_means_clust(data, num_clust, num_iter, w):
 
             clust_sum = 0
 
+            if not assignments[key]:
+                print("============== what!! ============")
+
             for k in assignments[key]:
                 clust_sum = clust_sum+np.asarray(data[k])
-                #print(clust_sum)
-                #print(data[k])
+                #print("clust_sum : ", clust_sum)
+                #print("data[k]", data[k])
 
-
+########## null 값으로 처리해야함 ########
+            print("clust_sum : ", clust_sum)
             centroids[key] = [m/len(assignments[key]) for m in clust_sum]
 
     print(assignments) #Result of Clustering
-    
+
+
     return centroids
 
 
