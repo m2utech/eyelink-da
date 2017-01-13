@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 
 ##### 분석 조건 세팅 #####
 start_date = '2016-12-07'
-end_date = '2016-12-08'
+end_date = '2016-12-07'
 time_interval = '15T'	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
@@ -97,10 +97,34 @@ pf_ls = OrderedDict(sorted(pf_ls.items(), key=lambda x:x[1], reverse=True))
 #################### clustering ###################
 ##### voltage #####
 v_centroids, v_assignments = ts_cluster.k_means_clust(v_ls,4,10,4) #data, clus_num, iter, window
-
+test = []
 print("==============")
-print(v_assignments)
-print(type(v_assignments))
+print(list(v_assignments.values()))
+
+import pdb; pdb.set_trace()  # breakpoint d537495b //
+
+#test = str(v_assignments.values())
+#print(v_assignments.values)
+#print(v_assignments)
+print("==============")
+#print(type(v_assignments))
+print(test)
+print("==============")
+test = test.replace("', ",";")
+print(test)
+print(type(test))
+
+s = test.split(',')
+print(s)
+print(type(s))
+print("================")
+d={}
+for i in s:
+	d[i.split(':')[0]] = i.split(':')[1]
+
+print(d)
+print(type(d))
+
 import pdb; pdb.set_trace()  # breakpoint 9db5c240 //
 
 v_result_centroids = pd.DataFrame(v_centroids)
