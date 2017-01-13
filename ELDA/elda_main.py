@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 ##### 분석 조건 세팅 #####
 start_date = '2016-12-07'
 end_date = '2016-12-08'
-time_interval = '30T'	#15분, W:weekly, D:daily, H:hourly, T:minutely
+time_interval = '15T'	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
 url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod?startDate={}&endDate={}".format(start_date,end_date)
@@ -52,6 +52,7 @@ power_factor_data = elda_ed.extract_data(dataset, 'event_time', 'node_id', 'powe
 result_tb = pd.DataFrame()
 result_tb['event_time'] = voltage_data.index
 result_tb['da_time'] = datetime.datetime.now()
+result_tb = result_tb[['da_time','event_time']]
 
 ###### time-series format ######
 v_ts = {}
@@ -95,7 +96,13 @@ pf_ls = OrderedDict(sorted(pf_ls.items(), key=lambda x:x[1], reverse=True))
 
 #################### clustering ###################
 ##### voltage #####
-v_centroids = ts_cluster.k_means_clust(v_ls,4,10,4) #data, clus_num, iter, window
+v_centroids, v_assignments = ts_cluster.k_means_clust(v_ls,4,10,4) #data, clus_num, iter, window
+
+print("==============")
+print(v_assignments)
+print(type(v_assignments))
+import pdb; pdb.set_trace()  # breakpoint 9db5c240 //
+
 v_result_centroids = pd.DataFrame(v_centroids)
 v_result_centroids.reset_index(level=0, inplace=True)
 v_result_centroids = v_result_centroids.pivot_table(columns = 'index')
@@ -142,12 +149,33 @@ result_tb['c3_power_factor'] = pf_result_centroids.loc[:,3]
 today = datetime.datetime.now().strftime('%Y%m%d_%H_%M_%S')
 result_tb.to_csv(str(today)+'_result_tb.csv', sep=',', encoding='utf-8', index=False, header=False)
 
-import pdb; pdb.set_trace()  # breakpoint 895c15f6 //
 
+plt.figure(1)
+
+plt.subplot(221)
+for i in v_centroids:
+    plt.plot(i)
+plt.title("Voltage pattern")
+#plt.legend(a_centroids, prop={'size':5})
+
+plt.subplot(222)
 for i in a_centroids:
     plt.plot(i)
+plt.title("Ampere pattern")
+#plt.legend(a_centroids, prop={'size':5})
 
-plt.legend(a_centroids, prop={'size':5})
+plt.subplot(223)
+for i in ap_centroids:
+    plt.plot(i)
+plt.title("Active power pattern")
+#plt.legend(a_centroids, prop={'size':5})
+
+plt.subplot(224)
+for i in pf_centroids:
+    plt.plot(i)
+plt.title("Power factor pattern")
+#plt.legend(a_centroids, prop={'size':5})
+
 plt.show()
 
 """#####################################
