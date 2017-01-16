@@ -49,10 +49,21 @@ active_power_data = elda_ed.extract_data(dataset, 'event_time', 'node_id', 'acti
 power_factor_data = elda_ed.extract_data(dataset, 'event_time', 'node_id', 'power_factor', 0.9, time_interval)
 
 ###### 결과 테이블 ######
+nowtime = datetime.datetime.now()
+
 result_tb = pd.DataFrame()
 result_tb['event_time'] = voltage_data.index
-result_tb['da_time'] = datetime.datetime.now()
+result_tb['da_time'] = nowtime
 result_tb = result_tb[['da_time','event_time']]
+
+master_tb = pd.DataFrame()
+master_tb['da_time'] = nowtime
+master_tb['start_date'] = start_date
+master_tb['end_date'] = end_date
+master_tb['time_interval'] = time_interval
+
+print(master_tb)
+import pdb; pdb.set_trace()  # breakpoint a65a897e //
 
 ###### time-series format ######
 v_ts = {}
@@ -97,36 +108,7 @@ pf_ls = OrderedDict(sorted(pf_ls.items(), key=lambda x:x[1], reverse=True))
 #################### clustering ###################
 ##### voltage #####
 v_centroids, v_assignments = ts_cluster.k_means_clust(v_ls,4,10,4) #data, clus_num, iter, window
-test = []
-print("==============")
-print(list(v_assignments.values()))
-
-import pdb; pdb.set_trace()  # breakpoint d537495b //
-
-#test = str(v_assignments.values())
-#print(v_assignments.values)
-#print(v_assignments)
-print("==============")
-#print(type(v_assignments))
-print(test)
-print("==============")
-test = test.replace("', ",";")
-print(test)
-print(type(test))
-
-s = test.split(',')
-print(s)
-print(type(s))
-print("================")
-d={}
-for i in s:
-	d[i.split(':')[0]] = i.split(':')[1]
-
-print(d)
-print(type(d))
-
-import pdb; pdb.set_trace()  # breakpoint 9db5c240 //
-
+## datail result ##
 v_result_centroids = pd.DataFrame(v_centroids)
 v_result_centroids.reset_index(level=0, inplace=True)
 v_result_centroids = v_result_centroids.pivot_table(columns = 'index')
@@ -134,10 +116,20 @@ result_tb['c0_voltage'] = v_result_centroids.loc[:,0]
 result_tb['c1_voltage'] = v_result_centroids.loc[:,1]
 result_tb['c2_voltage'] = v_result_centroids.loc[:,2]
 result_tb['c3_voltage'] = v_result_centroids.loc[:,3]
+## master result ##
+v_assign = ",".join(map(str, list(v_assignments.values())))
+v_assign = v_assign.replace("', ",";").replace("[","").replace("]","")
+v_assign = v_assign.split(',')
+v_assign = pd.DataFrame(v_assign).T
+master_tb['c0_voltage'] = v_assign.loc[:,0]
+master_tb['c0_voltage'] = v_assign.loc[:,1]
+master_tb['c0_voltage'] = v_assign.loc[:,2]
+master_tb['c0_voltage'] = v_assign.loc[:,3]
 
 
 ##### ampere #####
-a_centroids = ts_cluster.k_means_clust(a_ls,4,10,4)
+a_centroids, a_assignments = ts_cluster.k_means_clust(a_ls,4,10,4)
+## datail result ##
 a_result_centroids = pd.DataFrame(a_centroids)
 a_result_centroids.reset_index(level=0, inplace=True)
 a_result_centroids = a_result_centroids.pivot_table(columns = 'index')
@@ -145,9 +137,20 @@ result_tb['c0_ampere'] = a_result_centroids.loc[:,0]
 result_tb['c1_ampere'] = a_result_centroids.loc[:,1]
 result_tb['c2_ampere'] = a_result_centroids.loc[:,2]
 result_tb['c3_ampere'] = a_result_centroids.loc[:,3]
+## master result ##
+a_assign = ",".join(map(str, list(a_assignments.values())))
+a_assign = a_assign.replace("', ",";").replace("[","").replace("]","")
+a_assign = a_assign.split(',')
+a_assign = pd.DataFrame(a_assign).T
+master_tb['c0_ampere'] = a_assign.loc[:,0]
+master_tb['c0_ampere'] = a_assign.loc[:,1]
+master_tb['c0_ampere'] = a_assign.loc[:,2]
+master_tb['c0_ampere'] = a_assign.loc[:,3]
+
 
 ##### active power #####
-ap_centroids = ts_cluster.k_means_clust(ap_ls,4,10,4)
+ap_centroids, ap_assignments = ts_cluster.k_means_clust(ap_ls,4,10,4)
+## detail result ##
 ap_result_centroids = pd.DataFrame(ap_centroids)
 ap_result_centroids.reset_index(level=0, inplace=True)
 ap_result_centroids = ap_result_centroids.pivot_table(columns = 'index')
@@ -155,10 +158,20 @@ result_tb['c0_active_power'] = ap_result_centroids.loc[:,0]
 result_tb['c1_active_power'] = ap_result_centroids.loc[:,1]
 result_tb['c2_active_power'] = ap_result_centroids.loc[:,2]
 result_tb['c3_active_power'] = ap_result_centroids.loc[:,3]
+## master result ##
+ap_assign = ",".join(map(str, list(ap_assignments.values())))
+ap_assign = ap_assign.replace("', ",";").replace("[","").replace("]","")
+ap_assign = ap_assign.split(',')
+ap_assign = pd.DataFrame(ap_assign).T
+master_tb['c0_active_power'] = ap_assign.loc[:,0]
+master_tb['c0_active_power'] = ap_assign.loc[:,1]
+master_tb['c0_active_power'] = ap_assign.loc[:,2]
+master_tb['c0_active_power'] = ap_assign.loc[:,3]
 
 
 ##### power factor #####
-pf_centroids = ts_cluster.k_means_clust(pf_ls,4,10,4)
+pf_centroids, pf_assignments = ts_cluster.k_means_clust(pf_ls,4,10,4)
+## detail result ##
 pf_result_centroids = pd.DataFrame(pf_centroids)
 pf_result_centroids.reset_index(level=0, inplace=True)
 pf_result_centroids = pf_result_centroids.pivot_table(columns = 'index')
@@ -166,13 +179,23 @@ result_tb['c0_power_factor'] = pf_result_centroids.loc[:,0]
 result_tb['c1_power_factor'] = pf_result_centroids.loc[:,1]
 result_tb['c2_power_factor'] = pf_result_centroids.loc[:,2]
 result_tb['c3_power_factor'] = pf_result_centroids.loc[:,3]
+## master result ##
+pf_assign = ",".join(map(str, list(pf_assignments.values())))
+pf_assign = pf_assign.replace("', ",";").replace("[","").replace("]","")
+pf_assign = pf_assign.split(',')
+pf_assign = pd.DataFrame(pf_assign).T
+master_tb['c0_power_factor'] = pf_assign.loc[:,0]
+master_tb['c0_power_factor'] = pf_assign.loc[:,1]
+master_tb['c0_power_factor'] = pf_assign.loc[:,2]
+master_tb['c0_power_factor'] = pf_assign.loc[:,3]
 
 #print(result_tb)
+#print(master_tb)
 
 ##### save to CSV file #####
-today = datetime.datetime.now().strftime('%Y%m%d_%H_%M_%S')
-result_tb.to_csv(str(today)+'_result_tb.csv', sep=',', encoding='utf-8', index=False, header=False)
-
+today = nowtime.strftime('%Y%m%d_%H_%M_%S')
+result_tb.to_csv(str(today)+'_tb_da_clustering_detail.csv', sep=',', encoding='utf-8', index=False, header=False)
+master_tb.to_csv(str(today)+'_tb_da_clustering_master.csv', sep=',', encoding='utf-8', index=False, header=False)
 
 plt.figure(1)
 
