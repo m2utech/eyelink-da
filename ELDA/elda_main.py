@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 ##### 분석 조건 세팅 #####
 start_date = '2016-12-07'
 end_date = '2016-12-07'
-time_interval = '15T'	#15분, W:weekly, D:daily, H:hourly, T:minutely
+time_interval = 15	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
 url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod?startDate={}&endDate={}".format(start_date,end_date)
@@ -56,14 +56,17 @@ result_tb['event_time'] = voltage_data.index
 result_tb['da_time'] = nowtime
 result_tb = result_tb[['da_time','event_time']]
 
-master_tb = pd.DataFrame()
+#test = {'da_time': [nowtime]}
+#master_tb = pd.DataFrame(test)
+
+#print(master_tb)
+
+master_tb = pd.DataFrame(index=[0])
+
 master_tb['da_time'] = nowtime
 master_tb['start_date'] = start_date
 master_tb['end_date'] = end_date
 master_tb['time_interval'] = time_interval
-
-print(master_tb)
-import pdb; pdb.set_trace()  # breakpoint a65a897e //
 
 ###### time-series format ######
 v_ts = {}
@@ -118,7 +121,7 @@ result_tb['c2_voltage'] = v_result_centroids.loc[:,2]
 result_tb['c3_voltage'] = v_result_centroids.loc[:,3]
 ## master result ##
 v_assign = ",".join(map(str, list(v_assignments.values())))
-v_assign = v_assign.replace("', ",";").replace("[","").replace("]","")
+v_assign = v_assign.replace(", ",":").replace("'","").replace("[","").replace("]","")
 v_assign = v_assign.split(',')
 v_assign = pd.DataFrame(v_assign).T
 master_tb['c0_voltage'] = v_assign.loc[:,0]
@@ -139,7 +142,7 @@ result_tb['c2_ampere'] = a_result_centroids.loc[:,2]
 result_tb['c3_ampere'] = a_result_centroids.loc[:,3]
 ## master result ##
 a_assign = ",".join(map(str, list(a_assignments.values())))
-a_assign = a_assign.replace("', ",";").replace("[","").replace("]","")
+a_assign = a_assign.replace(", ",":").replace("'","").replace("[","").replace("]","")
 a_assign = a_assign.split(',')
 a_assign = pd.DataFrame(a_assign).T
 master_tb['c0_ampere'] = a_assign.loc[:,0]
@@ -160,7 +163,7 @@ result_tb['c2_active_power'] = ap_result_centroids.loc[:,2]
 result_tb['c3_active_power'] = ap_result_centroids.loc[:,3]
 ## master result ##
 ap_assign = ",".join(map(str, list(ap_assignments.values())))
-ap_assign = ap_assign.replace("', ",";").replace("[","").replace("]","")
+ap_assign = ap_assign.replace(", ",":").replace("'","").replace("[","").replace("]","")
 ap_assign = ap_assign.split(',')
 ap_assign = pd.DataFrame(ap_assign).T
 master_tb['c0_active_power'] = ap_assign.loc[:,0]
@@ -181,7 +184,7 @@ result_tb['c2_power_factor'] = pf_result_centroids.loc[:,2]
 result_tb['c3_power_factor'] = pf_result_centroids.loc[:,3]
 ## master result ##
 pf_assign = ",".join(map(str, list(pf_assignments.values())))
-pf_assign = pf_assign.replace("', ",";").replace("[","").replace("]","")
+pf_assign = pf_assign.replace(", ",":").replace("'","").replace("[","").replace("]","")
 pf_assign = pf_assign.split(',')
 pf_assign = pd.DataFrame(pf_assign).T
 master_tb['c0_power_factor'] = pf_assign.loc[:,0]
@@ -189,13 +192,17 @@ master_tb['c0_power_factor'] = pf_assign.loc[:,1]
 master_tb['c0_power_factor'] = pf_assign.loc[:,2]
 master_tb['c0_power_factor'] = pf_assign.loc[:,3]
 
-#print(result_tb)
-#print(master_tb)
 
+########### json 저장 ##############
+#result_tb.to_json('_tb_da_clustering_detail.json', orient='split', date_format='iso', date_unit='s')
+#master_tb.to_json('_tb_da_clustering_master.json', orient='values', date_format='iso', date_unit='s')
+####################################
+
+############################
 ##### save to CSV file #####
-today = nowtime.strftime('%Y%m%d_%H_%M_%S')
-result_tb.to_csv(str(today)+'_tb_da_clustering_detail.csv', sep=',', encoding='utf-8', index=False, header=False)
-master_tb.to_csv(str(today)+'_tb_da_clustering_master.csv', sep=',', encoding='utf-8', index=False, header=False)
+today = nowtime.strftime('%Y%m%d%H%M%S')
+result_tb.to_csv('tb_da_clustering_detail.'+str(today)+'.csv', sep=',', encoding='utf-8', index=False, header=False)
+master_tb.to_csv('tb_da_clustering_master.'+str(today)+'.csv', sep=',', encoding='utf-8', index=False, header=False)
 
 plt.figure(1)
 
