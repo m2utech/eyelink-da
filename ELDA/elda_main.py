@@ -3,6 +3,7 @@
 import pandas as pd
 from pandas import DataFrame
 import ujson
+import json
 import requests
 from collections import OrderedDict
 import datetime
@@ -20,8 +21,8 @@ import matplotlib.pyplot as plt
 #from pandasql import sqldf
 
 ##### 분석 조건 세팅 #####
-start_date = '2016-12-07'
-end_date = '2016-12-07'
+start_date = '2016-12-08'
+end_date = '2016-12-08'
 time_interval = 15	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
@@ -192,6 +193,15 @@ master_tb['c0_power_factor'] = pf_assign.loc[:,1]
 master_tb['c0_power_factor'] = pf_assign.loc[:,2]
 master_tb['c0_power_factor'] = pf_assign.loc[:,3]
 
+result = {}
+result['tb_da_clustering_master'] = master_tb.to_json(orient='values', date_format='iso', date_unit='s')
+result['tb_da_clustering_detail'] = result_tb.to_json(orient='values', date_format='iso', date_unit='s')
+
+test = json.dumps(result, indent=4)
+
+print(test)
+
+import pdb; pdb.set_trace()  # breakpoint 97efa62e //
 
 ########### json 저장 ##############
 #result_tb.to_json('_tb_da_clustering_detail.json', orient='split', date_format='iso', date_unit='s')
