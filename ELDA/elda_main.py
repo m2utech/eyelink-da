@@ -200,7 +200,7 @@ result['tb_da_clustering_detail'] = result_tb.to_json(orient='values', date_form
 test = json.dumps(result, indent=4)
 
 print(test)
-
+##### 특별히 진행한 사항이 없습니다. 1커밋을 위해... ㅠㅠ ####
 import pdb; pdb.set_trace()  # breakpoint 97efa62e //
 
 ########### json 저장 ##############
