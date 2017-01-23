@@ -21,8 +21,8 @@ import matplotlib.pyplot as plt
 #from pandasql import sqldf
 
 ##### 분석 조건 세팅 #####
-start_date = '2016-12-07'
-end_date = '2016-12-07'
+start_date = '2016-11-18'
+end_date = '2016-11-24'
 time_interval = 15	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
@@ -193,23 +193,13 @@ master_tb['c0_power_factor'] = pf_assign.loc[:,1]
 master_tb['c0_power_factor'] = pf_assign.loc[:,2]
 master_tb['c0_power_factor'] = pf_assign.loc[:,3]
 
+""" ########### JSON 합치기... ##############
 result = {}
-result['tb_da_clustering_master'] = master_tb.to_dict(orient='dict')
-result['tb_da_clustering_detail'] = result_tb.to_dict(orient='dict')
-print(result)
-import pdb; pdb.set_trace()  # breakpoint 3abe6942 //
-
 result['tb_da_clustering_master'] = master_tb.to_json(orient='values', date_format='iso', date_unit='s')
 result['tb_da_clustering_detail'] = result_tb.to_json(orient='values', date_format='iso', date_unit='s')
 
-print(result)
-import pdb; pdb.set_trace()  # breakpoint 675f420c //
-
-test = json.dumps(result, indent=4) # dumps는 
-
-print(test)
-##### 특별히 진행한 사항이 없습니다. 1커밋을 위해... ㅠㅠ ####
-import pdb; pdb.set_trace()  # breakpoint 97efa62e //
+print(json.dumps(result, indent=4))
+"""
 
 ########### json 저장 ##############
 #result_tb.to_json('_tb_da_clustering_detail.json', orient='split', date_format='iso', date_unit='s')
@@ -221,6 +211,7 @@ import pdb; pdb.set_trace()  # breakpoint 97efa62e //
 today = nowtime.strftime('%Y%m%d%H%M%S')
 result_tb.to_csv('tb_da_clustering_detail.'+str(today)+'.csv', sep=',', encoding='utf-8', index=False, header=False)
 master_tb.to_csv('tb_da_clustering_master.'+str(today)+'.csv', sep=',', encoding='utf-8', index=False, header=False)
+
 
 plt.figure(1)
 
