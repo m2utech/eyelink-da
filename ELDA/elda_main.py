@@ -21,8 +21,8 @@ import matplotlib.pyplot as plt
 #from pandasql import sqldf
 
 ##### 분석 조건 세팅 #####
-start_date = '2016-11-18'
-end_date = '2016-11-24'
+start_date = '2016-12-08'
+end_date = '2016-12-09'
 time_interval = 15	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
@@ -193,13 +193,24 @@ master_tb['c0_power_factor'] = pf_assign.loc[:,1]
 master_tb['c0_power_factor'] = pf_assign.loc[:,2]
 master_tb['c0_power_factor'] = pf_assign.loc[:,3]
 
-""" ########### JSON 합치기... ##############
-result = {}
-result['tb_da_clustering_master'] = master_tb.to_json(orient='values', date_format='iso', date_unit='s')
-result['tb_da_clustering_detail'] = result_tb.to_json(orient='values', date_format='iso', date_unit='s')
+########### JSON 합치기... ##############
+result_json = {}
+#result['tb_da_clustering_master'] = master_tb.to_json(orient='values', date_format='iso', date_unit='s')
+#result['tb_da_clustering_detail'] = result_tb.to_json(orient='values', date_format='iso', date_unit='s')
+#result['tb_da_clustering_master'] = result_tb.to_csv(sep=',', encoding='utf-8', index=False, header=False)
 
-print(json.dumps(result, indent=4))
-"""
+master_json = master_tb.to_json(orient='values', date_format='iso', date_unit='s')
+detail_json = result_tb.to_json(orient='values', date_format='iso', date_unit='s')
+
+result_json.tb_da_clustering_master = master_json
+result_json.tb_da_clustering_detail = detail_json
+
+print(result_json)
+
+import pdb; pdb.set_trace()  # breakpoint 65ad779e //
+
+#print(json.dumps(result, indent=4))
+
 
 ########### json 저장 ##############
 #result_tb.to_json('_tb_da_clustering_detail.json', orient='split', date_format='iso', date_unit='s')
