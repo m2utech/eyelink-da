@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 ##### 분석 조건 세팅 #####
 start_date = '2016-12-08'
-end_date = '2016-12-09'
+end_date = '2016-12-08'
 time_interval = 15	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
@@ -126,9 +126,9 @@ v_assign = v_assign.replace(", ",":").replace("'","").replace("[","").replace("]
 v_assign = v_assign.split(',')
 v_assign = pd.DataFrame(v_assign).T
 master_tb['c0_voltage'] = v_assign.loc[:,0]
-master_tb['c0_voltage'] = v_assign.loc[:,1]
-master_tb['c0_voltage'] = v_assign.loc[:,2]
-master_tb['c0_voltage'] = v_assign.loc[:,3]
+master_tb['c1_voltage'] = v_assign.loc[:,1]
+master_tb['c2_voltage'] = v_assign.loc[:,2]
+master_tb['c3_voltage'] = v_assign.loc[:,3]
 
 
 ##### ampere #####
@@ -147,9 +147,9 @@ a_assign = a_assign.replace(", ",":").replace("'","").replace("[","").replace("]
 a_assign = a_assign.split(',')
 a_assign = pd.DataFrame(a_assign).T
 master_tb['c0_ampere'] = a_assign.loc[:,0]
-master_tb['c0_ampere'] = a_assign.loc[:,1]
-master_tb['c0_ampere'] = a_assign.loc[:,2]
-master_tb['c0_ampere'] = a_assign.loc[:,3]
+master_tb['c1_ampere'] = a_assign.loc[:,1]
+master_tb['c2_ampere'] = a_assign.loc[:,2]
+master_tb['c3_ampere'] = a_assign.loc[:,3]
 
 
 ##### active power #####
@@ -168,9 +168,9 @@ ap_assign = ap_assign.replace(", ",":").replace("'","").replace("[","").replace(
 ap_assign = ap_assign.split(',')
 ap_assign = pd.DataFrame(ap_assign).T
 master_tb['c0_active_power'] = ap_assign.loc[:,0]
-master_tb['c0_active_power'] = ap_assign.loc[:,1]
-master_tb['c0_active_power'] = ap_assign.loc[:,2]
-master_tb['c0_active_power'] = ap_assign.loc[:,3]
+master_tb['c1_active_power'] = ap_assign.loc[:,1]
+master_tb['c2_active_power'] = ap_assign.loc[:,2]
+master_tb['c3_active_power'] = ap_assign.loc[:,3]
 
 
 ##### power factor #####
@@ -189,15 +189,24 @@ pf_assign = pf_assign.replace(", ",":").replace("'","").replace("[","").replace(
 pf_assign = pf_assign.split(',')
 pf_assign = pd.DataFrame(pf_assign).T
 master_tb['c0_power_factor'] = pf_assign.loc[:,0]
-master_tb['c0_power_factor'] = pf_assign.loc[:,1]
-master_tb['c0_power_factor'] = pf_assign.loc[:,2]
-master_tb['c0_power_factor'] = pf_assign.loc[:,3]
+master_tb['c1_power_factor'] = pf_assign.loc[:,1]
+master_tb['c2_power_factor'] = pf_assign.loc[:,2]
+master_tb['c3_power_factor'] = pf_assign.loc[:,3]
 
 ########### JSON 합치기... ##############
 result_json = {}
-#result['tb_da_clustering_master'] = master_tb.to_json(orient='values', date_format='iso', date_unit='s')
-#result['tb_da_clustering_detail'] = result_tb.to_json(orient='values', date_format='iso', date_unit='s')
+result_json['tb_da_clustering_master'] = master_tb.to_json(orient='records', date_format='iso', date_unit='s')
+#result_json['tb_da_clustering_detail'] = result_tb.to_json(orient='records', date_format='iso', date_unit='s')
 #result['tb_da_clustering_master'] = result_tb.to_csv(sep=',', encoding='utf-8', index=False, header=False)
+
+test = json.dumps(result_json, indent=4)
+
+print(test)
+print(type(test))
+
+import pdb; pdb.set_trace()  # breakpoint 2c264ee9 //
+
+
 
 master_json = master_tb.to_json(orient='values', date_format='iso', date_unit='s')
 detail_json = result_tb.to_json(orient='values', date_format='iso', date_unit='s')
