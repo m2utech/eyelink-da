@@ -22,13 +22,14 @@ import matplotlib.pyplot as plt
 
 ##### 분석 조건 세팅 #####
 start_date = '2016-12-08'
-end_date = '2016-12-08'
+end_date = '2016-12-09'
 time_interval = 15	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
 url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod?startDate={}&endDate={}".format(start_date,end_date)
 resp = requests.get(url)
 dataset = ujson.loads(resp.text)
+
 
 ##### 분석할 데이터 속성 추출 #####
 dataset = DataFrame(dataset['rtnData'], columns=['node_id', 'event_time', 'voltage', 'ampere', 'active_power', 'power_factor'])
@@ -196,13 +197,16 @@ master_tb['c3_power_factor'] = pf_assign.loc[:,3]
 ########### JSON 합치기... ##############
 result_json = {}
 result_json['tb_da_clustering_master'] = master_tb.to_json(orient='records', date_format='iso', date_unit='s')
-#result_json['tb_da_clustering_detail'] = result_tb.to_json(orient='records', date_format='iso', date_unit='s')
+result_json['tb_da_clustering_detail'] = result_tb.to_json(orient='records', date_format='iso', date_unit='s')
 #result['tb_da_clustering_master'] = result_tb.to_csv(sep=',', encoding='utf-8', index=False, header=False)
 
-test = json.dumps(result_json, indent=4)
+#test = json.dumps(result_json)
+upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
 
-print(test)
-print(type(test))
+r = requests.post(upload_url, json=json.dumps(result_json)) 
+
+#print(test)
+#print(type(test))
 
 import pdb; pdb.set_trace()  # breakpoint 2c264ee9 //
 
