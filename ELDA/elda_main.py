@@ -30,6 +30,23 @@ url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawD
 resp = requests.get(url)
 dataset = ujson.loads(resp.text)
 
+#########################
+#testdata = {}
+#testdata["detail"] = {"da_time":"2017-02-01T11:34:36Z","event_time":"2016-12-08T00:00:00Z","c0_voltage":227.1907654118,"c1_voltage":200.0,"c2_voltage":221.2668860769,"c3_voltage":225.28438234}
+#testdata["master"] = {"c0_voltage":"0001.0000001E:0001.00000005:0001.00000006:0001.0000001D:0001.00000001","c1_voltage":"","c2_voltage":"0002.0000003E:0002.00000028:0002.00000029:0002.0000002C:0002.0000002D"}
+
+#print(testdata)
+
+#testdata = str(testdata)
+
+#testdata = {'test':'[{"da_time":"2017-02-01T14:49:32Z","event_time":"2016-12-08T00:00:00Z"},{"da_time":"2017-02-01T14:49:32Z","event_time":"2016-12-09T23:45:00Z"}]'}
+#print(testdata)
+
+#upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
+
+#r = requests.post(upload_url, json=testdata) 
+######### 
+
 
 ##### 분석할 데이터 속성 추출 #####
 dataset = DataFrame(dataset['rtnData'], columns=['node_id', 'event_time', 'voltage', 'ampere', 'active_power', 'power_factor'])
@@ -200,10 +217,16 @@ result_json['tb_da_clustering_master'] = master_tb.to_json(orient='records', dat
 result_json['tb_da_clustering_detail'] = result_tb.to_json(orient='records', date_format='iso', date_unit='s')
 #result['tb_da_clustering_master'] = result_tb.to_csv(sep=',', encoding='utf-8', index=False, header=False)
 
-#test = json.dumps(result_json)
+#testdata = str(json.dumps(result_json))
+
+#print(testdata)
+
+
+print(result_json)
+
 upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
 
-r = requests.post(upload_url, json=json.dumps(result_json)) 
+r = requests.post(upload_url, json=result_json) 
 
 #print(test)
 #print(type(test))
