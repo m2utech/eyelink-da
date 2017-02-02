@@ -129,7 +129,7 @@ pf_ls = OrderedDict(sorted(pf_ls.items(), key=lambda x:x[1], reverse=True))
 
 #################### clustering ###################
 ##### voltage #####
-v_centroids, v_assignments = ts_cluster.k_means_clust(v_ls,4,10,4) #data, clus_num, iter, window
+v_centroids, v_assignments = ts_cluster.k_means_clust(v_ls,4,1,1) #data, clus_num, iter, window
 ## datail result ##
 v_result_centroids = pd.DataFrame(v_centroids)
 v_result_centroids.reset_index(level=0, inplace=True)
@@ -150,7 +150,7 @@ master_tb['c3_voltage'] = v_assign.loc[:,3]
 
 
 ##### ampere #####
-a_centroids, a_assignments = ts_cluster.k_means_clust(a_ls,4,10,4)
+a_centroids, a_assignments = ts_cluster.k_means_clust(a_ls,4,1,1)
 ## datail result ##
 a_result_centroids = pd.DataFrame(a_centroids)
 a_result_centroids.reset_index(level=0, inplace=True)
@@ -171,7 +171,7 @@ master_tb['c3_ampere'] = a_assign.loc[:,3]
 
 
 ##### active power #####
-ap_centroids, ap_assignments = ts_cluster.k_means_clust(ap_ls,4,10,4)
+ap_centroids, ap_assignments = ts_cluster.k_means_clust(ap_ls,4,1,1)
 ## detail result ##
 ap_result_centroids = pd.DataFrame(ap_centroids)
 ap_result_centroids.reset_index(level=0, inplace=True)
@@ -192,7 +192,7 @@ master_tb['c3_active_power'] = ap_assign.loc[:,3]
 
 
 ##### power factor #####
-pf_centroids, pf_assignments = ts_cluster.k_means_clust(pf_ls,4,10,4)
+pf_centroids, pf_assignments = ts_cluster.k_means_clust(pf_ls,4,1,1)
 ## detail result ##
 pf_result_centroids = pd.DataFrame(pf_centroids)
 pf_result_centroids.reset_index(level=0, inplace=True)
@@ -213,20 +213,45 @@ master_tb['c3_power_factor'] = pf_assign.loc[:,3]
 
 ########### JSON 합치기... ##############
 result_json = {}
-result_json['tb_da_clustering_master'] = master_tb.to_json(orient='records', date_format='iso', date_unit='s')
-result_json['tb_da_clustering_detail'] = result_tb.to_json(orient='records', date_format='iso', date_unit='s')
-#result['tb_da_clustering_master'] = result_tb.to_csv(sep=',', encoding='utf-8', index=False, header=False)
+result_json['tb_da_clustering_master'] = master_tb.to_dict(orient='records')
+result_json['tb_da_clustering_detail'] = result_tb.to_dict(orient='records')
+
+#result_json['tb_da_clustering_master'] = master_tb.to_json(orient='records', date_format='iso', date_unit='s')
+#result_json['tb_da_clustering_detail'] = result_tb.to_json(orient='records', date_format='iso', date_unit='s')
+
+#result_json = json.dumps(result_json, sort_keys=True).replace('"[','[').replace(']"',']')
+
+########### timestamp convert ############
+def myconverter(o):
+	if isinstance(o, datetime.datetime):
+		return o.__str__()
+
+
+result_json = json.dumps(result_json, default = myconverter)
+result_json = json.loads(result_json)
+
+upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
+
+r = requests.post(upload_url, json=result_json)
+
+import pdb; pdb.set_trace()  # breakpoint 5e9dfd9a //
 
 #testdata = str(json.dumps(result_json))
 
 #print(testdata)
+masterjson = {}
+detailjson = {}
+masterjson['tb_da_clustering_master'] = master_tb.to_json(orient='records', date_format='iso', date_unit='s')
+detailjson['tb_da_clustering_detail'] = result_tb.to_json(orient='records', date_format='iso', date_unit='s')
 
-
-print(result_json)
+print(masterjson)
+print("=================")
+#print(detailjson)
 
 upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
 
-r = requests.post(upload_url, json=result_json) 
+r = requests.post(upload_url, json=masterjson) 
+#r = requests.post(upload_url, json=detailjson) 
 
 #print(test)
 #print(type(test))
