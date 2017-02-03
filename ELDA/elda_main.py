@@ -21,12 +21,12 @@ import matplotlib.pyplot as plt
 #from pandasql import sqldf
 
 ##### 분석 조건 세팅 #####
-start_date = '2016-12-08'
-end_date = '2016-12-09'
+start_date = '2016-11-19'
+end_date = '2016-11-22'
 time_interval = 15	#15분, W:weekly, D:daily, H:hourly, T:minutely
 
 ##### JSON 로드 #####
-url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod?startDate={}&endDate={}".format(start_date,end_date)
+url = "http://192.168.10.64:5223/dashboard/restapi/getTbRawDataByPeriod?startDate={}&endDate={}".format(start_date,end_date)
 resp = requests.get(url)
 dataset = ujson.loads(resp.text)
 
@@ -227,10 +227,13 @@ def myconverter(o):
 		return o.__str__()
 
 
-result_json = json.dumps(result_json, default = myconverter)
+result_json = json.dumps(result_json, default = myconverter, sort_keys=True)
 result_json = json.loads(result_json)
 
-upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
+print(result_json)
+import pdb; pdb.set_trace()  # breakpoint 39af37f2 //
+
+upload_url = "http://192.168.10.64:5223/analysis/restapi/insertClusterRawData"
 
 r = requests.post(upload_url, json=result_json)
 
