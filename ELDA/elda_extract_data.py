@@ -15,3 +15,7 @@ def extract_data(targetdata, idx, col, val, def_val, t_interval):
 	targetdata = elda_pre.missingValue(targetdata,def_val)
 
 	return targetdata
+
+if __name__ == '__main__':
+	pass
+	#print("execute elda_extract_data.py")
