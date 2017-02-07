@@ -1,6 +1,6 @@
 # CLIENT
-
-# -*- coding : cp949 -*-
+# coding: utf-8
+# coding: cp949
 
 import socket
 
@@ -13,7 +13,7 @@ s=socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
 
 s.connect((HOST,PORT))
 
-s.send(b'{"s_date": "2016-12-08", "e_date": "2016-12-08", "t_itv": 15}') #문자를 보냄
+s.send(b'{"start_date": "2016-11-11", "end_date": "2016-11-18", "time_interval": 15}') #문자를 보냄
 
 data = s.recv(1024) #서버로 부터 정보를 받음
 
