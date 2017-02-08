@@ -1,11 +1,12 @@
+## time series clustering algorithm ##
+
 # coding: utf-8
 
-import pandas as pd
-
-### test library ###
-import numpy as np
-import matplotlib.pyplot as plt
+# default lib
 import random
+# required lib #
+import numpy as np
+
 
 def k_means_clust(data, num_clust, num_iter, w):
     centroids = random.sample(list(data.values()),num_clust) # 랜덤하게 중심점 선택
@@ -140,20 +141,6 @@ def LB_Keogh(s1, s2, r):
       
     return np.sqrt(LB_sum) 
 
-
-
-"""
-#test = pd.read_csv("../data/train.csv", sep=',')
-test = np.genfromtxt("../data/train.csv", delimiter=',')
-#test = test.T
-#test = test.values.tolist()
-#print(type(test))
-#print(list(test))
-
-centroids = k_means_clust(test, 5, 10, 4)
-
-for i in centroids:
-    plt.plot(i)
-
-plt.show()
-"""
+##########################
+if __name__ == '__main__':
+    pass
