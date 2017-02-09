@@ -1,6 +1,3 @@
-import pandas as pd
-from pandas import DataFrame
-
 import elda_preprocessing as elda_pre
 
 def extract_data(targetdata, idx, col, val, def_val, t_interval):
@@ -17,5 +14,4 @@ def extract_data(targetdata, idx, col, val, def_val, t_interval):
 	return targetdata
 
 if __name__ == '__main__':
-	pass
-	#print("execute elda_extract_data.py")
+	print("execute elda_extract_data.py")
