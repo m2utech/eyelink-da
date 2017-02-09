@@ -13,22 +13,27 @@ import elda_clustering as clustering_main
 def json_parsing(data):
 	dict = json.loads(data.decode("utf-8")) # dictionary type
 	start_date = dict['start_date']
+	print(start_date)
+	print(type(start_date))
 	end_date = dict['end_date']
+	print(end_date)
+	print(type(end_date))
 	time_interval = dict['time_interval']
-
+	print(time_interval)
+	print(type(time_interval))
 	clustering_main.data_load(start_date, end_date, time_interval)
 
 
 def socket_server():
 	HOST = '192.168.10.27'
-	#HOST = 'http://m2u-da.eastus.cloudapp.azure.com'
+	#HOST = "http://m2u-da.eastus.cloudapp.azure.com"
 	PORT = 5225
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 	s.bind((HOST, PORT))
 
-	s.listen(1) # Wait for connection
+	s.listen(10) # Wait for connection
 	print('The server is ready to receive')
 
 	while 1:

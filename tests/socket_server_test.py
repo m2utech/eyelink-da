@@ -1,13 +1,10 @@
 # SERVER
-
-# -*- coding : cp949 -*-
-
 import socket
 import json
 
-HOST='192.168.10.27' #호스트를 지정하지 않으면 가능한 모든 인터페이스를 의미한다.
-
-PORT=50007 #포트지정
+#HOST='192.168.10.27' 
+HOST = '40.117.230.68'
+PORT=5225 #포트지정
 
 s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 
