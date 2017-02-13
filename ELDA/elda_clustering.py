@@ -33,7 +33,6 @@ def data_load(s_date, e_date, t_iterval):
 	#url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod?startDate={}&endDate={}".format(start_date,end_date) 
 	resp = requests.get(url)
 	dataset = json.loads(resp.text)
-	print(dataset)
 	if not dataset['rtnData']:
 		print("empty dataset")
 
@@ -206,8 +205,8 @@ def data_load(s_date, e_date, t_iterval):
 
 	#	print(result_json)
 
-		#upload_url = "http://192.168.10.64:5223/analysis/restapi/insertClusterRawData"
-		upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
+		upload_url = "http://192.168.10.64:5223/analysis/restapi/insertClusterRawData"
+		#upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
 		r = requests.post(upload_url, json=result_json)
 
 		print("no problem!!!!!!!!!!!!!!!")
@@ -215,4 +214,4 @@ def data_load(s_date, e_date, t_iterval):
 ####################################
 if __name__ == '__main__':
 	#pass
-	data_load('2017-02-05', '2017-02-05', 15)
+	data_load('2016-11-20', '2016-11-21', 15)
