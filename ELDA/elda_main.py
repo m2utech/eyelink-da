@@ -25,7 +25,8 @@ def json_parsing(data):
 
 
 def socket_server():
-	HOST = '192.168.10.27'
+	#HOST = '192.168.10.27'
+	HOST = "DataAnalyzer"
 	#HOST = "http://m2u-da.eastus.cloudapp.azure.com"
 	PORT = 5225
 

@@ -205,8 +205,8 @@ def data_load(s_date, e_date, t_iterval):
 
 	#	print(result_json)
 
-		upload_url = "http://192.168.10.64:5223/analysis/restapi/insertClusterRawData"
-		#upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
+		#upload_url = "http://192.168.10.64:5223/analysis/restapi/insertClusterRawData"
+		upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
 		r = requests.post(upload_url, json=result_json)
 
 		print("no problem!!!!!!!!!!!!!!!")
