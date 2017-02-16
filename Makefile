@@ -1,5 +1,5 @@
 init:
-	pip install -r requirements.txt
+	pip3.5 install -r requirements.txt
 
 run:
-	python elda_main.py
+	python3.5 elda_main.py
