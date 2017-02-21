@@ -1,43 +1,39 @@
-# To kick off the script, run the following from the python directory:
-# PYTHONPATH=`pwd` python elda_daemon.py start
-
-#standard python libs
+import daemon
+import daemon.pidfile
+import lockfile
 import logging
+import logging.handlers
+
 import time
 
-#third party libs
-import daemon
-from daemon import runner
 from elda_main import socket_server
 
+def start_daemon():
 
-class App():
-  def __init__(self):
-    self.stdin_path = '/dev/null'
-    self.stdout_path = '/dev/tty'
-    self.stderr_path = '/dev/tty'
-    self.pidfile_path =  '/home/Toven/da/elda_daemon.pid'
-    self.pidfile_timeout = 5
+	logger = logging.getLogger("DaemonLog")
+	logger.setLevel(logging.INFO)
+	formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+	handler = logging.FileHandler("/home/Toven/da/logs/elda_daemon.log")
+	handler.setFormatter(formatter)
+	logger.addHandler(handler)
 
-  def run(self):
-    while True:
-      socket_server()
-      logger.debug("Debug message")
-      logger.info("Info message")
-      logger.warn("Warning message")
-      logger.error("Error message")
-      time.sleep(10)
+	daemon_context = daemon.DaemonContext(
+		working_directory='/home/Toven/da/elda',
+        umask=0o002,
+        pidfile=daemon.pidfile.PIDLockFile('/home/Toven/da/elda_daemon.pid'),
+        files_preserve=[handler.stream]
+	)
 
-app = App()
-logger = logging.getLogger("DaemonLog")
-logger.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler = logging.FileHandler("/home/Toven/da/logs/elda_daemon.log")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+	print("Start daemon for EyeLink in python")
 
-daemon_runner = runner.DaemonRunner(app)
+	with daemon_context as context:
+		while True:
+			socket_server()
+			logger.debug("Debug message")
+			logger.info("Info message")
+			logger.warn("Warning message")
+			logger.error("Error message")
+			time.sleep(10)
 
-#This ensures that the logger file handle does not get closed during daemonization
-daemon_runner.daemon_context.files_preserve=[handler.stream]
-daemon_runner.do_action()
+if __name__ == '__main__':
+	start_daemon()
