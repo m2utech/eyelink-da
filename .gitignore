@@ -1,4 +1,6 @@
 data/
+tests/
+drivers/
 build/
 dist/
 ELDA/__pycache__
