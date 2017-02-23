@@ -8,7 +8,15 @@ import socket
 import json
 
 # required lib
+import configparser
 import elda_clustering as clustering_main
+
+
+config = configparser.ConfigParser()
+config.read('config.cfg')
+cfg_server = config['SERVER_INFO']
+cfg_default = config['DEFAULT_INFO']
+
 
 def json_parsing(data):
 	dict = json.loads(data.decode("utf-8")) # dictionary type
@@ -26,9 +34,9 @@ def json_parsing(data):
 
 def socket_server():
 	#HOST = '192.168.10.27'
-	HOST = "DataAnalyzer"
+	HOST = cfg_server['host']
 	#HOST = "http://m2u-da.eastus.cloudapp.azure.com"
-	PORT = 5225
+	PORT = int(cfg_server['port'])
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

@@ -9,6 +9,7 @@ import datetime
 ##### required library #####
 import pandas as pd
 import requests
+import configparser
 
 # ## required eyelink modules ##
 import elda_data_extraction as elda_de
@@ -18,9 +19,14 @@ import elda_ts_clustering as elda_tsc
 # start_date = ''
 # end_date = ''
 # time_interval = 0	#15분, W:weekly, D:daily, H:hourly, T:minutely
+config = configparser.ConfigParser()
+config.read('config.cfg')
+cfg_server = config['SERVER_INFO']
+cfg_default = config['DEFAULT_INFO']
 
-load_url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod"
 
+#load_url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod"
+load_url = cfg_server['data_load_url']
 
 def data_load(s_date, e_date, t_iterval):
 	start_date = s_date
@@ -108,7 +114,7 @@ def data_load(s_date, e_date, t_iterval):
 		#################### clustering ###################
 
 		##### voltage #####
-		v_centroids, v_assignments = elda_tsc.k_means_clust(v_ls,4,1,1) #data, clus_num, iter, window
+		v_centroids, v_assignments = elda_tsc.k_means_clust(v_ls,4,2,2) #data, clus_num, iter, window
 		## datail result ##
 		v_result_centroids = pd.DataFrame(v_centroids)
 		v_result_centroids.reset_index(level=0, inplace=True)
@@ -129,7 +135,7 @@ def data_load(s_date, e_date, t_iterval):
 
 
 		##### ampere #####
-		a_centroids, a_assignments = elda_tsc.k_means_clust(a_ls,4,1,1)
+		a_centroids, a_assignments = elda_tsc.k_means_clust(a_ls,4,2,2)
 		## datail result ##
 		a_result_centroids = pd.DataFrame(a_centroids)
 		a_result_centroids.reset_index(level=0, inplace=True)
@@ -150,7 +156,7 @@ def data_load(s_date, e_date, t_iterval):
 
 
 		##### active power #####
-		ap_centroids, ap_assignments = elda_tsc.k_means_clust(ap_ls,4,1,1)
+		ap_centroids, ap_assignments = elda_tsc.k_means_clust(ap_ls,4,2,2)
 		## detail result ##
 		ap_result_centroids = pd.DataFrame(ap_centroids)
 		ap_result_centroids.reset_index(level=0, inplace=True)
@@ -171,7 +177,7 @@ def data_load(s_date, e_date, t_iterval):
 
 
 		##### power factor #####
-		pf_centroids, pf_assignments = elda_tsc.k_means_clust(pf_ls,4,1,1)
+		pf_centroids, pf_assignments = elda_tsc.k_means_clust(pf_ls,4,2,2)
 		## detail result ##
 		pf_result_centroids = pd.DataFrame(pf_centroids)
 		pf_result_centroids.reset_index(level=0, inplace=True)
@@ -206,7 +212,10 @@ def data_load(s_date, e_date, t_iterval):
 	#	print(result_json)
 
 		#upload_url = "http://192.168.10.64:5223/analysis/restapi/insertClusterRawData"
-		upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
+		#upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
+		upload_url = cfg_server['result_upload_url']
+		#print(upload_url)
+
 		r = requests.post(upload_url, json=result_json)
 
 		print("no problem!!!!!!!!!!!!!!!")
@@ -214,4 +223,6 @@ def data_load(s_date, e_date, t_iterval):
 ####################################
 if __name__ == '__main__':
 	#pass
-	data_load('2016-11-20', '2016-11-21', 15)
+
+	#data_load('2016-11-20', '2016-11-21', 15)
+	data_load(cfg_default['s_date'], cfg_default['e_date'], int(cfg_default['t_interval']))
