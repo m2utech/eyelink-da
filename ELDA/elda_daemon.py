@@ -5,8 +5,15 @@ import logging
 import logging.handlers
 
 import time
+import configparser
 
 from elda_main import socket_server
+
+config = configparser.ConfigParser()
+config.read('../config.cfg')
+cfg_server = config['SERVER_INFO']
+cfg_default = config['DEFAULT_INFO']
+
 
 def start_daemon():
 
