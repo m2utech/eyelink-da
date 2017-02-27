@@ -11,12 +11,10 @@ import json
 import configparser
 import elda_clustering as clustering_main
 
-
 config = configparser.ConfigParser()
-config.read('config.cfg')
+config.read('../config.cfg')
 cfg_server = config['SERVER_INFO']
 cfg_default = config['DEFAULT_INFO']
-
 
 def json_parsing(data):
 	dict = json.loads(data.decode("utf-8")) # dictionary type

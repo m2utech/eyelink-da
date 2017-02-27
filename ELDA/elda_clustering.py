@@ -20,10 +20,9 @@ import elda_ts_clustering as elda_tsc
 # end_date = ''
 # time_interval = 0	#15분, W:weekly, D:daily, H:hourly, T:minutely
 config = configparser.ConfigParser()
-config.read('config.cfg')
+config.read('../config.cfg')
 cfg_server = config['SERVER_INFO']
 cfg_default = config['DEFAULT_INFO']
-
 
 #load_url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod"
 load_url = cfg_server['data_load_url']
