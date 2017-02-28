@@ -9,6 +9,7 @@ import configparser
 
 from elda_main import socket_server
 
+# 전역변수로 처리 필요
 config = configparser.ConfigParser()
 config.read('../config.cfg')
 cfg_server = config['SERVER_INFO']
