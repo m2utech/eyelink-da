@@ -9,6 +9,7 @@ import configparser
 
 from elda_main import socket_server
 
+# 전역변수로 처리 필요
 config = configparser.ConfigParser()
 config.read('../config.cfg')
 cfg_server = config['SERVER_INFO']
@@ -20,14 +21,14 @@ def start_daemon():
 	logger = logging.getLogger("DaemonLog")
 	logger.setLevel(logging.INFO)
 	formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-	handler = logging.FileHandler("/home/Toven/da/logs/elda_daemon.log")
+	handler = logging.FileHandler(cfg_default['logging_path'])
 	handler.setFormatter(formatter)
 	logger.addHandler(handler)
 
 	daemon_context = daemon.DaemonContext(
 		working_directory='/home/Toven/da/elda',
         umask=0o002,
-        pidfile=daemon.pidfile.PIDLockFile('/home/Toven/da/elda_daemon.pid'),
+        pidfile=daemon.pidfile.PIDLockFile(cfg_default['pidfile_path'),
         files_preserve=[handler.stream]
 	)
 
