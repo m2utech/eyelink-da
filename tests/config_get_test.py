@@ -1,3 +1,4 @@
+#진행된 사항이 없음(0303)
 import configparser
 
 config = configparser.RawConfigParser()
