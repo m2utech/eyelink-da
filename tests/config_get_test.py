@@ -1,21 +1,13 @@
-
-import daemon
-import daemon.pidfile
-import lockfile
-import logging
-import logging.handlers
-
-import time
 import configparser
 
-from elda_main import socket_server
+config = configparser.RawConfigParser()
+config.read('example.cfg')
 
-# 전역변수로 처리 필요
-config = configparser.ConfigParser()
-config.read('../config.cfg')
 cfg_server = config['SERVER_INFO']
 cfg_default = config['DEFAULT_INFO']
 
+
+print(config.sections())
 
 def start_daemon():
 
@@ -45,4 +37,4 @@ def start_daemon():
 			time.sleep(10)
 
 if __name__ == '__main__':
-	start_daemon()
+	
