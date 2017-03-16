@@ -1,14 +1,20 @@
-
+import os
 import daemon
 import daemon.pidfile
-import lockfile
+
 import logging
 import logging.handlers
+
+from lockfile.pidlockfile import PIDLockFile
+from lockfile import AlreadyLocked
 
 import time
 import configparser
 
-from elda_main import socket_server
+#from elda_main import socket_server
+import elda_main
+#import elda_socket
+
 
 # 전역변수로 처리 필요
 config = configparser.ConfigParser()
@@ -18,30 +24,59 @@ cfg_default = config['DEFAULT_INFO']
 
 
 def start_daemon():
+	# make logger instance
+	logger = logging.getLogger("DA_daemonLog")
 
-	logger = logging.getLogger("DaemonLog")
-	logger.setLevel(logging.INFO)
-	formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-	handler = logging.FileHandler(cfg_default['logging_path'])
-	handler.setFormatter(formatter)
-	logger.addHandler(handler)
+	# make formatter
+	formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
+
+	# make handler to output Log for stream and file
+	fileMaxByte = 1024 * 1024 * 100 #100MB
+	fileHandler = logging.handlers.RotatingFileHandler(cfg_default['daemon_path'], maxBytes=fileMaxByte, backupCount=10)
+
+	# fileHandler = logging.FileHandler(cfg_default['logging_path'])
+	streamHandler = logging.StreamHandler()
+
+	# specify formatter to each handler
+	fileHandler.setFormatter(formatter)
+	streamHandler.setFormatter(formatter)
+
+	# attach stream and file handler to logger instance
+	logger.addHandler(fileHandler)
+	logger.addHandler(streamHandler)
+
+	pidfile = PIDLockFile('/home/Toven/da/elda_daemon.pid', timeout=-1)
+	try:
+		pidfile.acquire()
+	except AlreadyLocked:
+		try:
+			os.kill(pidfile.read_pid(), 0)
+			print('Process already running!')
+			exit(1)
+		except OSError:  #No process with locked PID
+			pidfile.break_lock()
+
+
 
 	daemon_context = daemon.DaemonContext(
 		working_directory='/home/Toven/da/elda',
-        umask=0o002,
-        pidfile=daemon.pidfile.PIDLockFile(cfg_default['pidfile_path'],
-        files_preserve=[handler.stream]
+		umask=0o002,
+		pidfile=PIDLockFile('/home/Toven/da/elda_daemon.pid'),
 	)
 
 	print("Start daemon for EyeLink in python")
 
-	with daemon_context as context:
+	with daemon_context:
 		while True:
-			socket_server()
+			logger.info("==========================")
 			logger.debug("Debug message")
 			logger.info("Info message")
 			logger.warn("Warning message")
 			logger.error("Error message")
+			logger.critical("critical debug message")
+			logger.info("==========================")
+
+#			elda_main.run()
 			time.sleep(10)
 
 if __name__ == '__main__':
