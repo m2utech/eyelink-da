@@ -2,3 +2,4 @@ pandas
 requests
 numpy
 configparser
+apscheduler
