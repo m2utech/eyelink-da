@@ -46,10 +46,10 @@ class ClientThread(Thread):
 			print("anlysis success")
 
 
-HOST = '192.168.10.27'
-PORT=5225 #포트지정
-#HOST = cfg_server['host']
-#PORT = int(cfg_server['port'])
+#HOST = '192.168.10.27'
+#PORT=5225 #포트지정
+HOST = cfg_server['host']
+PORT = int(cfg_server['port'])
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -57,7 +57,7 @@ s.bind((HOST, PORT))
 threads = []
 
 while True:
-	s.listen(4)
+	s.listen(50)
 	print('The da-server is ready to receive')
 	(conn, (ip,port)) = s.accept()
 	newthread = ClientThread(ip, port)
@@ -69,4 +69,4 @@ for t in threads:
 
 
 if __name__ == '__main__':
-    pass
+	pass

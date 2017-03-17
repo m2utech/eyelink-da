@@ -57,7 +57,7 @@ s.bind((HOST, PORT))
 threads = []
 
 while True:
-	s.listen(4)
+	s.listen(50)
 	print('The da-server is ready to receive')
 	(conn, (ip,port)) = s.accept()
 	newthread = ClientThread(ip, port)

@@ -4,10 +4,10 @@
 
 import socket
 
-#HOST = 'm2u-da.eastus.cloudapp.azure.com'
+HOST = 'm2u-da.eastus.cloudapp.azure.com'
 #HOST = 'localhost'
 PORT=5225 #포트지정
-HOST='192.168.10.27' #localhost
+#HOST='192.168.10.27' #localhost
 #HOST = 'localhost'
 #PORT=5225 #서버와 같은 포트사용
 

@@ -8,13 +8,7 @@ import logging.handlers
 from lockfile.pidlockfile import PIDLockFile
 from lockfile import AlreadyLocked
 
-import time
 import configparser
-
-#from elda_main import socket_server
-import elda_main
-#import elda_socket
-
 
 # 전역변수로 처리 필요
 config = configparser.ConfigParser()
@@ -26,6 +20,7 @@ cfg_default = config['DEFAULT_INFO']
 def start_daemon():
 	# make logger instance
 	logger = logging.getLogger("DA_daemonLog")
+	logger.setLevel(logging.INFO)
 
 	# make formatter
 	formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
@@ -45,7 +40,7 @@ def start_daemon():
 	logger.addHandler(fileHandler)
 	logger.addHandler(streamHandler)
 
-	pidfile = PIDLockFile('/home/Toven/da/elda_daemon.pid', timeout=-1)
+	pidfile = PIDLockFile(cfg_default['pidfile_path'])
 	try:
 		pidfile.acquire()
 	except AlreadyLocked:
@@ -76,8 +71,8 @@ def start_daemon():
 			logger.critical("critical debug message")
 			logger.info("==========================")
 
-#			elda_main.run()
-			time.sleep(10)
+			import elda_main
+
 
 if __name__ == '__main__':
 	start_daemon()
