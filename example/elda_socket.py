@@ -2,7 +2,8 @@ import socket
 from threading import Thread
 import json
 import configparser
-import elda_clustering as clustering_main
+#import elda_clustering as clustering_main
+
 
 # Multithreaded Python server : TCP Server Socket Thread Pool
 class ClientThread(Thread):

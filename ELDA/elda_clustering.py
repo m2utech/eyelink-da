@@ -31,7 +31,8 @@ def data_load(s_date, e_date, t_iterval):
 	start_date = s_date
 	end_date = e_date
 	time_interval = t_iterval
-	nowtime = datetime.datetime.now()
+	#nowtime = datetime.datetime.now()
+	nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
 	##### JSON 로드 #####
 	url = load_url + "?startDate={}&endDate={}".format(start_date, end_date)

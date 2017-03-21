@@ -17,7 +17,7 @@ s.connect((HOST,PORT))
 
 s.send(b'{"start_date": "2017-02-05", "end_date": "2017-02-05", "time_interval": 30}') #문자를 보냄
 
-data = s.recv(1024) #서버로 부터 정보를 받음
+data = s.recv(2048) #서버로 부터 정보를 받음
 
 s.close()
 
