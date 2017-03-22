@@ -4,8 +4,8 @@
 
 import socket
 
-#HOST = 'm2u-da.eastus.cloudapp.azure.com'
-HOST = 'DataAnalyzer'
+HOST = 'm2u-da.eastus.cloudapp.azure.com'
+#HOST = 'DataAnalyzer'
 PORT=5225 #포트지정
 #HOST='192.168.10.27' #localhost
 #HOST = 'localhost'

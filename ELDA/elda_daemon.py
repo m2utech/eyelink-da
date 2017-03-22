@@ -1,4 +1,5 @@
 import os
+import time
 import daemon
 import daemon.pidfile
 
@@ -8,41 +9,29 @@ import logging.handlers
 from lockfile.pidlockfile import PIDLockFile
 from lockfile import AlreadyLocked
 
-import configparser
-
-
-# 전역변수로 처리 필요
-config = configparser.ConfigParser()
-config.read('../config.cfg')
-cfg_server = config['SERVER_INFO']
-cfg_default = config['DEFAULT_INFO']
+# configuration
+import config_info as config
 
 
 def start_daemon():
 
-	daemon_context = daemon.DaemonContext(
-		working_directory='./', umask=0o002, pidfile=PIDLockFile('/home/Toven/da/elda_daemon.pid'))
-
 	# make logger instance
-	logging.basicConfig(level=logging.DEBUG)
+	#logging.basicConfig(level=logging.DEBUG)
 	logger = logging.getLogger("DA_daemonLog")
-	# logger.setLevel(logging.DEBUG)
+	logger.setLevel(logging.INFO)
 
 	# make formatter
 	formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
 
 	# make handler to output Log for stream and file
 	fileMaxByte = 1024 * 1024 * 100 #100MB
-	fileHandler = logging.handlers.RotatingFileHandler('./testlog.log', maxBytes=fileMaxByte, backupCount=10)
+	fileHandler = logging.handlers.RotatingFileHandler(config.cfg['daemon_path'], maxBytes=fileMaxByte, backupCount=10)
 	# specify formatter to each handler
 	fileHandler.setFormatter(formatter)
 	# attach stream and file handler to logger instance
 	logger.addHandler(fileHandler)
 
-	daemon_context.filesPreserve = [fileHandler.stream]
-
-
-	pidfile = PIDLockFile(cfg_default['pidfile_path'])
+	pidfile = PIDLockFile(config.cfg['pidfile_path'])
 	try:
 		pidfile.acquire()
 	except AlreadyLocked:
@@ -54,22 +43,30 @@ def start_daemon():
 			pidfile.break_lock()
 
 
+	daemon_context = daemon.DaemonContext(
+			working_directory='/home/Toven/da/elda', umask=0o002,
+			pidfile=daemon.pidfile.PIDLockFile('/home/Toven/da/elda_daemon.pid'),
+			files_preserve=[fileHandler.stream]
+			)
+
+	logger.info("==========================")
+	logger.debug("Debug message")
+	logger.info("Info message")
+	logger.warning("Warning message")
+	logger.error("Error message")
+	logger.critical("critical debug message")
+	logger.info("==========================")
+
+
 	print("Start daemon for EyeLink in python")
 
-	daemon_context.open()
+#	daemon_context.open()
 
 
-	with daemon_context:
+	with daemon_context as context:
 		while True:
 			import elda_main
-			import apscheduler_test_0320
-			logger.info("==========================")
-			logger.debug("Debug message")
-			logger.info("Info message")
-			logger.warn("Warning message")
-			logger.error("Error message")
-			logger.critical("critical debug message")
-			logger.info("==========================")
+			#time.sleep(10)
 
 
 
