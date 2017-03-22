@@ -35,7 +35,7 @@ class ClientThread(Thread):
 
 	def run(self):
 		while True:
-			data = conn.recv(1024)
+			data = conn.recv(2048)
 			print("Server received data:", data)
 
 			if not data:	break

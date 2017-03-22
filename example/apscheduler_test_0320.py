@@ -1,13 +1,16 @@
+import time
 from apscheduler.jobstores.base import JobLookupError
 from apscheduler.schedulers.background import BackgroundScheduler
+#from apscheduler.schedulers.blocking import BlockingScheduler
 import socket
-import time
+
 
 class Scheduler(object):
 
     # 클래스 생성시 스케쥴러 데몬을 생성
     def __init__(self):
         self.sched = BackgroundScheduler()
+        #self.sched = BlockingScheduler()
         self.sched.start()
         self.job_id=''
 
@@ -30,14 +33,14 @@ class Scheduler(object):
 
     def cron_day(self, type, job_id):
         print("%s scheduler process_id[%s] : %d" % (type, job_id, time.localtime().tm_sec))
-        HOST = 'm2u-da.eastus.cloudapp.azure.com'
-        #HOST = 'dataanalyzer'
+        #HOST = 'm2u-da.eastus.cloudapp.azure.com'
+        HOST = 'DataAnalyzer'
         PORT = 5225
         print("Start data analysis for every day")
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
         s.connect((HOST,PORT))
-        s.send(b'{"start_date": "2017-02-08", "end_date": "2017-02-08", "time_interval": 15}') #문자를 보냄
-        data = s.recv(128) #서버로 부터 정보를 받음
+        s.send(b'{"start_date":"2017-02-03", "end_date":"2017-02-03", "time_interval":15}') #문자를 보냄
+        data = s.recv(2048) #서버로 부터 정보를 받음
         s.close()
         print('Received',repr(data))
 
@@ -45,14 +48,14 @@ class Scheduler(object):
 
     def cron_week(self, type, job_id):
         print("%s scheduler process_id[%s] : %d" % (type, job_id, time.localtime().tm_sec))
-        HOST = 'm2u-da.eastus.cloudapp.azure.com'
-        #HOST = 'dataanalyzer'
+        #HOST = 'm2u-da.eastus.cloudapp.azure.com'
+        HOST = 'DataAnalyzer'
         PORT = 5225
         print("Start data analysis for every week")
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
         s.connect((HOST,PORT))
-        s.send(b'{"start_date": "2017-02-06", "end_date": "2017-02-06", "time_interval": 60}') #문자를 보냄
-        data = s.recv(128) #서버로 부터 정보를 받음
+        s.send(b'{"start_date": "2017-02-07", "end_date": "2017-02-07", "time_interval": 60}') #문자를 보냄
+        data = s.recv(2048) #서버로 부터 정보를 받음
         s.close()
         print('Received',repr(data))
 
@@ -65,8 +68,7 @@ class Scheduler(object):
     def scheduler(self, type, job_id):
         print("%s Scheduler Start" % type)
         if type == 'cron':
-            self.sched.add_job(self.cron_day, type, max_instances=10, day_of_week='mon-sun', 
-                                hour='0-23', minute=10, id=job_id, args=(type, job_id))
+            self.sched.add_job(self.cron_day, type, max_instances=10, hour='0-23', second='*/60', id=job_id, args=(type, job_id))
         elif type == 'interval':
             self.sched.add_job(self.cron_week, type, max_instances=10, hours=3, id=job_id, args=(type, job_id))
 
@@ -77,11 +79,30 @@ if __name__ == '__main__':
 
     # cron_week 스케쥴러를 실행시키며, job_id는 "2" 입니다.
     scheduler.scheduler('interval', "2")
+    count = 0
+    while True:
+        print("Running main process...............")
+        time.sleep(10)
+        count += 1
+        if count == 10:
+            scheduler.kill_scheduler("10")
+            print("######### kill cron schedule ##########")
+        elif count == 30:
+            scheduler.kill_scheduler("30")
+            print("######## kill interval schedule ##########")
+
+else:
+    scheduler = Scheduler()
+    # cron_day 스케쥴러를 실행시키며, job_id는 "1" 입니다.
+    scheduler.scheduler('cron', "1")
+
+    # cron_week 스케쥴러를 실행시키며, job_id는 "2" 입니다.
+    scheduler.scheduler('interval', "2")
 
     count = 0
     while True:
         print("Running main process...............")
-        time.sleep(1)
+        time.sleep(10)
         count += 1
         if count == 10:
             scheduler.kill_scheduler("10")

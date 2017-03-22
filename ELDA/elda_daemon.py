@@ -10,6 +10,7 @@ from lockfile import AlreadyLocked
 
 import configparser
 
+
 # 전역변수로 처리 필요
 config = configparser.ConfigParser()
 config.read('../config.cfg')
@@ -61,6 +62,7 @@ def start_daemon():
 	with daemon_context:
 		while True:
 			import elda_main
+			import apscheduler_test_0320
 			logger.info("==========================")
 			logger.debug("Debug message")
 			logger.info("Info message")
