@@ -1,14 +1,12 @@
+import os
 import socket
 from threading import Thread
 import json
 import configparser
 import elda_clustering as clustering_main
 
-
-config = configparser.ConfigParser()
-config.read('../config.cfg')
-cfg_server = config['SERVER_INFO']
-cfg_default = config['DEFAULT_INFO']
+#configuration
+import config_info as config
 
 # Multithreaded Python server : TCP Server Socket Thread Pool
 class ClientThread(Thread):
@@ -48,8 +46,8 @@ class ClientThread(Thread):
 
 #HOST = '192.168.10.27'
 #PORT=5225 #포트지정
-HOST = cfg_server['host']
-PORT = int(cfg_server['port'])
+HOST = config.cfg['host']
+PORT = int(config.cfg['port'])
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

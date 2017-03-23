@@ -2,6 +2,7 @@
 # coding: utf-8
 
 # default lib
+import os
 import json
 from collections import OrderedDict
 import datetime
@@ -9,23 +10,15 @@ import datetime
 ##### required library #####
 import pandas as pd
 import requests
-import configparser
 
 # ## required eyelink modules ##
+import config_info as config
 import elda_data_extraction as elda_de
 import elda_ts_clustering as elda_tsc
 
-# #### 분석 조건 세팅 #####
-# start_date = ''
-# end_date = ''
-# time_interval = 0	#15분, W:weekly, D:daily, H:hourly, T:minutely
-config = configparser.ConfigParser()
-config.read('../config.cfg')
-cfg_server = config['SERVER_INFO']
-cfg_default = config['DEFAULT_INFO']
-
 #load_url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod"
-load_url = cfg_server['data_load_url']
+load_url = config.cfg['data_load_url']
+
 
 def data_load(s_date, e_date, t_iterval):
 	start_date = s_date
@@ -213,7 +206,7 @@ def data_load(s_date, e_date, t_iterval):
 
 		#upload_url = "http://192.168.10.64:5223/analysis/restapi/insertClusterRawData"
 		#upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
-		upload_url = cfg_server['result_upload_url']
+		upload_url = config.cfg['result_upload_url']
 		#print(upload_url)
 
 		r = requests.post(upload_url, json=result_json)
@@ -223,6 +216,5 @@ def data_load(s_date, e_date, t_iterval):
 ####################################
 if __name__ == '__main__':
 	#pass
-
 	#data_load('2016-11-20', '2016-11-21', 15)
-	data_load(cfg_default['s_date'], cfg_default['e_date'], int(cfg_default['t_interval']))
+	data_load(config.cfg['s_date'], config.cfg['e_date'], int(config.cfg['t_interval']))
