@@ -1,6 +1,8 @@
 import os
 import time
-from datetime import datetime, timedelta
+#from datetime import datetime, timedelta
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 import daemon
 import daemon.pidfile
@@ -50,8 +52,8 @@ def job_cron_day():
 	logger.debug("Start data analysis for one day")
 	logger.info("==========================")
 
-	today = datetime.now()
-	minusDay = timedelta(days=122)
+	today = date.today()
+	minusDay = relativedelta(days=121)
 	startDate = today - minusDay
 	endDate = startDate
 
@@ -72,13 +74,13 @@ def job_cron_week():
 	logger.debug("Start data analysis for one week")
 	logger.info("==========================")
 
-	today = datetime.now()
-	minusDay = timedelta(days=123)
-	oneWeek = timedelta(days=6)
+	today = date.today()
+	minusDay = relativedelta(days=123)
+	oneWeek = relativedelta(days=6)
 	endDate = today - minusDay
 	startDate = endDate - oneWeek
 
-	sendDate = '{"start_date":"'+ startDate.strftime('%Y-%m-%d') + '", "end_date":"' + endDate.strftime('%Y-%m-%d') + '", "time_interval":15}'
+	sendDate = '{"start_date":"'+ startDate.strftime('%Y-%m-%d') + '", "end_date":"' + endDate.strftime('%Y-%m-%d') + '", "time_interval":60}'
 	sendDate = sendDate.encode()
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
@@ -89,6 +91,26 @@ def job_cron_week():
 	s.close()
 	print('Received',repr(data))
 
+
+def job_cron_month():
+	logger.info("==========================")
+	logger.debug("Start data analysis for one month")
+	logger.info("==========================")
+
+	today = date.today()
+	premonth = today - relativedelta(months=5)
+	startDate = date(premonth.year, premonth.month, 1)
+	endDate = date(today.year, today.month, 1) - relativedelta(months=4) - relativedelta(days=1)
+	sendDate = '{"start_date":"'+ startDate.strftime('%Y-%m-%d') + '", "end_date":"' + endDate.strftime('%Y-%m-%d') + '", "time_interval":60}'
+	sendDate = sendDate.encode()
+
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
+	s.connect((HOST,PORT))
+	s.send(sendDate) 
+	#s.send(b'{"start_date": "2017-02-07", "end_date": "2017-02-07", "time_interval": 60}') #문자를 보냄
+	data = s.recv(2048) #서버로 부터 정보를 받음
+	s.close()
+	print('Received',repr(data))
 
 def start_daemon():
 
@@ -108,8 +130,9 @@ def start_daemon():
 	# Schedules job_function to be run on the third Friday
 	# of June, July, August, November and December at 00:00, 01:00, 02:00 and 03:00
 	#sched.add_job(job_function, 'cron', day_of_week='mon-fri', minute='*/1')
-	sched.add_job(job_cron_day, 'cron', max_instances=10, hour='*/3')
-	sched.add_job(job_cron_week, 'cron', max_instances=10, hour=0)
+	sched.add_job(job_cron_day, 'cron', max_instances=10, hour=0)
+	sched.add_job(job_cron_week, 'cron', max_instances=10, day_of_week='mon', hour=0)
+	sched.add_job(job_cron_month, 'cron', max_instances=10, day=1, hour=1)
 
 	sched.start()
 
