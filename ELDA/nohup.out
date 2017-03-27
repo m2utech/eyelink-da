@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "elda_daemon.py", line 2, in <module>
-    import daemon
-ImportError: No module named daemon
