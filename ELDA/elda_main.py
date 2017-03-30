@@ -25,7 +25,7 @@ class ClientThread(Thread):
 
 		# running time check
 		start_time = time.time()
-		logger.info("===== start data analysis =====")
+		logger.info("Dataset Loading...")
 
 		dict = json.loads(data.decode("utf-8")) # dictionary type
 		start_date = dict['start_date']
@@ -51,6 +51,7 @@ class ClientThread(Thread):
 
 #########################################
 # make logger instance
+
 logger = logging.getLogger("Running_Log")
 logger.setLevel(logging.INFO)
 

@@ -6,6 +6,8 @@ import os
 import json
 from collections import OrderedDict
 import datetime
+import logging
+import logging.handlers
 
 ##### required library #####
 import pandas as pd
@@ -19,6 +21,10 @@ import elda_ts_clustering as elda_tsc
 #load_url = "http://m2utech.eastus.cloudapp.azure.com:5223/dashboard/restapi/getTbRawDataByPeriod"
 load_url = config.cfg['data_load_url']
 
+################ Logging ##################
+# make logger instance
+logger = logging.getLogger("Running_Log")
+#########################################
 
 def data_load(s_date, e_date, t_iterval):
 	start_date = s_date
@@ -39,6 +45,8 @@ def data_load(s_date, e_date, t_iterval):
 		##### 분석할 데이터 속성 추출 #####
 		dataset = pd.DataFrame(dataset['rtnData'], columns=['node_id', 'event_time', 'voltage', 'ampere', 'active_power', 'power_factor'])
 
+		logger.info("Data Analysis start... >> data size : {} rows".format(len(dataset.index)))
+		
 		##### 데이터 타입 변환 #####
 		dataset['voltage'] = dataset['voltage'].convert_objects(convert_numeric=True)
 		dataset['ampere'] = dataset['ampere'].convert_objects(convert_numeric=True)
