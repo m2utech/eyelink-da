@@ -1,23 +1,35 @@
-import os
-import time
-import daemon
-import daemon.pidfile
+import sys
+
+from daemon import Daemon
 
 import logging
 import logging.handlers
-
-from lockfile.pidlockfile import PIDLockFile
-from lockfile import AlreadyLocked
 
 # configuration
 import config_info as config
 
 
-def start_daemon():
+class Start_daemon(object):
+	
+	def run(self):
 
+		logger.info("ELDA daemon start...")
+		while True:
+			import elda_main
+
+
+class EldaDaemon(Daemon):
+	def run(self):
+		startdaemon = Start_daemon()
+		startdaemon.run()
+		
+
+
+
+if __name__ == '__main__':
 	# make logger instance
 	#logging.basicConfig(level=logging.DEBUG)
-	logger = logging.getLogger("DA_daemonLog")
+	logger = logging.getLogger("elda_daemonLog")
 	logger.setLevel(logging.INFO)
 
 	# make formatter
@@ -31,44 +43,21 @@ def start_daemon():
 	# attach stream and file handler to logger instance
 	logger.addHandler(fileHandler)
 
-	pidfile = PIDLockFile(config.cfg['pidfile_path'])
-	try:
-		pidfile.acquire()
-	except AlreadyLocked:
-		try:
-			os.kill(pidfile.read_pid(), 0)
-			print('Process already running!')
-			exit(1)
-		except OSError:  #No process with locked PID
-			pidfile.break_lock()
 
 
-	daemon_context = daemon.DaemonContext(
-			working_directory='/home/Toven/da/elda', umask=0o002,
-			pidfile=daemon.pidfile.PIDLockFile('/home/Toven/da/elda_daemon.pid'),
-			files_preserve=[fileHandler.stream]
-			)
+	daemon = EldaDaemon(config.cfg['pidfile_path'])
 
-	logger.info("==========================")
-	logger.debug("Debug message")
-	logger.info("Info message")
-	logger.warning("Warning message")
-	logger.error("Error message")
-	logger.critical("critical debug message")
-	logger.info("==========================")
-
-
-	print("Start daemon for EyeLink in python")
-
-#	daemon_context.open()
-
-
-	with daemon_context as context:
-		while True:
-			import elda_main
-			#time.sleep(10)
-
-
-
-if __name__ == '__main__':
-	start_daemon()
+	if len(sys.argv) == 2:
+		if 'start' == sys.argv[1]:
+			daemon.start()
+		elif 'stop' == sys.argv[1]:
+			daemon.stop()
+		elif 'restart' == sys.argv[1]:
+			daemon.restart()
+		else:
+			print("unknown command")
+			sys.exit(2)
+		sys.exit(0)
+	else:
+		print("usage: %s start|stop|restart" % sys.argv[0])
+		sys.exit(2)
