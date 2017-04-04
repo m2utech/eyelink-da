@@ -1,56 +1,24 @@
-import os
-import time
-#from datetime import datetime, timedelta
-from datetime import date
-from dateutil.relativedelta import relativedelta
-
-import daemon
-import daemon.pidfile
-
+import sys
+from daemon import Daemon
 import logging
 import logging.handlers
-from logging import getLogger
-
-from lockfile.pidlockfile import PIDLockFile
-from lockfile import AlreadyLocked
-
-# configuration
 import config_info as config
 
-from apscheduler.schedulers.blocking import BlockingScheduler
-#from apscheduler.schedulers.background import BackgroundScheduler
 import socket
 
-#######################################################
-# make logger instance
-#logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("Scheduler_Log")
-logger.setLevel(logging.DEBUG)
-LOGFILE = config.cfg['apscheduler_path']
-LOGSIZE = 1024*100
-LOGBACKUP_COUNT = 5
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from apscheduler.schedulers.blocking import BlockingScheduler
 
-if not logger.handlers:
-	loghandler = logging.handlers.RotatingFileHandler(LOGFILE, 
-		maxBytes=LOGSIZE, backupCount=LOGBACKUP_COUNT)
-	formatter = logging.Formatter('[%(asctime)s|%(name)s-%(levelname)s] >> %(message)s')
-	loghandler.setFormatter(formatter)
-	logger.addHandler(loghandler)
 
-aps_logger = getLogger(__name__)
-aps_logger = logger
-#######################################################
 # Server infomation for Socket
-import config_info as config
 HOST = config.cfg['host']
 PORT = int(config.cfg['port'])
 #HOST = 'm2u-da.eastus.cloudapp.azure.com'
 
 #######################################################
 def job_cron_day():
-	logger.info("==========================")
-	logger.debug("Start data analysis for one day")
-	logger.info("==========================")
+	logger.info("===== Start data analysis for one day =====")
 
 	today = date.today()
 	minusDay = relativedelta(days=121)
@@ -70,10 +38,8 @@ def job_cron_day():
 
 
 def job_cron_week():
-	logger.info("==========================")
-	logger.debug("Start data analysis for one week")
-	logger.info("==========================")
-
+	logger.info("===== Start data analysis for one week =====")
+	
 	today = date.today()
 	minusDay = relativedelta(days=123)
 	oneWeek = relativedelta(days=6)
@@ -93,9 +59,7 @@ def job_cron_week():
 
 
 def job_cron_month():
-	logger.info("==========================")
-	logger.debug("Start data analysis for one month")
-	logger.info("==========================")
+	logger.info("===== Start data analysis for one month =====")
 
 	today = date.today()
 	premonth = today - relativedelta(months=5)
@@ -112,32 +76,57 @@ def job_cron_month():
 	s.close()
 	print('Received',repr(data))
 
-def start_daemon():
 
-	pidfile = PIDLockFile(config.cfg['schePID_path'])
-	try:
-		pidfile.acquire()
-	except AlreadyLocked:
-		try:
-			os.kill(pidfile.read_pid(), 0)
-			print('Process already running!')
-			exit(1)
-		except OSError:  #No process with locked PID
-			pidfile.break_lock()
+class Start_scheduler(object):
 
+	def run(self):
+		logger.info("ELDA Scheduler start...")
+		while True:
+			sched = BlockingScheduler()
 
-	sched = BlockingScheduler()
-	# Schedules job_function to be run on the third Friday
-	# of June, July, August, November and December at 00:00, 01:00, 02:00 and 03:00
-	#sched.add_job(job_function, 'cron', day_of_week='mon-fri', minute='*/1')
-	sched.add_job(job_cron_day, 'cron', max_instances=10, hour=0)
-	sched.add_job(job_cron_week, 'cron', max_instances=10, day_of_week='mon', hour=0)
-	sched.add_job(job_cron_month, 'cron', max_instances=10, day=1, hour=1)
-
-	sched.start()
-
-	print("Start daemon for EyeLink in python")
+			sched.add_job(job_cron_day, 'cron', max_instances=10, hour=0)
+			sched.add_job(job_cron_week, 'cron', max_instances=10, day_of_week='mon', hour=0)
+			sched.add_job(job_cron_month, 'cron', max_instances=10, day=1, hour=1)
+			sched.start()
 
 
-with daemon.DaemonContext():
-	start_daemon()
+class SchedulerDaemon(Daemon):
+	def run(self):
+		startdaemon = Start_scheduler()
+		startdaemon.run()
+		
+
+
+if __name__ == '__main__':
+	# make logger instance
+	logger = logging.getLogger("Scheduler_Log")
+	logger.setLevel(logging.INFO)
+
+	# make formatter
+	formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
+
+	# make handler to output Log for stream and file
+	fileMaxByte = 1024 * 1024 * 100 #100MB
+	fileHandler = logging.handlers.RotatingFileHandler(config.cfg['apscheduler_path'], maxBytes=fileMaxByte, backupCount=10)
+	# specify formatter to each handler
+	fileHandler.setFormatter(formatter)
+	# attach stream and file handler to logger instance
+	logger.addHandler(fileHandler)
+
+	daemon = SchedulerDaemon(config.cfg['schePID_path'])
+
+	if len(sys.argv) == 2:
+		if 'start' == sys.argv[1]:
+			daemon.start()
+		elif 'stop' == sys.argv[1]:
+			daemon.stop()
+		elif 'restart' == sys.argv[1]:
+			daemon.restart()
+		else:
+			print("unknown command")
+			sys.exit(2)
+		sys.exit(0)
+	else:
+		print("usage: %s start|stop|restart" % sys.argv[0])
+		sys.exit(2)
+	#######################################################

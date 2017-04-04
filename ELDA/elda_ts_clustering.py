@@ -10,39 +10,18 @@ import numpy as np
 
 def k_means_clust(data, num_clust, num_iter, w):
     centroids = random.sample(list(data.values()),num_clust) # 랜덤하게 중심점 선택
-    #centroids = random.sample(list(data),num_clust) # 랜덤하게 중심점 선택
-    #centroids = [0,0,0,0,0]
-    ##print(list(data.values()))
-    ##print("-----------------")
-    ##print(centroids)
-
-    counter = 0
-
-    for n in range(num_iter):   # 10회 반복
-        counter += 1
-        #print(counter)
-
-    #assign data points to clusters
+    
+    for n in range(num_iter):   # num_iter회 반복
+        #assign data points to clusters
         assignments = {}
 
-        for ind, i in enumerate(data.values()):  #ex) ind: 0, i: ts_1
-            ind = list(data)[ind]
+        for ind, i in enumerate(data.values()):  #ex) index: 0~n, i: ts_0~n
+            ind = list(data)[ind]   # replace index to node ID
             
             min_dist = float('inf')
             closest_clust = None
 
-            #print(ind)
-            #print("----------")
-            #print(type(i))
-            #print("----------")
-            #print(min_dist)
-            #print("----------")
-            #print(closest_clust)
-
             for c_ind, j in enumerate(centroids): #random centroid 
-                
-                #print(c_ind, j) ###############
-
                 if LB_Keogh(i, j, 5) < min_dist:
                     cur_dist = float(DTWDistance(i, j, w))
                     if cur_dist < min_dist:
@@ -52,30 +31,26 @@ def k_means_clust(data, num_clust, num_iter, w):
                 assignments[closest_clust].append(ind)
             else:
                 assignments[closest_clust] = []
-        #print(assignments) #Result of Clustering
-        #print(type(assignments))
+
+        print(assignments) #Result of Clustering
 
         #recalculate centroids of clusters 
         for key in assignments:
-            #print(key)
-            #print("-------------")
-            #print(assignments[key])
 
-            clust_sum = 0
+            #clust_sum = 0
+            # clust_sum 리스트로 초기화
+            clust_sum = [0.0 for _ in range(len(data.keys()))]
 
-            if not assignments[key]:
-                print("============== Null Cluster ============")
-                #centroids[key] = 0
+            # 클러스터의 중심값 계산
+            for k in assignments[key]:
+                clust_sum = [x + y for x,y in zip(clust_sum, data[k])]
+                
+            # 클러스터가 빙있다면.. -1로 초기화
+            if all(v == 0 for v in clust_sum):
+                print("There is no cluster")
+                centroids[key] = [-1 for _ in range(len(data.keys()))]
             else:
-                for k in assignments[key]:
-                    clust_sum = clust_sum+np.asarray(data[k])
-                    #print("clust_sum : ", clust_sum)
-                    #print("data[k]", data[k])
-                ########## null 값으로 처리해야함 ########
                 centroids[key] = [m/len(assignments[key]) for m in clust_sum]
-
-    print(assignments) #Result of Clustering
-
 
     return centroids, assignments
 
@@ -117,15 +92,7 @@ def DTWDistance(s1, s2, w):
 
 
 def LB_Keogh(s1, s2, r):
-    ''' 
-    Calculates LB_Keough lower bound to dynamic time warping. Linear 
-    complexity compared to quadratic complexity of dtw. 
-    ''' 
-#    print(s1)
-#    print("-----------------------")
-#    print(s2)
-
-
+    
     LB_sum = 0
     for ind, i in enumerate(s1):
           
