@@ -1,15 +1,13 @@
-import os
 import socket
 from threading import Thread
 import json
-import configparser
 import elda_clustering as clustering_main
 
 import logging
 import logging.handlers
 import time
 
-#configuration
+# configuration
 import config_info as config
 
 # Multithreaded Python server : TCP Server Socket Thread Pool
