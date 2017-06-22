@@ -38,7 +38,7 @@ def data_load(s_date, e_date, t_iterval):
 	resp = requests.get(url)
 	dataset = json.loads(resp.text)
 	if not dataset['rtnData']:
-		print("empty dataset")
+		logger.warning("There is no dataset")
 
 	else:
 		##### 분석할 데이터 속성 추출 #####
@@ -114,17 +114,20 @@ def data_load(s_date, e_date, t_iterval):
 		#################### clustering ###################
 
 		##### voltage #####
-		v_centroids, v_assignments = elda_tsc.k_means_clust(v_ls,4,2,2) #data, clus_num, iter, window
+		v_centroids, v_assignments = elda_tsc.k_means_clust(v_ls,4,2,1) #data, clus_num, iter, window
 		## datail result ##
 		v_result_centroids = pd.DataFrame(v_centroids)
 		v_result_centroids.reset_index(level=0, inplace=True)
 		v_result_centroids = v_result_centroids.pivot_table(columns = 'index')
+		#print(v_result_centroids)
+		
+		for clus_no in v_result_centroids.columns.values:
+			v_label = 'c{}_voltage'.format(clus_no)
+			result_tb[v_label] = v_result_centroids.loc[:,clus_no]
 
-		result_tb['c0_voltage'] = v_result_centroids.loc[:,0]
-		result_tb['c1_voltage'] = v_result_centroids.loc[:,1]
-		result_tb['c2_voltage'] = v_result_centroids.loc[:,2]
-		result_tb['c3_voltage'] = v_result_centroids.loc[:,3]
-
+#			if any(result_tb[v_label] == -1):
+#				del result_tb[v_label]
+			
 
 		## master result ##
 		v_assign = ",".join(map(str, list(v_assignments.values())))
@@ -142,10 +145,15 @@ def data_load(s_date, e_date, t_iterval):
 		a_result_centroids = pd.DataFrame(a_centroids)
 		a_result_centroids.reset_index(level=0, inplace=True)
 		a_result_centroids = a_result_centroids.pivot_table(columns = 'index')
-		result_tb['c0_ampere'] = a_result_centroids.loc[:,0]
-		result_tb['c1_ampere'] = a_result_centroids.loc[:,1]
-		result_tb['c2_ampere'] = a_result_centroids.loc[:,2]
-		result_tb['c3_ampere'] = a_result_centroids.loc[:,3]
+
+		for clus_no in a_result_centroids.columns.values:
+			a_label = 'c{}_ampere'.format(clus_no)
+			result_tb[a_label] = a_result_centroids.loc[:,clus_no]
+			
+#			if any(result_tb[a_label] == -1):
+#				del result_tb[a_label]
+
+
 		## master result ##
 		a_assign = ",".join(map(str, list(a_assignments.values())))
 		a_assign = a_assign.replace(", ",":").replace("'","").replace("[","").replace("]","")
@@ -162,10 +170,14 @@ def data_load(s_date, e_date, t_iterval):
 		ap_result_centroids = pd.DataFrame(ap_centroids)
 		ap_result_centroids.reset_index(level=0, inplace=True)
 		ap_result_centroids = ap_result_centroids.pivot_table(columns = 'index')
-		result_tb['c0_active_power'] = ap_result_centroids.loc[:,0]
-		result_tb['c1_active_power'] = ap_result_centroids.loc[:,1]
-		result_tb['c2_active_power'] = ap_result_centroids.loc[:,2]
-		result_tb['c3_active_power'] = ap_result_centroids.loc[:,3]
+
+		for clus_no in ap_result_centroids.columns.values:
+			ap_label = 'c{}_active_power'.format(clus_no)
+			result_tb[ap_label] = ap_result_centroids.loc[:,clus_no]
+
+#			if any(result_tb[ap_label] == -1):
+#				del result_tb[ap_label]
+
 		## master result ##
 
 		ap_assign = ",".join(map(str, list(ap_assignments.values())))
@@ -178,22 +190,37 @@ def data_load(s_date, e_date, t_iterval):
 
 		##### power factor #####
 		pf_centroids, pf_assignments = elda_tsc.k_means_clust(pf_ls,4,2,2)
+		#print(pf_assignments)
+
 		## detail result ##
 		pf_result_centroids = pd.DataFrame(pf_centroids)
 		pf_result_centroids.reset_index(level=0, inplace=True)
 		pf_result_centroids = pf_result_centroids.pivot_table(columns = 'index')
-		result_tb['c0_power_factor'] = pf_result_centroids.loc[:,0]
-		result_tb['c1_power_factor'] = pf_result_centroids.loc[:,1]
-		result_tb['c2_power_factor'] = pf_result_centroids.loc[:,2]
-		result_tb['c3_power_factor'] = pf_result_centroids.loc[:,3]
+
+		for clus_no in pf_result_centroids.columns.values:
+			pf_label = 'c{}_power_factor'.format(clus_no)
+			result_tb[pf_label] = pf_result_centroids.loc[:,clus_no]
+
+#			if any(result_tb[pf_label] == -1):
+#				del result_tb[pf_label]
+
 		## master result ##
 		pf_assign = ",".join(map(str, list(pf_assignments.values())))
 		pf_assign = pf_assign.replace(", ",":").replace("'","").replace("[","").replace("]","")
 		pf_assign = pf_assign.split(',')
+		#print(pf_assign)
 		pf_assign = pd.DataFrame(pf_assign).T
+		#print(pf_assign)
+#		print(type(pf_assign))
 
 		for clus_no in pf_assign.columns.values:
 			master_tb['c{}_power_factor'.format(clus_no)] = pf_assign.loc[:,clus_no]
+			
+
+#		print(result_tb)
+#		print(master_tb)
+
+
 
 		### Merge JSON in dictionary type for converting timestamp data ####
 		result_json = {}
@@ -208,19 +235,15 @@ def data_load(s_date, e_date, t_iterval):
 		result_json = json.dumps(result_json, default = myconverter, sort_keys=True)
 		result_json = json.loads(result_json)
 
-	#	print(result_json)
-
-		#upload_url = "http://192.168.10.64:5223/analysis/restapi/insertClusterRawData"
-		#upload_url = "http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterRawData"
 		upload_url = config.cfg['result_upload_url']
-		#print(upload_url)
 
 		r = requests.post(upload_url, json=result_json)
 
-		print("no problem!!!!!!!!!!!!!!!")
+		logger.info("Data Analysis completed ...")
+		# print("no problem!!!!!!!!!!!!!!!")
 
 ####################################
 if __name__ == '__main__':
-	#pass
-	data_load('2017-02-07', '2017-02-07', 30)
+	pass
+	data_load('2017-01-02', '2017-01-02', 15)
 	# data_load(config.cfg['s_date'], config.cfg['e_date'], int(config.cfg['t_interval']))
