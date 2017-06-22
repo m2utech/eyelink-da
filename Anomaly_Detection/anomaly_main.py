@@ -42,7 +42,13 @@ def main(node_id, s_date, e_date, t_interval):
 
 	print(clusterer.cluster_centers_)
 
+
 	import pdb; pdb.set_trace()  # breakpoint eefc1a67 //
+# reconstruction
+    print("Reconstructing...")
+    reconstruction = learn_utils.reconstruct(data, window, clusterer)
+    error = reconstruction - data
+    print("Maximum reconstruction error is %.1f" % max(error))
 
 
 	import learn_utils
