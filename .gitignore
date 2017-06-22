@@ -4,7 +4,6 @@ build/
 dist/
 ELDA/__pycache__
 tests/
-example/
 *.log
 *.pyc
 *.csv

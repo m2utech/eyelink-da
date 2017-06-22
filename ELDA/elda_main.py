@@ -17,7 +17,8 @@ class ClientThread(Thread):
 		Thread.__init__(self)
 		self.ip = ip
 		self.port = port
-		print("New da-server socket thread started for" + ip + ":" + str(port))
+		#print("New da-server socket thread started for" + ip + ":" + str(port))
+		logger.info("New da-server socket thread started for" + ip + ":" + str(port))
 
 	def json_parsing(data):
 
@@ -70,7 +71,7 @@ HOST = config.cfg['host']
 PORT = int(config.cfg['port'])
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.bind((HOST, PORT))
 threads = []
 
