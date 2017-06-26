@@ -32,14 +32,14 @@ def plot_waves(waves, step):
     and increasing in index by 'step' for each subsequent graph
     """
     plt.figure()
-    n_graph_rows = 5
-    n_graph_cols = 5
+    n_graph_rows = 3
+    n_graph_cols = 3
     graph_n = 1
     wave_n = 0
     for _ in range(n_graph_rows):
         for _ in range(n_graph_cols):
             axes = plt.subplot(n_graph_rows, n_graph_cols, graph_n)
-            axes.set_ylim([-100, 150])
+            axes.set_ylim([-250, 250])
             plt.plot(waves[wave_n])
             graph_n += 1
             wave_n += step
