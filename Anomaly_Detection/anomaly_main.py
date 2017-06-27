@@ -21,29 +21,40 @@ def main(node_id, s_date, e_date, t_interval):
     dataset = data_convert.resample_missingValue(dataset, 100, 1)
     #print(dataset)
 
-    data = dataset['voltage']
+    # 추후 속성별 데이터 로드 
+    attr = 'voltage'  
+    data = data_convert.extract_attribute(dataset, attr)
 
+    # sliding_chunker(data, window_len, slide_len)
+    # not apply sine signal
+    print("Windowing data...")
+    segments = learn_utils.sliding_chunker(data,60,60)
+    print("Produced %d waveform segments" % len(segments))
+    learn_utils.plot_waves(segments, 1, 10, 10)
+
+
+    ##############################
     ########## windowing #########
     window_rads = np.linspace(0, np.pi, WINDOW_LEN)
     window = np.sin(window_rads)**2
 
     print("Windowing data...")
     windowed_segments = get_windowed_segments(data, window)
-    print("Produced %d waveform segments" % len(windowed_segments))
-    #print(windowed_segments)
-    #t = np.arange(0, 47, 1)
-    #plt.plot(t, windowed_segments)
-    #plt.show()
+    print("Produced %d waveform windowed segments" % len(windowed_segments))
+    learn_utils.plot_waves(windowed_segments, 1, 10, 10)
 
-
-    clusterer = KMeans(n_clusters=27)
+    ########################################
+    ## clustering using K-Means algorithm ##
+    ########################################
+    print("Clustering data...")
+    clusterer = KMeans(n_clusters=16)
     #clusterer = KMeans()
     # compute k-means clustering
     clusterer.fit(windowed_segments)
     print(clusterer.cluster_centers_)
     #plt.plot(clusterer.cluster_centers_)
     #plt.show()
-    learn_utils.plot_waves(clusterer.cluster_centers_, step=1)
+    learn_utils.plot_waves(clusterer.cluster_centers_, 1, 4, 4)
     import pdb; pdb.set_trace()  # breakpoint 463ccb9e //
 
 
