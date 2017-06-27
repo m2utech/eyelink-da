@@ -48,10 +48,12 @@ def resample_missingValue(dataset, def_val, t_interval):
     dataset = dataset.fillna(def_val)
 
     #dataset = dataset[dataset.voltage != 100]
-
     return dataset
 
 
+def extract_attribute(dataset, attr):
+    data = dataset[attr]
+    return data
 
 
 ###############################################
