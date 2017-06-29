@@ -5,6 +5,7 @@ import data_convert
 import learn_utils
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+import pandas as pd
 
 WINDOW_LEN = 60
 
@@ -19,29 +20,42 @@ def main(node_id, s_date, e_date, t_interval):
     
     # data resampling
     dataset = data_convert.resample_missingValue(dataset, 100, 1)
-    #print(dataset)
+    
 
     # 추후 속성별 데이터 로드 
     attr = 'voltage'  
     data = data_convert.extract_attribute(dataset, attr)
+    print(data)
+    print(type(data))
+
+#    dataset = pd.DataFrame(data)
+#    print(dataset)
+#    dataset.voltage += 100
+#    print(dataset)
+    #########-100 ##########
+    #data -= 100
+    print("========")
+    print(data)
 
     # sliding_chunker(data, window_len, slide_len)
     # not apply sine signal
     print("Windowing data...")
-    segments = learn_utils.sliding_chunker(data,60,60)
+    segments = learn_utils.sliding_chunker(data,60,15)
     print("Produced %d waveform segments" % len(segments))
-    learn_utils.plot_waves(segments, 1, 10, 10)
+    #learn_utils.plot_waves(segments, 1, 10, 10)
 
 
     ##############################
     ########## windowing #########
     window_rads = np.linspace(0, np.pi, WINDOW_LEN)
     window = np.sin(window_rads)**2
+    #plt.plot(window)
+    #plt.show()
 
     print("Windowing data...")
     windowed_segments = get_windowed_segments(data, window)
     print("Produced %d waveform windowed segments" % len(windowed_segments))
-    learn_utils.plot_waves(windowed_segments, 1, 10, 10)
+    #learn_utils.plot_waves(windowed_segments, 1, 10, 10)
 
     ########################################
     ## clustering using K-Means algorithm ##
@@ -55,13 +69,25 @@ def main(node_id, s_date, e_date, t_interval):
     #plt.plot(clusterer.cluster_centers_)
     #plt.show()
     learn_utils.plot_waves(clusterer.cluster_centers_, 1, 4, 4)
-    import pdb; pdb.set_trace()  # breakpoint 463ccb9e //
 
 
     print("Reconstructing...")
     reconstruction = learn_utils.reconstruct(data, window, clusterer)
     error = reconstruction - data
+
     print("Maximum reconstruction error is %.1f" % max(error))
+    #learn_utils.plot_waves(reconstruction, 1, 4, 4)
+    plt.figure()
+    plt.plot(data[0:10000], label="Original voltage")
+    #plt.legend()
+    #plt.show()
+    #plt.plot(reconstruction[0:10000], label="Reconstructed voltage")
+    #plt.legend()
+    #plt.show()
+
+    plt.plot(error[0:10000], label="Reconstruction Error")
+    plt.legend()
+    plt.show()
 
     import pdb; pdb.set_trace()  # breakpoint a3ed6eb3 //
 
