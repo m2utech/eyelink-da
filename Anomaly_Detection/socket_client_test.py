@@ -17,7 +17,7 @@ s=socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
 
 s.connect((HOST,PORT))
 print("start test...")
-s.send(b'{"node_id": "0002.00000039", "start_date": "2017-01-23", "end_date": "2017-01-29", "time_interval": 15}') #문자를 보냄
+s.send(b'{"node_id": "0002.00000039", "start_date": "2017-01-22", "end_date": "2017-01-31", "time_interval": 15}') #문자를 보냄
 
 data = s.recv(2048) #서버로 부터 정보를 받음
 

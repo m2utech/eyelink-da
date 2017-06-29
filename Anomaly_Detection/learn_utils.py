@@ -66,5 +66,6 @@ def reconstruct(data, window, clusterer):
         pos = segment_n * slide_len
         reconstructed_data[pos:pos+window_len] += nearest_match
 
+
     return reconstructed_data
 
