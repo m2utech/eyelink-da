@@ -33,7 +33,8 @@ def json_data_load(node_id, s_date, e_date):
         #logger.warning("There is no dataset")
 
     else:
-        dataset = pd.DataFrame(dataset['rtnData'], columns=['node_id', 'event_time', 'voltage'])
+        #dataset = pd.DataFrame(dataset['rtnData'], columns=['node_id', 'event_time', 'voltage'])
+        dataset = pd.DataFrame(dataset['rtnData'], columns=['event_time', 'voltage'])
         dataset['event_time'] = pd.to_datetime(dataset['event_time'], format='%Y-%m-%d %H:%M:%S.%f')
         dataset['voltage'] = dataset['voltage'].apply(pd.to_numeric, errors='ignore')
         dataset = dataset.set_index('event_time')  
@@ -46,7 +47,7 @@ def resample_missingValue(dataset, def_val, t_interval):
     # 처음-끝 일정사이에 15분 단위로 구분(비어있는 날짜는 자동으로 생성)
     dataset = dataset.resample(str(t_interval)+'T').mean()
     dataset = dataset.fillna(def_val)
-
+    dataset = dataset.reset_index()
     #dataset = dataset[dataset.voltage != 100]
     return dataset
 
