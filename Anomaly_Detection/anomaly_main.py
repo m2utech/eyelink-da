@@ -106,6 +106,7 @@ def main(node_id, s_date, e_date, t_interval):
     plt.plot(error, label="Reconstruction Error")
     plt.legend()
     plt.show()
+    print(error)
 
     import pdb; pdb.set_trace()  # breakpoint a3ed6eb3 //
 
