@@ -7,6 +7,21 @@ Helper functions for time series data learning process
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def get_windowed_segments(data, window):
+    step = 5
+    windowed_segments = []
+    segments = sliding_chunker(
+        data,
+        window_len=len(window),
+        slide_len=step
+    )
+    for segment in segments:
+        segment *= window
+        windowed_segments.append(segment)
+    return windowed_segments
+
+
 def sliding_chunker(data, window_len, slide_len):
     """
     Split a list into a series of sub-lists, each sub-list window_len long,
@@ -39,12 +54,12 @@ def plot_waves(waves, step, n_graph_rows, n_graph_cols):
     for _ in range(n_graph_rows):
         for _ in range(n_graph_cols):
             axes = plt.subplot(n_graph_rows, n_graph_cols, graph_n)
-            #axes.set_ylim([0, 240])
+            axes.set_ylim([0, 240])
             plt.plot(waves[wave_n])
             graph_n += 1
             wave_n += step
     # fix subplot sizes so that everything fits
-    plt.tight_layout()
+    #plt.tight_layout()
     plt.show()
 
 def reconstruct(data, window, clusterer):
@@ -52,9 +67,13 @@ def reconstruct(data, window, clusterer):
     Reconstruct the given data using the cluster centers from the given
     clusterer.
     """
-    window_len = len(window)
+    #window_len = len(window)
+    window_len = window
     slide_len = int(window_len/2)
+    
     segments = sliding_chunker(data, window_len, slide_len)
+    
+    # zeros() : float형으로 이루어진 0으로 len만큼 채워줌
     reconstructed_data = np.zeros(len(data))
     for segment_n, segment in enumerate(segments):
         # window the segment so that we can find it in our clusters which were
