@@ -3,7 +3,7 @@ drivers/
 build/
 dist/
 ELDA/__pycache__
-exmaple/
+example/
 *.log
 *.pyc
 *.csv
