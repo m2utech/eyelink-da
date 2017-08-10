@@ -2,10 +2,11 @@ import configparser
 
 config = configparser.ConfigParser()
 config.read('./config.cfg')
-cfg_info = config['INFO']
 
 global cfg
 cfg = {}
 
-for x in cfg_info:
-    cfg[x] = cfg_info[x]
+for section in config.sections():
+    cfg[section] = {}
+    for item in config[section]:
+        cfg[section][item] = config[section][item]

@@ -17,7 +17,7 @@ def json_data_load(node_id, s_date, e_date):
     nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
     ##### load JSON #####
-    url = cfg['train_data_url'] + "?nodeId={}&startDate={}&endDate={}".format(node_id, s_date, e_date)
+    url = cfg['SERVER']['train_data_url'] + "?nodeId={}&startDate={}&endDate={}".format(node_id, s_date, e_date)
     #print(url)
 
     resp = requests.get(url)
@@ -47,7 +47,7 @@ def json_data_load(node_id, s_date, e_date):
 def pattern_data_load(id):
 
     ##### load JSON #####
-    url = cfg['pattern_dataset_url'] + id
+    url = cfg['SERVER']['pattern_dataset_url'] + id
     #print(url)
 
     resp = requests.get(url)
