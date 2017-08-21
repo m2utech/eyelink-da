@@ -1,44 +1,30 @@
-# coding: utf-8
-
 import sys
 from daemon import Daemon
-import logging
-import logging.handlers
-
+# import logging
+# import logging.handlers
+import ad_logger as adLogging
 from config_parser import cfg
 
-class Start_daemon(object):
 
+class Start_daemon(object):
     def run(self):
-        logger.info("ELDA-ad daemon start...")
+        logger.info("Anomaly Detection daemon start...")
         while True:
             import ad_main
 
-class EldaDaemon(Daemon):
+
+class adDaemon(Daemon):
     def run(self):
         startdaemon = Start_daemon()
         startdaemon.run()
 
+
 if __name__ == '__main__':
-    #make logger instance
-    #logging.basicConfig(level=logging.DEBUG)
-    logger = logging.getLogger("ad_DaemonLog")
-    logger.setLevel(logging.INFO)
-
-    # make formatter
-    formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
-
-    # make handler to output Log for stream and file
-    #100MB
-    fileMaxByte = 1024 * 1024 * 100 
-    fileHandler = logging.handlers.RotatingFileHandler(cfg['daemon_path'], maxBytes=fileMaxByte, backupCount=10)
-    # specify formatter to each handler
-    fileHandler.setFormatter(formatter)
-    # attach stream and file handler to logger instance
-    logger.addHandler(fileHandler)
-
-    daemon = EldaDaemon(cfg['ad_pid_path'])
-
+    # pidfile_path = '/home/Toven/da/ad_daemon.pid'
+    # daemon = adDaemon(pidfile_path)
+    logger = adLogging.get_daemon_logger()
+    
+    daemon = adDaemon(cfg['DAEMON']['ad_pid_path'])
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             daemon.start()

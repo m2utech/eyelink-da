@@ -13,4 +13,3 @@ sns.lmplot(x='size', y='tip', data=tips, x_jitter=0.1)
 """
 print('test')
 plt.show()
-
