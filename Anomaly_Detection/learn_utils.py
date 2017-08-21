@@ -5,7 +5,7 @@ Helper functions for time series data learning process
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 def get_windowed_segments(data, window):
@@ -41,26 +41,26 @@ def sliding_chunker(data, window_len, slide_len):
 
     return chunks
 
-def plot_waves(waves, step, n_graph_rows, n_graph_cols):
-    """
-    Plot a set of 9 waves from the given set, starting from the first one
-    and increasing in index by 'step' for each subsequent graph
-    """
-    plt.figure()
-    #n_graph_rows = 10
-    #n_graph_cols = 10
-    graph_n = 1
-    wave_n = 0
-    for _ in range(n_graph_rows):
-        for _ in range(n_graph_cols):
-            axes = plt.subplot(n_graph_rows, n_graph_cols, graph_n)
-            axes.set_ylim([0, 240])
-            plt.plot(waves[wave_n])
-            graph_n += 1
-            wave_n += step
-    # fix subplot sizes so that everything fits
-    #plt.tight_layout()
-    plt.show()
+# def plot_waves(waves, step, n_graph_rows, n_graph_cols):
+#     """
+#     Plot a set of 9 waves from the given set, starting from the first one
+#     and increasing in index by 'step' for each subsequent graph
+#     """
+#     plt.figure()
+#     #n_graph_rows = 10
+#     #n_graph_cols = 10
+#     graph_n = 1
+#     wave_n = 0
+#     for _ in range(n_graph_rows):
+#         for _ in range(n_graph_cols):
+#             axes = plt.subplot(n_graph_rows, n_graph_cols, graph_n)
+#             axes.set_ylim([0, 240])
+#             plt.plot(waves[wave_n])
+#             graph_n += 1
+#             wave_n += step
+#     # fix subplot sizes so that everything fits
+#     #plt.tight_layout()
+#     plt.show()
 
 def reconstruct(data, window, clusterer):
     """

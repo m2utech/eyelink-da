@@ -1,6 +1,6 @@
-import numpy as np
+#import numpy as np
 #import struct
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 #import csv
 import datetime
 import requests
@@ -79,27 +79,3 @@ def extract_attribute(dataset, attr):
 
 
 ###############################################
-def read_test_data(input_file):
-    with open(input_file, 'rb') as input_file:
-        data_raw = input_file.readlines()
-        
-    # sklearn seems to throw up if data not in float format
-    # sklearn seems to throw up if data not in float format
-    data = np.array(data_raw).astype(float)
-    return data
-
-def read_txt_to_numpy(input_file):
-    data_raw = np.genfromtxt(input_file, usecols=(0,1), delimiter='\t', dtype=None)
-    return data_raw
-
-def read_data(input_file):
-    data = np.genfromtxt(input_file, delimiter='\t', dtype=str)
-    return data
-
-def plot_test_data(input_file, n_samples):
-    """
-    Plot the EKG data from the given file (for debugging).
-    """
-    ekg_data = read_test_data(input_file)
-    plt.plot(ekg_data[0:n_samples])
-    plt.show()

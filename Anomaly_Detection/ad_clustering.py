@@ -32,6 +32,7 @@ today = datetime.datetime.today()
 s_date = (today - relativedelta(months=1)).strftime('%Y-%m-%d')
 e_date = today.strftime('%Y-%m-%d')
 save_day = today.strftime('%Y-%m-%d')
+#save_day = today.strftime('%Y-%m-%dT%H:%M:%S')
 
 
 ######################
@@ -121,37 +122,43 @@ def main(node_id, s_date, e_date):
 
         min_df, max_df = compute_min_max(lbl_dataset)
 
-        ##소수점 4자리로 정리
-        #clusted_df = clusted_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
-        #min_df = min_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
-        #max_df = max_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
-        #clusted_df = clusted_df.apply(lambda x: x.astype(int) if np.allclose(x, x.astype(int)) else x)
-        #min_df = min_df.apply(lambda x: x.astype(int) if np.allclose(x, x.astype(int)) else x)
-        #max_df = max_df.apply(lambda x: x.astype(int) if np.allclose(x, x.astype(int)) else x)
+        #소수점 4자리로 정리
+        # clusted_df = clusted_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
+        # min_df = min_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
+        # max_df = max_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
+        
+        # clusted_df = clusted_df.convert_objects(convert_numeric=True)
+        # min_df = min_df.convert_objects(convert_numeric=True)
+        # max_df = max_df.convert_objects(convert_numeric=True)
+        
+
         pd.options.display.float_format = '{:,.4f}'.format
 
-        clusted_df = clusted_df.apply(lambda x: x.astype(int) if np.allclose(x, x.astype(int)) else x)
-        min_df = min_df.apply(lambda x: x.astype(int) if np.allclose(x, x.astype(int)) else x)
-        max_df = max_df.apply(lambda x: x.astype(int) if np.allclose(x, x.astype(int)) else x)
+        clusted_df = clusted_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
+        min_df = min_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
+        max_df = max_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
 
         total_pattern[col_name] = {}
         total_pattern[col_name]["center"] = clusted_df.T.to_dict(orient='list')
         total_pattern[col_name]["min_value"] = min_df.to_dict(orient='list')
         total_pattern[col_name]["max_value"] = max_df.to_dict(orient='list')
+        # end for loop
 
     result_json = {}
     result_json['pattern_data'] = total_pattern
     # print(result_json)
 
     print("result uploading .......")
+    print(e_date)
     # upload json data (업로드 테스트 완료)
-    upload_url = cfg['SERVER']['pattern_upload_url'] + 'test'
+    upload_url = cfg['SERVER']['pattern_upload_url'] + save_day
     requests.post(upload_url, json=result_json)
 
     print("Completed ~~~~ ^0^")
 
+    return result_json
+
 
 if __name__ == '__main__':
     # import socket_client_test
-    main(node_id, s_date, e_date)
-    # pass
+    main('0002.00000039', '2017-08-20', '2017-08-20')
