@@ -17,9 +17,10 @@ s=socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
 
 s.connect((HOST,PORT))
 print("start test...")
-s.send(b'{"type":"matching", "node_id": "0002.00000039", "s_time": "2017-08-21T14:00:00", "e_time": "2017-08-21T16:00:00"}') #문자를 보냄
+s.send(b'{"type":"pattern", "node_id": "0002.00000039", "s_date": "2017-07-22T00:00:00", "e_date": "2017-08-22T00:00:00"}') #문자를 보냄
+#s.send(b'{"type":"matching", "node_id": "0002.00000039", "s_time": "2017-08-21T14:00:00", "e_time": "2017-08-21T16:00:00"}') #문자를 보냄
 print("good?")
-data = s.recv(128) #서버로 부터 정보를 받음
+data = s.recv(512) #서버로 부터 정보를 받음
 
 print(data)
 

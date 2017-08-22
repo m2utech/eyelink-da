@@ -2,7 +2,7 @@ import socket
 from threading import Thread
 import json
 import datetime
-import time
+#import time
 from config_parser import cfg
 #import ad_logger as adLogging
 import ad_clustering
@@ -65,7 +65,7 @@ class ClientThread(Thread):
 
 	def run(self):
 		while True:
-			data = conn.recv(1024)
+			data = conn.recv(512)
 			logger.info("received data from socket:", data)
 			if not data:	break
 			ClientThread.json_parsing(data)
@@ -88,7 +88,7 @@ threads = []
 # logger.info("[%(asctime)s] > after socket")
 while True:
 	# logger.info("[%(asctime)s] > listen")
-	s.listen(50)
+	s.listen()
 	print('The ad-server is ready to receive')
 	# logger.info("connection test")
 	(conn, (ip, port)) = s.accept()

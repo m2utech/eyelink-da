@@ -48,11 +48,15 @@ def extract_segment(dataset, col_name):
 def compute_min_max(dataset):
     min_dict = dict()
     max_dict = dict()
+    lower_dict = dict()
+    upper_dict = dict()
 
     for cno in range(n_cluster):
         df = dataset[dataset['cluster'] == cno]
         min_list = []
         max_list = []
+        lower_list = []
+        upper_list = []
 
         for i in df.columns:
             if i == 'cluster':
@@ -60,14 +64,27 @@ def compute_min_max(dataset):
             else:
                 min_value = df[i].min()
                 min_list.append(min_value)
+                # lower_bound
+                lower = np.mean(df[i]) - np.std(df[i])
+                lower_list.append(lower)
+
                 max_value = df[i].max()
                 max_list.append(max_value)
+                # upper_bound
+                upper = np.mean(df[i]) + np.std(df[i])
+                upper_list.append(upper)
+
         min_dict["cluster_{}".format(cno)] = min_list
         max_dict["cluster_{}".format(cno)] = max_list
+        lower_dict["cluster_{}".format(cno)] = lower_list
+        upper_dict["cluster_{}".format(cno)] = upper_list
+
     min_df = pd.DataFrame(min_dict)
     max_df = pd.DataFrame(max_dict)
+    lower_df = pd.DataFrame(lower_dict)
+    upper_df = pd.DataFrame(upper_dict)
 
-    return min_df, max_df
+    return min_df, max_df, lower_df, upper_df
 
 
 ###############
@@ -120,7 +137,7 @@ def main(node_id, s_date, e_date):
 
         lbl_dataset = pd.concat([segment_df, labels_df], axis=1)
 
-        min_df, max_df = compute_min_max(lbl_dataset)
+        min_df, max_df, lower_df, upper_df = compute_min_max(lbl_dataset)
 
         #소수점 4자리로 정리
         # clusted_df = clusted_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
@@ -130,18 +147,22 @@ def main(node_id, s_date, e_date):
         # clusted_df = clusted_df.convert_objects(convert_numeric=True)
         # min_df = min_df.convert_objects(convert_numeric=True)
         # max_df = max_df.convert_objects(convert_numeric=True)
-        
 
         pd.options.display.float_format = '{:,.4f}'.format
 
         clusted_df = clusted_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
         min_df = min_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
         max_df = max_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
+        lower_df = lower_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
+        upper_df = upper_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
 
         total_pattern[col_name] = {}
         total_pattern[col_name]["center"] = clusted_df.T.to_dict(orient='list')
         total_pattern[col_name]["min_value"] = min_df.to_dict(orient='list')
         total_pattern[col_name]["max_value"] = max_df.to_dict(orient='list')
+        total_pattern[col_name]["lower"] = lower_df.to_dict(orient='list')
+        total_pattern[col_name]["upper"] = upper_df.to_dict(orient='list')
+        
         # end for loop
 
     result_json = {}
