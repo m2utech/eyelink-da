@@ -2,6 +2,8 @@ import sys
 from daemon import Daemon
 from config_parser import cfg
 import ad_logger as adLogging
+import logging
+import logging.handlers
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -16,6 +18,7 @@ from apscheduler.jobstores.base import JobLookupError
 host = cfg['SERVER']['host']
 port = int(cfg['SERVER']['port'])
 node_id = cfg['DA']['node_id']
+logger = logging.getLogger("ad-daemon")
 # HOST = 'm2u-da.eastus.cloudapp.azure.com'
 
 #######################################################
@@ -44,9 +47,9 @@ class Scheduler(object):
 		s.connect((host,port))
 		s.send(sendDate)
 		# print("send data : ", sendDate)
-		data = s.recv(1024)  # 서버로 부터 정보를 받음
+		data = s.recv(512)  # 서버로 부터 정보를 받음
 		s.close()
-		print('Received', repr(data))
+		#print('Received', repr(data))
 
 
 	def job_pattern_matching(self):
@@ -60,9 +63,9 @@ class Scheduler(object):
 		s.connect((host, port))
 		s.send(sendDate)
 		logger.info("sendDate: ", sendDate)
-		data = s.recv(1024)  # 서버로 부터 정보를 받음
+		data = s.recv(512)  # 서버로 부터 정보를 받음
 		s.close()
-		print('Received', repr(data))
+		#print('Received', repr(data))
 
 
 	def job_test(self):
@@ -70,7 +73,7 @@ class Scheduler(object):
 
 	def scheduler(self):
 		logger.info("Anomaly Detect Scheduler start...")
-		self.sched.add_job(self.job_pattern_matching, 'cron', max_instances=5, minute='*/10')
+		self.sched.add_job(self.job_pattern_matching, 'cron', max_instances=5, minute='*/5')
 		self.sched.add_job(self.job_construct_patterns, 'cron', max_instances=5, hour=0)
 		#self.sched.add_job(self.job_test, 'cron', max_instances=5, second='*/10')
 
@@ -87,7 +90,7 @@ class SchedulerDaemon(Daemon):
 
 
 if __name__ == '__main__':
-	logger = adLogging.get_sche_logger()
+	#logger = adLogging.get_sche_logger()
 	daemon = SchedulerDaemon(cfg['DAEMON']['sche_pid_path'])
 	if len(sys.argv) == 2:
 		if 'start' == sys.argv[1]:

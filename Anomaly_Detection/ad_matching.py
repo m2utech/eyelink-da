@@ -14,6 +14,8 @@ import numpy as np
 # import learn_utils
 from config_parser import cfg
 import pandas as pd
+import logging
+
 #from sklearn.cluster import KMeans
 #import matplotlib.pyplot as plt
 
@@ -26,6 +28,9 @@ a_default = float(cfg['DA']['a_default'])
 ap_default = float(cfg['DA']['ap_default'])
 pf_default = float(cfg['DA']['pf_default'])
 n_cluster = int(cfg['DA']['n_cluster'])
+
+
+logger = logging.getLogger("ad-daemon")
 
 #today = datetime.datetime.today()
 #pattern_id = today.strftime('%Y-%m-%d')
@@ -44,21 +49,21 @@ def main(node_id, s_time, e_time, pattern_data):
 #    global pattern_data
     #pattern_data = data_convert.pattern_data_load(pattern_id)
 
-    print("target data loading ....")
+    logger.info("target data loading ....")
     # target data loading
     dataset = data_convert.json_data_load(node_id, s_time, e_time)
     
     if dataset is None:
-        print("There is no dataset")
+        logger.info("There is no dataset")
     else:
-        print("data preprocessing ....")
+        logger.info("data preprocessing ....")
         dataset = data_preprocess(dataset, s_time)
-        print("pattern matching ....")
-        assign_result = pattern_matching(dataset, pattern_data)
+        logger.info("pattern matching ....")
+        assign_result = pattern_matching(dataset, pattern_data, e_time)
 
         ######## 결과 업로드 #######
-        print("result uploading .......")
-        print("save_time: ", e_time)
+        logger.info("result uploading .......")
+        logger.info("save_time: ", e_time)
         print("==============")
         print(assign_result)
         anomaly_pattern_url = cfg['SERVER']['anomaly_pattern_url'] + e_time
@@ -92,7 +97,7 @@ def data_preprocess(dataset, s_time):
     return dataset
 
 ################
-def pattern_matching(dataset, pattern_data):
+def pattern_matching(dataset, pattern_data, timestamp):
 
     assign_result = {}
 
@@ -124,6 +129,9 @@ def pattern_matching(dataset, pattern_data):
         assign_result[col_name] = closest_clust
         #assign_result['{}_status'.format(col_name)] = status
         assign_result['{}_status'.format(col_name)] = min_dist
+
+    assign_result['timestamp'] = timestamp
+
 
     #print(assign_result)
     #print(min_dist)
