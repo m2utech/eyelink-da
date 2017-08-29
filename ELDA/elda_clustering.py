@@ -31,7 +31,7 @@ def data_load(s_date, e_date, t_iterval):
 	end_date = e_date
 	time_interval = t_iterval
 	#nowtime = datetime.datetime.now()
-	nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+	nowtime = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]
 
 	##### JSON 로드 #####
 	url = load_url + "?startDate={}&endDate={}".format(start_date, end_date)
@@ -62,6 +62,8 @@ def data_load(s_date, e_date, t_iterval):
 		power_factor_data = elda_de.extract_data(dataset, 'event_time', 'node_id', 'power_factor', 0.9, time_interval)
 
 		###### 결과 테이블 ######
+		#########################
+		#########################
 		result_tb = pd.DataFrame()
 		result_tb['event_time'] = voltage_data.index
 		result_tb['da_time'] = nowtime
