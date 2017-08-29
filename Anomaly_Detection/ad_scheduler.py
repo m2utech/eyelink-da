@@ -47,7 +47,7 @@ class Scheduler(object):
 		s.connect((host,port))
 		s.send(sendDate)
 		# print("send data : ", sendDate)
-		data = s.recv(512)  # 서버로 부터 정보를 받음
+		data = s.recv(256)  # 서버로 부터 정보를 받음
 		s.close()
 		#print('Received', repr(data))
 
@@ -63,7 +63,7 @@ class Scheduler(object):
 		s.connect((host, port))
 		s.send(sendDate)
 		logger.info("sendDate: ", sendDate)
-		data = s.recv(512)  # 서버로 부터 정보를 받음
+		data = s.recv(256)  # 서버로 부터 정보를 받음
 		s.close()
 		#print('Received', repr(data))
 

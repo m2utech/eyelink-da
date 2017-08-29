@@ -6,9 +6,12 @@ import datetime
 import requests
 import json
 import pandas as pd
+import logging
 
 # configuration
 from config_parser import cfg
+
+logger = logging.getLogger("ad-daemon")
 
 ############################
 def json_data_load(node_id, s_date, e_date):
@@ -22,10 +25,9 @@ def json_data_load(node_id, s_date, e_date):
 
     resp = requests.get(url)
     dataset = json.loads(resp.text)
-
-    if not dataset['rtnData']:
+    if not dataset['rtnCode']['code'] == '0001':
         dataset = None
-        return dataset
+        #return dataset
         #logger.warning("There is no dataset")
     else:
         attr = ['event_time', 'voltage', 'ampere', 'active_power','power_factor']
@@ -53,8 +55,10 @@ def pattern_data_load(id):
     resp = requests.get(url)
     dataset = json.loads(resp.text)
 
-    if not dataset['rtnData']:
-        print("There is no dataset")
+    if not dataset['rtnCode']['code'] == '0001':
+        logger.info(dataset['rtnCode']['message'])
+        dataset = None
+        #print("There is no dataset")
         #logger.warning("There is no dataset")
     else:
         dataset = dataset['rtnData']['pattern_data']

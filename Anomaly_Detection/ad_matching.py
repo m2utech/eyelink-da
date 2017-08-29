@@ -3,7 +3,7 @@
 
 # 모듈 및 라이브러리 임포트
 import data_convert
-
+import time
 #from datetime import date
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -63,11 +63,14 @@ def main(node_id, s_time, e_time, pattern_data):
 
         ######## 결과 업로드 #######
         logger.info("result uploading .......")
-        logger.info("save_time: ", e_time)
-        print("==============")
-        print(assign_result)
+        #print("==============")
+        #print(assign_result)
+        #try:
         anomaly_pattern_url = cfg['SERVER']['anomaly_pattern_url'] + e_time
+        logger.info("save_info: {}".format(anomaly_pattern_url))
         requests.post(anomaly_pattern_url, json=assign_result)
+        #except requests.exceptions.ConnectionError as e:
+        #    logger.info(e)
         ############################
         #visualization(dataset,pattern_data,assign_result)
 
@@ -206,4 +209,4 @@ def DTWDistance(s1, s2, w):
 
 if __name__ == '__main__':
     pass
-    # main()
+    # main(node_id, s_time, e_time, pattern_data)
