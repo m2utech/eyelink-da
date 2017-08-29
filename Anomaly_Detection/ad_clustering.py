@@ -12,6 +12,7 @@ import requests
 import pandas as pd
 from sklearn.cluster import KMeans
 import numpy as np
+import logging
 
 # 1. Dataset loading
 # 1.1 Condition of target dataset
@@ -34,6 +35,7 @@ e_date = today.strftime('%Y-%m-%d')
 save_day = today.strftime('%Y-%m-%d')
 #save_day = today.strftime('%Y-%m-%dT%H:%M:%S')
 
+logger = logging.getLogger("ad-daemon")
 
 ######################
 # 속성별 세그먼트 추출
@@ -91,20 +93,24 @@ def compute_min_max(dataset):
 # main function
 def main(node_id, s_date, e_date):
 
-    print("data loading .......")
+    logger.info("Trainnig data loading ...")
+    #print("data loading .......")
 
     # 학습데이터 로드
     dataset = data_convert.json_data_load(node_id, s_date, e_date)
 
-    print("data preprocessing .......")
+    logger.info("Data preprocessing ...")
+    #print("data preprocessing .......")
     # 데이터 전처리(결측치 처리, 구간화, 디폴트값)
 
+    logger.info("Resampling & missing value process ...")
     # 미싱벨류 처리
     voltage_data = data_convert.resample_missingValue(dataset['voltage'], v_default, time_interval)
     ampere_data = data_convert.resample_missingValue(dataset['ampere'], a_default, time_interval)
     active_power_data = data_convert.resample_missingValue(dataset['active_power'], ap_default, time_interval)
     power_factor_data = data_convert.resample_missingValue(dataset['power_factor'], pf_default, time_interval)
 
+    logger.info("data merge ...")
     # 각 데이터를 하나로 merge
     dataset = pd.concat([voltage_data, ampere_data.ampere, active_power_data.active_power, power_factor_data.power_factor], axis=1, join_axes=[voltage_data.index])
 
@@ -118,10 +124,13 @@ def main(node_id, s_date, e_date):
     total_pattern = {}
 
     for col_name in dataset.columns:
-        print("extracting segment for {}".format(col_name))
+        logger.info("extracting segment for {} ...".format(col_name))
+        #print("extracting segment for {}".format(col_name))
         segments = extract_segment(dataset[col_name], col_name)
 
-        print("Clustering of {} segments....".format(col_name))
+        logger.info("Clustering of {} segments ...".format(col_name))
+        #print("Clustering of {} segments....".format(col_name))
+
         clusted_segments = clusterer.fit(segments)
         clusted_df = pd.DataFrame(clusted_segments.cluster_centers_)
 
@@ -129,7 +138,9 @@ def main(node_id, s_date, e_date):
         for i in range(len(clusted_df.index)):
             clusted_df = clusted_df.rename(index={i: 'cluster_{}'.format(i)})
 
-        print("Create segment and label dataset")
+        logger.info("Create labeled DataFrame ...")
+        #print("Create segment and label dataset")
+        
         labels_df = pd.DataFrame(clusted_segments.labels_)
         labels_df = labels_df.rename(columns={0: "cluster"})
 
@@ -137,6 +148,7 @@ def main(node_id, s_date, e_date):
 
         lbl_dataset = pd.concat([segment_df, labels_df], axis=1)
 
+        logger.info("Computing boundary threshold ...")
         min_df, max_df, lower_df, upper_df = compute_min_max(lbl_dataset)
 
         #소수점 4자리로 정리
@@ -156,6 +168,7 @@ def main(node_id, s_date, e_date):
         lower_df = lower_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
         upper_df = upper_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
 
+        logger.info("Merging each DataFrame ...")
         total_pattern[col_name] = {}
         total_pattern[col_name]["center"] = clusted_df.T.to_dict(orient='list')
         total_pattern[col_name]["min_value"] = min_df.to_dict(orient='list')
@@ -169,13 +182,11 @@ def main(node_id, s_date, e_date):
     result_json['pattern_data'] = total_pattern
     # print(result_json)
 
-    print("result uploading .......")
-    print(e_date)
+    logger.info("Uploading result dataset ... [ID : {}]".format(save_day))
+    #print("result uploading .......")
     # upload json data (업로드 테스트 완료)
     upload_url = cfg['SERVER']['pattern_upload_url'] + save_day
     requests.post(upload_url, json=result_json)
-
-    print("Completed ~~~~ ^0^")
 
     return result_json
 
