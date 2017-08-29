@@ -40,7 +40,7 @@ class ClientThread(Thread):
 
 	def run(self):
 		while True:
-			data = conn.recv(2048)
+			data = conn.recv(512)
 			print("Server received data:", data)
 			if not data:	break
 			ClientThread.json_parsing(data)
@@ -76,7 +76,7 @@ s.bind((HOST, PORT))
 threads = []
 
 while True:
-	s.listen(50)
+	s.listen()
 	print('The da-server is ready to receive')
 	(conn, (ip,port)) = s.accept()
 	newthread = ClientThread(ip, port)

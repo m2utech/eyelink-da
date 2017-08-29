@@ -98,7 +98,7 @@ def main(node_id, s_date, e_date):
 
     # 학습데이터 로드
     dataset = data_convert.json_data_load(node_id, s_date, e_date)
-
+    
     logger.info("Data preprocessing ...")
     #print("data preprocessing .......")
     # 데이터 전처리(결측치 처리, 구간화, 디폴트값)
@@ -106,11 +106,15 @@ def main(node_id, s_date, e_date):
     logger.info("Resampling & missing value process ...")
     # 미싱벨류 처리
     voltage_data = data_convert.resample_missingValue(dataset['voltage'], v_default, time_interval)
+    #logger.info("voltage OK ...")
     ampere_data = data_convert.resample_missingValue(dataset['ampere'], a_default, time_interval)
+    #logger.info("ampere OK ...")
     active_power_data = data_convert.resample_missingValue(dataset['active_power'], ap_default, time_interval)
+    #logger.info("active_power OK ...")
     power_factor_data = data_convert.resample_missingValue(dataset['power_factor'], pf_default, time_interval)
+    #logger.info("power_factor OK ...")
 
-    logger.info("data merge ...")
+    #logger.info("data merge ...")
     # 각 데이터를 하나로 merge
     dataset = pd.concat([voltage_data, ampere_data.ampere, active_power_data.active_power, power_factor_data.power_factor], axis=1, join_axes=[voltage_data.index])
 

@@ -6,7 +6,7 @@ import config_info as config
 
 import socket
 
-from datetime import date
+import datetime
 from dateutil.relativedelta import relativedelta
 from apscheduler.schedulers.blocking import BlockingScheduler
 
@@ -20,19 +20,18 @@ PORT = int(config.cfg['port'])
 def job_cron_day():
 	logger.info("===== Start data analysis for one day =====")
 
-	today = date.today()
-	minusDay = relativedelta(days=121)
-	startDate = today - minusDay
-	endDate = startDate
+	today = datetime.datetime.today()
+	startDate = (today - relativedelta(days=1)).strftime('%Y-%m-%dT%H:%M:00')
+	endDate = today.strftime('%Y-%m-%dT%H:%M:00')
 
-	sendDate = '{"start_date":"'+ startDate.strftime('%Y-%m-%d') + '", "end_date":"' + endDate.strftime('%Y-%m-%d') + '", "time_interval":15}'
+	sendDate = '{"start_date":"'+ startDate + '", "end_date":"' + endDate + '", "time_interval":15}'
 	sendDate = sendDate.encode()
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
 	s.connect((HOST,PORT))
 	s.send(sendDate) 
 #	s.send(b'{"start_date": "2017-02-03", "end_date": "2017-02-03", "time_interval": 15}') #문자를 보냄
-	data = s.recv(2048) #서버로 부터 정보를 받음
+	data = s.recv(512) #서버로 부터 정보를 받음
 	s.close()
 	print('Received',repr(data))
 
@@ -40,20 +39,18 @@ def job_cron_day():
 def job_cron_week():
 	logger.info("===== Start data analysis for one week =====")
 	
-	today = date.today()
-	minusDay = relativedelta(days=123)
-	oneWeek = relativedelta(days=6)
-	endDate = today - minusDay
-	startDate = endDate - oneWeek
+	today = datetime.datetime.today()
+	startDate = (today - relativedelta(weeks=1)).strftime('%Y-%m-%dT%H:00:00')
+	endDate = today.strftime('%Y-%m-%dT%H:00:00')
 
-	sendDate = '{"start_date":"'+ startDate.strftime('%Y-%m-%d') + '", "end_date":"' + endDate.strftime('%Y-%m-%d') + '", "time_interval":60}'
+	sendDate = '{"start_date":"'+ startDate + '", "end_date":"' + endDate + '", "time_interval":60}'
 	sendDate = sendDate.encode()
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
 	s.connect((HOST,PORT))
 	s.send(sendDate) 
 	#s.send(b'{"start_date": "2017-02-07", "end_date": "2017-02-07", "time_interval": 60}') #문자를 보냄
-	data = s.recv(2048) #서버로 부터 정보를 받음
+	data = s.recv(512) #서버로 부터 정보를 받음
 	s.close()
 	print('Received',repr(data))
 
@@ -61,18 +58,18 @@ def job_cron_week():
 def job_cron_month():
 	logger.info("===== Start data analysis for one month =====")
 
-	today = date.today()
-	premonth = today - relativedelta(months=5)
-	startDate = date(premonth.year, premonth.month, 1)
-	endDate = date(today.year, today.month, 1) - relativedelta(months=4) - relativedelta(days=1)
-	sendDate = '{"start_date":"'+ startDate.strftime('%Y-%m-%d') + '", "end_date":"' + endDate.strftime('%Y-%m-%d') + '", "time_interval":60}'
+	today = datetime.datetime.today()
+	startDate = (today - relativedelta(months=1)).strftime('%Y-%m-%dT00:00:00')
+	endDate = today.strftime('%Y-%m-%dT00:00:00')
+
+	sendDate = '{"start_date":"'+ startDate + '", "end_date":"' + endDate + '", "time_interval":60}'
 	sendDate = sendDate.encode()
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
 	s.connect((HOST,PORT))
 	s.send(sendDate) 
 	#s.send(b'{"start_date": "2017-02-07", "end_date": "2017-02-07", "time_interval": 60}') #문자를 보냄
-	data = s.recv(2048) #서버로 부터 정보를 받음
+	data = s.recv(512) #서버로 부터 정보를 받음
 	s.close()
 	print('Received',repr(data))
 
@@ -85,7 +82,7 @@ class Start_scheduler(object):
 			sched = BlockingScheduler()
 
 			sched.add_job(job_cron_day, 'cron', max_instances=10, hour=0)
-			sched.add_job(job_cron_week, 'cron', max_instances=10, day_of_week='mon', hour=0)
+			sched.add_job(job_cron_week, 'cron', max_instances=10, day_of_week='mon', hour=0, minute=10)
 			sched.add_job(job_cron_month, 'cron', max_instances=10, day=1, hour=1)
 			sched.start()
 
