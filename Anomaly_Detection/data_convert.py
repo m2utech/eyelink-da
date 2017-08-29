@@ -25,7 +25,8 @@ def json_data_load(node_id, s_date, e_date):
 
     resp = requests.get(url)
     dataset = json.loads(resp.text)
-    if not dataset['rtnCode']['code'] == '0001':
+    #if not dataset['rtnCode']['code'] == '0001':
+    if dataset['rtnCode']['code'] == '0001':
         dataset = None
         #return dataset
         #logger.warning("There is no dataset")
