@@ -16,8 +16,8 @@ import logging.handlers
 
 pattern_dataset = None
 # ### status code ###
-PATTERN_CODE = 1
-MATCH_CODE = 1
+PATTERN_CODE = 0
+#MATCH_CODE = 1
 
 logger = logging.getLogger("ad-daemon")
 
@@ -45,14 +45,15 @@ class ClientThread(Thread):
         #print(json_dict)
 
         if json_dict["type"] == "pattern":
+            PATTERN_CODE = 1;
             node_id = json_dict['node_id']
             s_date = json_dict['s_date']
             e_date = json_dict['e_date']
             ClientThread.create_pattern(node_id, s_date, e_date)
 
         elif json_dict["type"] == "matching":
-            if PATTERN_CODE == 0:
-                logger.info("Now, Pattern dataset is being generated ... wait")
+            if PATTERN_CODE == 1:
+                logger.warning("Now, Pattern dataset is being generated ... wait")
             
             else:
                 if pattern_dataset is None:
@@ -86,26 +87,22 @@ class ClientThread(Thread):
                 else:
                     ClientThread.matching_pattern(json_dict)
         else:
-            logger.info("The type is invalid")
+            logger.warning("The type is invalid")
 
 
     #############
     def create_pattern(node_id, s_date, e_date):
         # 패턴매칭
         global PATTERN_CODE
-        global pattern_dataset
-        global PATTERN_CODE
-        global MATCH_CODE
-
-        PATTERN_CODE = 0
 
         logger.info("====== Start creating pattern dataset ======")
         logger.info("[node-id:{0} | start-date:{1} | end-date:{2}]".format(node_id,s_date, e_date))
-        pattern_dataset = ad_clustering.main(node_id, s_date, e_date)
+        #pattern_dataset = ad_clustering.main(node_id, s_date, e_date)
+        ad_clustering.main(node_id, s_date, e_date)
         logger.info("====== Completed creating pattern dataset ======")
 
-        PATTERN_CODE = 1
-        MATCH_CODE = 1
+        PATTERN_CODE = 0
+        #MATCH_CODE = 1
     #############
 
     #############
@@ -126,7 +123,7 @@ class ClientThread(Thread):
             print("received data from socket: {}".format(data))
             if not data:	break
             ClientThread.json_parsing(data)
-            conn.send(b"received analysis success")
+            #conn.send(b"received analysis success")
 # ##### end of class #####
 
 

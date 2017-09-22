@@ -12,19 +12,20 @@ import socket
 
 #from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.base import JobLookupError
+#from apscheduler.jobstores.base import JobLookupError
 
 # Server infomation for Socket
 host = cfg['SERVER']['host']
 port = int(cfg['SERVER']['port'])
 node_id = cfg['DA']['node_id']
-logger = logging.getLogger("ad-daemon")
-# HOST = 'm2u-da.eastus.cloudapp.azure.com'
 
+# HOST = 'm2u-da.eastus.cloudapp.azure.com'
+#logger = logging.getLogger("ad-daemon")
 #######################################################
 class Scheduler(object):
 	def __init__(self):
 		self.sched = BackgroundScheduler()
+		#self.sched = BlockingScheduler()
 		self.sched.start()
 		self.job_id=''
 
@@ -47,7 +48,7 @@ class Scheduler(object):
 		s.connect((host,port))
 		s.send(sendDate)
 		# print("send data : ", sendDate)
-		data = s.recv(256)  # 서버로 부터 정보를 받음
+		#data = s.recv(256)  # 서버로 부터 정보를 받음
 		s.close()
 		#print('Received', repr(data))
 
@@ -62,19 +63,19 @@ class Scheduler(object):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # 소켓생성
 		s.connect((host, port))
 		s.send(sendDate)
-		logger.info("sendDate: ", sendDate)
-		data = s.recv(256)  # 서버로 부터 정보를 받음
+		#logger.info("sendDate: ", sendDate)
+		#data = s.recv(256)  # 서버로 부터 정보를 받음
 		s.close()
 		#print('Received', repr(data))
 
 
 	def job_test(self):
-		logger.info("job test~~~ just 10 sec")
+		logger.debug("job test~~~ just 10 sec")
 
 	def scheduler(self):
-		logger.info("Anomaly Detect Scheduler start...")
-		self.sched.add_job(self.job_pattern_matching, 'cron', max_instances=5, minute='*/5')
-		self.sched.add_job(self.job_construct_patterns, 'cron', max_instances=5, hour=0)
+		#self.sched.add_job(self.job_pattern_matching, 'cron', max_instances=5, hour='5-22', minute='*/2')
+		self.sched.add_job(self.job_pattern_matching, 'cron', max_instances=10, minute='*/5')
+		self.sched.add_job(self.job_construct_patterns, 'cron', max_instances=10, hour=0)
 		#self.sched.add_job(self.job_test, 'cron', max_instances=5, second='*/10')
 
 
@@ -90,14 +91,18 @@ class SchedulerDaemon(Daemon):
 
 
 if __name__ == '__main__':
-	#logger = adLogging.get_sche_logger()
+	logger = adLogging.get_sche_logger()
+	
 	daemon = SchedulerDaemon(cfg['DAEMON']['sche_pid_path'])
 	if len(sys.argv) == 2:
 		if 'start' == sys.argv[1]:
+			logger.info("Started Anomaly Detect Scheduler ...")
 			daemon.start()
 		elif 'stop' == sys.argv[1]:
+			logger.info("Stopped Anomaly Detect Scheduler ...")
 			daemon.stop()
 		elif 'restart' == sys.argv[1]:
+			logger.info("Restarted Anomaly Detect Scheduler ...")
 			daemon.restart()
 		else:
 			print("unknown command")

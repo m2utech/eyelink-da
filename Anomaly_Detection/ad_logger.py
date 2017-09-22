@@ -46,7 +46,7 @@ def get_sche_logger():
 	# make handler to output Log for stream and file
 	fileMaxByte = 1024 * 1024 * 100     # 100MB
 	
-	fileHandler = logging.handlers.RotatingFileHandler(cfg['DAEMON']['scheduler_path'], maxBytes=fileMaxByte, backupCount=10)
+	fileHandler = logging.handlers.RotatingFileHandler(cfg['DAEMON']['daemon_path'], maxBytes=fileMaxByte, backupCount=10)
 	# specify formatter to each handler
 	fileHandler.setFormatter(formatter)
 	# attach stream and file handler to logger instance
