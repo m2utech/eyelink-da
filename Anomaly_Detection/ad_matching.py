@@ -52,15 +52,20 @@ def main(node_id, s_time, e_time, pattern_data):
     logger.info("target data loading ....")
     # target data loading
     dataset = data_convert.json_data_load(node_id, s_time, e_time)
-    
+
     if dataset is None:
         logger.info("There is no dataset")
     else:
         logger.info("data preprocessing ....")
         dataset = data_preprocess(dataset, s_time)
-        logger.info("pattern matching ....")
+        logger.info("pattern matching start ....")
+
         assign_result = pattern_matching(dataset, pattern_data, e_time)
 
+        assign_json = {}
+        assign_json['analysis'] = assign_result
+
+        #logger.info("assign_result ====> {}".format(assign_result))
         ######## 결과 업로드 #######
         logger.info("result uploading .......")
         #print("==============")
@@ -68,7 +73,7 @@ def main(node_id, s_time, e_time, pattern_data):
         #try:
         anomaly_pattern_url = cfg['SERVER']['anomaly_pattern_url'] + e_time
         logger.info("save_info: {}".format(anomaly_pattern_url))
-        requests.post(anomaly_pattern_url, json=assign_result)
+        requests.post(anomaly_pattern_url, json=assign_json)
         #except requests.exceptions.ConnectionError as e:
         #    logger.info(e)
         ############################
@@ -101,75 +106,103 @@ def data_preprocess(dataset, s_time):
 
 ################
 def pattern_matching(dataset, pattern_data, timestamp):
+    # pattern_info loading
+    today = datetime.datetime.today()
+    pattern_info = data_convert.pattern_info_load(today)
 
     assign_result = {}
 
     for col_name in dataset.columns:
-        min_dist = float('inf')
-        closest_clust = None
+            
+        t1_dist = float('inf')
+        t2_dist = float('inf')
+        t3_dist = float('inf')
+        t1_clust = None
+        t2_clust = None
+        t3_clust = None
         #status = 'Normality'
-        
+
         test_data = dataset[col_name]
         pattern_df = pd.DataFrame.from_records(pattern_data[col_name]['center'])
-                
+
+        max_dist = []
+
         for clust_name in pattern_df.columns:
             match_data = pattern_df[clust_name]
             cur_dist = DTWDistance(test_data[:110], match_data[:110], 1)
-            
-            if cur_dist < min_dist:
-                #print("min="+ str(min_dist) + ", cur=" + str(cur_dist) + ", cluster=" + str(clust_name))
-                min_dist = cur_dist
-                closest_clust = clust_name
-            #print(col_name + "==> " + closest_clust)
+
+            ######## matching rate ########
+            max_dist.append(cur_dist)
+            ###############################
+            if cur_dist < t1_dist:
+                t3_dist = t2_dist
+                t2_dist = t1_dist
+                t1_dist = cur_dist
+
+                t3_clust = t2_clust
+                t2_clust = t1_clust
+                t1_clust = clust_name
+
+            elif cur_dist < t2_dist:
+                t3_dist = t2_dist
+                t2_dist = cur_dist
+                t3_clust = t2_clust
+                t2_clust = clust_name
+
+            elif cur_dist < t3_dist:
+                t3_dist = cur_dist
+                t3_clust = clust_name
+            else:
+                continue
         
-    #     if min_dist > 0.7:
-    #         status = 'Anomaly'
-    #     elif min_dist > 0.3:
-    #         status = 'Caution'
-    #     else:
-    #         status = 'Normality'
+        # 매칭율
+        max_dist = max(max_dist)
+        percentile = max_dist / 100.0
+        t1_rate = t1_dist / percentile
+        t2_rate = t2_dist / percentile
+        t3_rate = t3_dist / percentile
+        ############################
+        assign_result[col_name] = t1_clust
+        assign_result['{}_rate'.format(col_name)] = 100.0 - t1_rate
+        assign_result['{}_2'.format(col_name)] = t2_clust
+        assign_result['{}_2_rate'.format(col_name)] = 100.0 - t2_rate
+        assign_result['{}_3'.format(col_name)] = t3_clust
+        assign_result['{}_3_rate'.format(col_name)] = 100.0 - t3_rate
 
-        assign_result[col_name] = closest_clust
-        #assign_result['{}_status'.format(col_name)] = status
-        assign_result['{}_status'.format(col_name)] = min_dist
+        ###### 비교 ######
+        lower_df = pd.DataFrame.from_records(pattern_data[col_name]['lower'])[t1_clust][:110]
+        upper_df = pd.DataFrame.from_records(pattern_data[col_name]['upper'])[t1_clust][:110]
+        min_df = pd.DataFrame.from_records(pattern_data[col_name]['min_value'])[t1_clust][:110]
+        max_df = pd.DataFrame.from_records(pattern_data[col_name]['max_value'])[t1_clust][:110]
 
+        anomaly_code = []
+        caution_code = []
+
+        for ind in range(len(test_data)):
+            if (test_data[ind] >= lower_df[ind]) and (test_data[ind] <= upper_df[ind]):
+                anomaly_code.append(-1)
+                caution_code.append(-1)
+            else:
+                if (test_data[ind] <= max_df[ind]) and (test_data[ind] >= min_df[ind]):
+                    anomaly_code.append(-1)
+                    caution_code.append(test_data[ind])
+                else:
+                    anomaly_code.append(test_data[ind])
+                    caution_code.append(-1)
+
+        ######################
+        # 상태정보에 따라 알람 메시지 저장 예정
+        ######################
+        assign_result['{}_status'.format(col_name)] = pattern_info[col_name][t1_clust]
+        ############# 추후에 넣자 #####
+        assign_result['{}_anomaly_pt'.format(col_name)] = anomaly_code
+        assign_result['{}_caution_pt'.format(col_name)] = caution_code
+        
     assign_result['timestamp'] = timestamp
 
-
-    #print(assign_result)
-    #print(min_dist)
+    # print(assign_result)
+    # print(min_dist)
     return assign_result
-
-######### Visualization ##########
-# def visualization(dataset, pattern_data, assign_result):
-#     plt.figure(figsize=(20,10))
-#     i = 1
-
-#     for key, no in assign_result.items():
-#         if "_status" in key:
-#             pass
-#         else:
-#             ax = plt.subplot(4,1,i)
-            
-#             if key == 'ampere': ax.set_ylim([-0.5, 1.2])
-#             elif key == 'power_factor': ax.set_ylim([-0.2, 1.2])
-#             elif key == 'active_power': ax.set_ylim([-10, 140])
-#             else: ax.set_ylim([200, 240])
-            
-#             plt.plot(dataset[key], label='Original data', c='b')
-#             plt.plot(pattern_data[key]['center'][no], label="Prediction pattern", linestyle='dashed', c='r')
-#             plt.plot(pattern_data[key]['min_value'][no], label="min-max threshold", c='g', alpha=.3)
-#             plt.plot(pattern_data[key]['max_value'][no], c='g', alpha=.3)
-#             ax.fill_between(range(120),pattern_data[key]['min_value'][no],pattern_data[key]['max_value'][no], color='green', alpha='0.3')
-            
-#             plt.ylabel(key)
-#             i+=1
-
-#         plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    
-#     plt.suptitle("{} ~ {}".format(s_time, e_time), fontsize=16)
-#     plt.show()
-    
 
 
 #####################################

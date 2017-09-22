@@ -4,7 +4,9 @@
 # 모듈 및 라이브러리 임포트
 from config_parser import cfg
 import data_convert
+import ad_matching
 import learn_utils
+import json
 
 import datetime
 from dateutil.relativedelta import relativedelta
@@ -41,7 +43,7 @@ logger = logging.getLogger("ad-daemon")
 # 속성별 세그먼트 추출
 def extract_segment(dataset, col_name):
     segment = learn_utils.sliding_chunker(dataset, window_len, slide_len)
-    print("Produced %d waveform {}-segments".format(col_name) % len(segment))
+    #print("Produced %d waveform {}-segments".format(col_name) % len(segment))
     return segment
 
 
@@ -93,12 +95,22 @@ def compute_min_max(dataset):
 # main function
 def main(node_id, s_date, e_date):
 
+    today = datetime.datetime.today()
+    save_day = today.strftime('%Y-%m-%d')
+    
     logger.info("Trainnig data loading ...")
     #print("data loading .......")
 
     # 학습데이터 로드
     dataset = data_convert.json_data_load(node_id, s_date, e_date)
     
+    # 전날 패턴데이터 로드
+    logger.info("Previous day's pattern Data loading ...")
+    pre_day = (today - relativedelta(days=1)).strftime('%Y-%m-%d')
+    pre_dataset = data_convert.pattern_data_load(pre_day)
+    pre_pattern_info = data_convert.pattern_info_load(pre_day)
+
+
     logger.info("Data preprocessing ...")
     #print("data preprocessing .......")
     # 데이터 전처리(결측치 처리, 구간화, 디폴트값)
@@ -126,6 +138,7 @@ def main(node_id, s_date, e_date):
     # # Data Analysis
     clusterer = KMeans(n_clusters=n_cluster)
     total_pattern = {}
+    meta_pattern = {}  # information about clustered pattern
 
     for col_name in dataset.columns:
         logger.info("extracting segment for {} ...".format(col_name))
@@ -144,7 +157,7 @@ def main(node_id, s_date, e_date):
 
         logger.info("Create labeled DataFrame ...")
         #print("Create segment and label dataset")
-        
+
         labels_df = pd.DataFrame(clusted_segments.labels_)
         labels_df = labels_df.rename(columns={0: "cluster"})
 
@@ -159,7 +172,7 @@ def main(node_id, s_date, e_date):
         # clusted_df = clusted_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
         # min_df = min_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
         # max_df = max_df.applymap(lambda x: str(int(x)) if abs(x-int(x)) < 1e-6 else str(round(x,4)))
-        
+
         # clusted_df = clusted_df.convert_objects(convert_numeric=True)
         # min_df = min_df.convert_objects(convert_numeric=True)
         # max_df = max_df.convert_objects(convert_numeric=True)
@@ -179,22 +192,64 @@ def main(node_id, s_date, e_date):
         total_pattern[col_name]["max_value"] = max_df.to_dict(orient='list')
         total_pattern[col_name]["lower"] = lower_df.to_dict(orient='list')
         total_pattern[col_name]["upper"] = upper_df.to_dict(orient='list')
+
+
+        #############2017.09.22#################
+        pre_df = pd.DataFrame.from_records(pre_dataset[col_name]['center'])
+        today_df = clusted_df.T
+        meta_pattern[col_name] = {}
         
+        for today_clustNo in today_df.columns:
+            target_cluster = today_df[today_clustNo]
+
+            min_dist = float('inf')
+            max_dist = 0.0
+            min_cluster = None
+            for pre_clustNo in pre_df.columns:
+                match_cluster = pre_df[pre_clustNo]
+                cur_dist = ad_matching.DTWDistance(target_cluster, match_cluster, 1)
+
+                if cur_dist < min_dist:
+                    min_dist = cur_dist
+                    min_cluster = pre_clustNo
+                elif cur_dist > max_dist:
+                    max_dist = cur_dist
+                else: continue
+                
+            #############################
+            #   여기에 매칭율
+            percentile = max_dist / 100.0
+            rate = min_dist / percentile
+            match_rate = 100.0 - rate
+            ############################
+            if match_rate > 85.0:
+                meta_pattern[col_name][today_clustNo] = pre_pattern_info[col_name][pre_clustNo]
+            else:
+                meta_pattern[col_name][today_clustNo] = 'undefined'
         # end for loop
 
     result_json = {}
     result_json['pattern_data'] = total_pattern
+    result_json['pattern_data']['creation_Date'] = save_day
+
+    pattern_json = {}
+    pattern_json['pattern_info'] = meta_pattern
+
     # print(result_json)
 
     logger.info("Uploading result dataset ... [ID : {}]".format(save_day))
     #print("result uploading .......")
     # upload json data (업로드 테스트 완료)
-    upload_url = cfg['SERVER']['pattern_upload_url'] + save_day
+    upload_url = cfg['SERVER']['pattern_upload_url'] + save_day #'TEST' #save_day
     requests.post(upload_url, json=result_json)
 
-    return result_json
+    pattern_info_url = cfg['SERVER']['pattern_info_upload_url'] + save_day
+    requests.post(pattern_info_url, json=pattern_json)
+
+    #return result_json
 
 
 if __name__ == '__main__':
     # import socket_client_test
-    main('0002.00000039', '2017-08-20', '2017-08-20')
+    pass
+    # main('0002.00000039', '2016-12-01', '2017-01-31')

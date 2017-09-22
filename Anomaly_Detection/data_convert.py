@@ -45,6 +45,21 @@ def json_data_load(node_id, s_date, e_date):
     return dataset
 ############################
 
+def pattern_info_load(id):
+    url = cfg['SERVER']['pattern_info_url'] + "?id={}".format(id)
+    resp = requests.get(url)
+    dataset = json.loads(resp.text)
+
+    if dataset['rtnCode']['code'] == '0001':
+        logger.info(dataset['rtnCode']['message'])
+        dataset = None
+        #print("There is no dataset")
+        #logger.warning("There is no dataset")
+    else:
+        dataset = dataset['rtnData']['pattern_info']
+#        dataset = pd.DataFrame.from_records(dataset['rtnData']['pattern_data'])
+
+    return dataset
 
 ############################
 def pattern_data_load(id):
@@ -56,7 +71,7 @@ def pattern_data_load(id):
     resp = requests.get(url)
     dataset = json.loads(resp.text)
 
-    if not dataset['rtnCode']['code'] == '0001':
+    if dataset['rtnCode']['code'] == '0001':
         logger.info(dataset['rtnCode']['message'])
         dataset = None
         #print("There is no dataset")

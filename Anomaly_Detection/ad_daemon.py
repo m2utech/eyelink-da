@@ -8,7 +8,6 @@ from config_parser import cfg
 
 class Start_daemon(object):
     def run(self):
-        logger.info("Anomaly Detection daemon start...")
         while True:
             import ad_main
 
@@ -27,10 +26,13 @@ if __name__ == '__main__':
     daemon = adDaemon(cfg['DAEMON']['ad_pid_path'])
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
+            logger.info("Started Anomaly Detection daemon ...")
             daemon.start()
         elif 'stop' == sys.argv[1]:
+            logger.info("Stopped Anomaly Detection daemon ...")
             daemon.stop()
         elif 'restart' == sys.argv[1]:
+            logger.info("Restarted Anomaly Detection daemon ...")
             daemon.restart()
         else:
             print("unknown command")
