@@ -74,7 +74,7 @@ class Scheduler(object):
 
 	def scheduler(self):
 		#self.sched.add_job(self.job_pattern_matching, 'cron', max_instances=5, hour='5-22', minute='*/2')
-		self.sched.add_job(self.job_pattern_matching, 'cron', max_instances=10, minute='*/5')
+		self.sched.add_job(self.job_pattern_matching, 'cron', max_instances=10, minute='*/2')
 		self.sched.add_job(self.job_construct_patterns, 'cron', max_instances=10, hour=0)
 		#self.sched.add_job(self.job_test, 'cron', max_instances=5, second='*/10')
 

@@ -222,7 +222,7 @@ def main(node_id, s_date, e_date):
             rate = min_dist / percentile
             match_rate = 100.0 - rate
             ############################
-            if match_rate > 85.0:
+            if match_rate > 95.0:
                 meta_pattern[col_name][today_clustNo] = pre_pattern_info[col_name][pre_clustNo]
             else:
                 meta_pattern[col_name][today_clustNo] = 'undefined'

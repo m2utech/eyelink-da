@@ -7,6 +7,7 @@ import time
 #from datetime import date
 import datetime
 from dateutil.relativedelta import relativedelta
+from socketIO_client import SocketIO
 
 import requests
 import numpy as np
@@ -108,6 +109,7 @@ def data_preprocess(dataset, s_time):
 def pattern_matching(dataset, pattern_data, timestamp):
     # pattern_info loading
     today = datetime.datetime.today()
+    today = today.strftime('%Y-%m-%d')
     pattern_info = data_convert.pattern_info_load(today)
 
     assign_result = {}
@@ -197,6 +199,20 @@ def pattern_matching(dataset, pattern_data, timestamp):
         ############# 추후에 넣자 #####
         assign_result['{}_anomaly_pt'.format(col_name)] = anomaly_code
         assign_result['{}_caution_pt'.format(col_name)] = caution_code
+
+        if assign_result['{}_status'.format(col_name)] == 'anomaly':
+            sendData = {}
+            sendData['applicationType'] = 'ELAGENT/DA'
+            sendData['agentId'] = ''
+            sendData['timestamp'] = timestamp
+            sendData['alarmType'] = 'BATCH_ANOMALY'
+            sendData['alarmTypeName'] = 'BATCH_ANOMALY'
+            sendData['message'] = 'Anomaly expected in {} factor'.format(col_name)
+
+            socketIO = SocketIO('http://m2utech.eastus.cloudapp.azure.com', 5223)
+            socketIO.emit('receiveAlarmData', sendData)
+        else:
+            continue
         
     assign_result['timestamp'] = timestamp
 
