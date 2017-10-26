@@ -1,28 +1,29 @@
 import sys
 from daemon import Daemon
-from ad_logger import getAdLogger
-from ad_configParser import getConfig
-import ad_main
-import consts
+# import logging
+# import logging.handlers
+import ad_logger as adLogging
+from config_parser import cfg
 
 
-class StartDaemon(object):
+class Start_daemon(object):
     def run(self):
         while True:
-            ad_main.AdSocketThread(consts.HOST, consts.PORT).listen()
+            import ad_main
 
 
-class AdDaemon(Daemon):
+class adDaemon(Daemon):
     def run(self):
-        startDaemon = StartDaemon()
-        startDaemon.run()
+        startdaemon = Start_daemon()
+        startdaemon.run()
 
 
 if __name__ == '__main__':
-    logger = getAdLogger()
-    cfg = getConfig()
-    daemon = AdDaemon(cfg['FILE_PATH']['path_ad_pid'])
-
+    # pidfile_path = '/home/Toven/da/ad_daemon.pid'
+    # daemon = adDaemon(pidfile_path)
+    logger = adLogging.get_daemon_logger()
+    
+    daemon = adDaemon(cfg['DAEMON']['ad_pid_path'])
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             logger.info("Started Anomaly Detection daemon ...")

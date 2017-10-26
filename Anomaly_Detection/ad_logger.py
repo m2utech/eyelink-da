@@ -1,55 +1,45 @@
 import logging
 import logging.handlers
-from config_parser import cfg
-
-def get_running_logger():
-	logger = logging.getLogger("ad-running")
-	logger.setLevel(logging.INFO)
-	# make formatter
-	formatter = logging.Formatter('[%(levelname)s|%(asctime)s] > %(message)s')
-
-	# make handler to output Log for stream and file
-	fileMaxByte = 1024 * 1024 * 100     # 100MB
-	
-	fileHandler = logging.handlers.RotatingFileHandler(cfg['DAEMON']['run_log_path'], maxBytes=fileMaxByte, backupCount=10)
-	# specify formatter to each handler
-	fileHandler.setFormatter(formatter)
-	# attach stream and file handler to logger instance
-	logger.addHandler(fileHandler)
-
-	return logger
+from ad_configParser import getConfig
+import consts
 
 
-def get_daemon_logger():
-	logger = logging.getLogger("ad-daemon")
-	logger.setLevel(logging.INFO)
-	# make formatter
-	formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
+def getAdLogger():
+    cfg = getConfig()
 
-	# make handler to output Log for stream and file
-	fileMaxByte = 1024 * 1024 * 100     # 100MB
-	
-	fileHandler = logging.handlers.RotatingFileHandler(cfg['DAEMON']['daemon_path'], maxBytes=fileMaxByte, backupCount=10)
-	# specify formatter to each handler
-	fileHandler.setFormatter(formatter)
-	# attach stream and file handler to logger instance
-	logger.addHandler(fileHandler)
+    logger = logging.getLogger(consts.LOGGER_NAME['AD'])
+    formatter = logging.Formatter(consts.LOG_FORMAT)
+    fileMaxByte = consts.FILE_MAX_BYTE    # 100MB
+    fileHandler = logging.handlers.RotatingFileHandler(cfg['FILE_PATH']['path_ad_log'], maxBytes=fileMaxByte, backupCount=10)
+    fileHandler.setFormatter(formatter)
+    logger.addHandler(fileHandler)
 
-	return logger
+    # streamHandler = logging.StreamHandler()
+    # streamHandler.setFormatter(formatter)
+    # logger.addHandler(streamHandler)
+    logger.setLevel(logging.DEBUG)
 
-def get_sche_logger():
-	logger = logging.getLogger("ad-scheduler")
-	logger.setLevel(logging.INFO)
-	# make formatter
-	formatter = logging.Formatter('[%(levelname)s|%(filename)s:%(lineno)s] %(asctime)s > %(message)s')
+    return logger
 
-	# make handler to output Log for stream and file
-	fileMaxByte = 1024 * 1024 * 100     # 100MB
-	
-	fileHandler = logging.handlers.RotatingFileHandler(cfg['DAEMON']['daemon_path'], maxBytes=fileMaxByte, backupCount=10)
-	# specify formatter to each handler
-	fileHandler.setFormatter(formatter)
-	# attach stream and file handler to logger instance
-	logger.addHandler(fileHandler)
 
-	return logger
+def getSchedulerLogger():
+    cfg = getConfig()
+
+    logger = logging.getLogger(consts.LOGGER_NAME['SCHE'])
+    formatter = logging.Formatter(consts.LOG_FORMAT)
+    fileMaxByte = consts.FILE_MAX_BYTE     # 100MB
+    fileHandler = logging.handlers.RotatingFileHandler(cfg['FILE_PATH']['path_scheduler_log'], maxBytes=fileMaxByte, backupCount=10)
+    fileHandler.setFormatter(formatter)
+    logger.addHandler(fileHandler)
+    logger.setLevel(logging.DEBUG)
+
+    return logger
+
+
+if __name__ == '__main__':
+    logger = getAdLogger()
+    logger.debug("debugging level message")
+    logger.info("info level message")
+    logger.warn("warning level message")
+    logger.error("error level message")
+    logger.critical("cretical error message")
