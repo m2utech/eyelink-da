@@ -3,6 +3,8 @@
 # coding: cp949
 
 import socket
+import consts
+import util
 
 HOST = 'm2u-da.eastus.cloudapp.azure.com'
 #HOST = 'DataAnalyzer'
@@ -14,13 +16,13 @@ PORT=5226 #포트지정
 
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
 #s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
 s.connect((HOST,PORT))
 print("start test...")
-#s.send(b'{"type":"pattern", "node_id": "0002.00000039", "s_date": "2017-09-06T00:00:00", "e_date": "2017-09-07T00:00:00"}') #문자를 보냄
-s.send(b'{"type":"matching", "node_id": "0002.00000039", "s_time": "2017-09-11T09:40:00", "e_time": "2017-09-11T11:30:00"}') #문자를 보냄
+
+#s.send(b'{"type":"pattern", "node_id": "0002.00000039", "s_date": "2017-10-21T00:00:00", "e_date": "2017-10-22T02:00:00"}') #문자를 보냄
+s.send(b'{"type":"matching", "node_id": "0002.00000039", "s_date": "2017-10-25T19:20:00", "e_date": "2017-10-25T21:10:00"}') #문자를 보냄
 print("good?")
-data = s.recv(512) #서버로 부터 정보를 받음
+data = s.recv(256) #서버로 부터 정보를 받음
 
 print(data)
 

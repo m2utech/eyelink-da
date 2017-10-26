@@ -1,26 +1,18 @@
-#import numpy as np
-#import struct
-#import matplotlib.pyplot as plt
-#import csv
-import datetime
 import requests
 import json
 import pandas as pd
-import logging
-
 # configuration
-from config_parser import cfg
-
-logger = logging.getLogger("ad-daemon")
+from ad_configParser import getConfig
+cfg = getConfig()
 
 ############################
-def json_data_load(node_id, s_date, e_date):
+def loadJsonData(node_id, s_date, e_date, cfg):
     
     #nowtime = datetime.datetime.now()
-    nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+    #nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
     ##### load JSON #####
-    url = cfg['SERVER']['train_data_url'] + "?nodeId={}&startDate={}&endDate={}".format(node_id, s_date, e_date)
+    url = cfg['API']['url_get_train_data'] + "?nodeId={}&startDate={}&endDate={}".format(node_id, s_date, e_date)
     #print(url)
 
     resp = requests.get(url)
@@ -28,8 +20,6 @@ def json_data_load(node_id, s_date, e_date):
     #if not dataset['rtnCode']['code'] == '0001':
     if dataset['rtnCode']['code'] == '0001':
         dataset = None
-        #return dataset
-        #logger.warning("There is no dataset")
     else:
         attr = ['event_time', 'voltage', 'ampere', 'active_power','power_factor']
         dataset = pd.DataFrame(dataset['rtnData'], columns=attr)
@@ -45,55 +35,43 @@ def json_data_load(node_id, s_date, e_date):
     return dataset
 ############################
 
-def pattern_info_load(id):
-    url = cfg['SERVER']['pattern_info_url'] + "?id={}".format(id)
+def loadPatternInfo(id):
+    url = cfg['API']['url_get_pattern_info'] + "?id={}".format(id)
     resp = requests.get(url)
     dataset = json.loads(resp.text)
 
     if dataset['rtnCode']['code'] == '0001':
-        logger.info(dataset['rtnCode']['message'])
         dataset = None
-        #print("There is no dataset")
-        #logger.warning("There is no dataset")
     else:
         dataset = dataset['rtnData']['pattern_info']
-#        dataset = pd.DataFrame.from_records(dataset['rtnData']['pattern_data'])
 
     return dataset
 
 ############################
-def pattern_data_load(id):
-
-    ##### load JSON #####
-    url = cfg['SERVER']['pattern_dataset_url'] + id
-    #print(url)
-
+def loadPatternData(id):
+    url = cfg['API']['url_get_pattern_data'] + id
     resp = requests.get(url)
     dataset = json.loads(resp.text)
 
     if dataset['rtnCode']['code'] == '0001':
-        logger.info(dataset['rtnCode']['message'])
         dataset = None
-        #print("There is no dataset")
-        #logger.warning("There is no dataset")
     else:
         dataset = dataset['rtnData']['pattern_data']
-#        dataset = pd.DataFrame.from_records(dataset['rtnData']['pattern_data'])
 
     return dataset
 
 ############################
 
-def resample_missingValue(dataset, def_val, t_interval):
+def processResamplingAndMissingValue(dataset, def_val, t_interval, output):
     # 처음-끝 일정사이에 15분 단위로 구분(비어있는 날짜는 자동으로 생성)
     dataset = dataset.resample(str(t_interval)+'T').mean()
     dataset = dataset.fillna(def_val)
     dataset = dataset.reset_index()
-    #dataset = dataset[dataset.voltage != 100]
-    return dataset
+    # proc = os.getpid()
+    # print('process by process id: {}'.format(proc))
+    output.put(dataset)
 
-
-def extract_attribute(dataset, attr):
+def extractAttribute(dataset, attr):
     data = dataset[attr]
     return data
 
