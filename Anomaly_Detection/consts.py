@@ -1,8 +1,8 @@
 # #### DATEFORMAT ####
 DATE = '%Y-%m-%d'
-DATETIME = '%Y-%m-%dT%H:%M:%S'
-DATETIMEZERO = '%Y-%m-%dT%H:%M:00'
-DATETIMEMILLI = '%Y-%m-%dT%H:%M:%S.%f'
+DATETIME = '%Y-%m-%dT%H:%M:%SZ'
+DATETIMEZERO = '%Y-%m-%dT%H:%M:00Z'
+DATETIMEMILLI = '%Y-%m-%dT%H:%M:%S.%fZ'
 LOCAL_TIMEZONE = 'Asia/Seoul'
 
 # #### LOGGING ####
@@ -51,5 +51,5 @@ ATTR_NODE_ID = '0002.00000039'
 ATTR_WIN_LEN = 120
 ATTR_SLIDE_LEN = 1
 ATTR_TIME_INTERVAL = 1
-ATTR_N_CLUSTER = 120
+ATTR_N_CLUSTER = 50
 ATTR_TOP_K = 3

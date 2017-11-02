@@ -3,8 +3,8 @@
 
 # 모듈 및 라이브러리 임포트
 import ad_dataConvert
-# from datetime import date
-import datetime
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from socketIO_client import SocketIO
 import heapq
 import consts
@@ -61,10 +61,10 @@ def preprocessData(dataset, s_time, cfg):
     dataset = dataset.resample(str(t_interval)+'T').mean()
     dataset = dataset.reset_index()
 
-    s_timestamp = s_time.replace("T", " ")
-    s_timestamp = datetime.datetime.strptime(s_timestamp, '%Y-%m-%d %H:%M:00')
+    s_timestamp = s_time.replace("T", " ").replace("Z", "")
+    s_timestamp = datetime.strptime(s_timestamp, '%Y-%m-%d %H:%M:00')
 
-    date_list = [s_timestamp + datetime.timedelta(minutes=x) for x in range(0, window_len-10)]
+    date_list = [s_timestamp + relativedelta(minutes=x) for x in range(0, window_len-10)]
     date_list = pd.DataFrame(date_list, columns=['event_time'])
 
     dataset = date_list.set_index('event_time').join(dataset.set_index('event_time'))
@@ -222,8 +222,8 @@ def DTWDistance(s1, s2, w):
 if __name__ == '__main__':
     freeze_support()
 
-    from ad_logger import getAdLogger
-    logger = getAdLogger()
+    # from ad_logger import getAdLogger
+    # logger = getAdLogger()
 
     master_id = consts.ATTR_MASTER_ID
     url = cfg['API']['url_get_pattern_data'] + master_id
