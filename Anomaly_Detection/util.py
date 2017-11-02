@@ -1,5 +1,6 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from dateutil.parser import parse
 import pytz
 import consts
 
@@ -26,6 +27,16 @@ def getLocalStr2Utc(strDate, fm):
     utc_dt = local_tz.localize(strDate).astimezone(pytz.UTC)
     utc_dt = utc_dt.strftime(fm)
     return utc_dt
+
+
+def getUtcStr2Local(strDate, fm):
+    strDate = parse(strDate)
+    local_tz = pytz.timezone(consts.LOCAL_TIMEZONE)
+    local_dt = strDate.replace(tzinfo=pytz.UTC).astimezone(local_tz)
+    local_dt = local_dt.strftime(fm)
+
+    return local_dt
+
 
 
 def getStartEndDateByHour(timeRange, utcYN, fm):

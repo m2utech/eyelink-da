@@ -26,34 +26,40 @@ logger = logging.getLogger("anomalyDetection")
 # ##### Main function #####
 def main(node_id, s_date, e_date, master_data):
     dataset = preprocessData(node_id, s_date, e_date, cfg)
+    save_day = util.getToday(True, consts.DATE)
 
-    if dataset is not None:
+    if (dataset is None) or (dataset.empty):
+        logger.warning("There is no dataset for clustering")
+    else:
         if master_data is not None:
             master_info = ad_dataConvert.loadPatternInfo(consts.ATTR_MASTER_ID)
-            total_pattern, info_pattern = createPatternData(dataset, master_data, master_info, cfg)
-            savePatternData(total_pattern, info_pattern, cfg, True)
+            pData, pInfo, npData, npInfo = createPatternData(dataset, master_data, master_info, save_day, cfg)
+            savePatternData(pData, pInfo, npData, npInfo, save_day, cfg, True)
         else:
             logger.debug("master data is None ...")
             master_info = None
-            total_pattern, info_pattern = createPatternData(dataset, master_data, master_info, cfg)
-            savePatternData(total_pattern, info_pattern, cfg, False)
-    else:
-        logger.warning("There is no dataset for clustering")
+            pData, pInfo, npData, npInfo = createPatternData(dataset, master_data, master_info, save_day, cfg)
+            savePatternData(pData, pInfo, npData, npInfo, save_day, cfg, False)
+
+        
 
 
-def savePatternData(pattern, pattern_info, cfg, masterYN):
-    save_day = util.getToday(True, consts.DATE)
+def savePatternData(pattern, pattern_info, newPattern, newPattern_info, save_day, cfg, masterYN):
+    creationDate = util.getToday(True, consts.DATETIME)
     logger.debug("Uploading result dataset ... [ID : {}]".format(save_day))
 
     pattern_json = {}
     pattern_json['pattern_data'] = pattern
-    pattern_json['pattern_data']['creation_Date'] = save_day
+    pattern_json['pattern_data']['creation_Date'] = creationDate
 
     pattern_info_json = {}
     pattern_info_json['pattern_info'] = pattern_info
-    pattern_info_json['pattern_info']['creation_Date'] = save_day
+    pattern_info_json['pattern_info']['creation_Date'] = creationDate
 
-    # #### 데이터 저장 #####
+    print(newPattern)
+    print(newPattern_info)
+
+    #### 데이터 저장 #####
     pattern_url = cfg['API']['url_post_pattern_data']   # 'TEST' #save_day
     requests.post(pattern_url + save_day, json=pattern_json)
 
@@ -64,8 +70,7 @@ def savePatternData(pattern, pattern_info, cfg, masterYN):
         requests.post(pattern_url+consts.ATTR_MASTER_ID, json=pattern_json)
         requests.post(pattern_info_url+consts.ATTR_MASTER_ID, json=pattern_info_json)
 
-    print(pattern_json)
-    print(pattern_info_json)
+
 
 
 # ##### 초기 데이터 처리 ######
@@ -114,47 +119,54 @@ def preprocessData(node_id, s_date, e_date, cfg):
 
 
 # ##### 속성별 패턴생성 (multiprocessing) #####
-def createPatternData(dataset, master_data, master_info, cfg):
-    procs = []
-    col_list = []
-    p_output = {}
-    i_output = {}
-    total_pattern = dict()
-    info_pattern = dict()
+def createPatternData(dataset, master_data, master_info, save_day, cfg):
+    procs, col_list = [], []
+    pdQ, piQ, npdQ, npiQ = {}, {}, {}, {}
+    # pattern data, pattern info, new pattern data, new pattern info
+    pData, pInfo, npData, npInfo = {}, {}, {}, {}
 
     for col_name in dataset.columns:
-        p_output[col_name] = Queue()
-        i_output[col_name] = Queue()
+        pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name] = Queue(), Queue(), Queue(), Queue()
         col_list.append(col_name)
+
         if master_data is not None:
             procs.append(Process(target=clusteringSegment,
                 args=(dataset[col_name], master_data[col_name],
-                    master_info[col_name], col_name,
-                    p_output[col_name], i_output[col_name])))
+                    master_info[col_name], col_name, save_day,
+                    pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name])))
         else:
             procs.append(Process(target=clusteringSegment,
-                args=(dataset[col_name], master_data, master_info,
-                    col_name, p_output[col_name], i_output[col_name])))
+                args=(dataset[col_name], master_data,
+                    master_info, col_name, save_day,
+                    pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name])))
 
     for p in procs:
         p.start()
 
     for col_name in col_list:
-        fact_pattern = p_output[col_name].get()
-        fact_info = i_output[col_name].get()
-        total_pattern[col_name] = fact_pattern
-        info_pattern[col_name] = fact_info
-        p_output[col_name].close()
-        i_output[col_name].close()
+        # fact_pattern = pdQ[col_name].get()
+        # fact_info = piQ[col_name].get()
+        # new_pattern = npdQ[col_name].get()
+        # new_info = npiQ[col_name].get()
+
+        pData[col_name] = pdQ[col_name].get()
+        pInfo[col_name] = piQ[col_name].get()
+        npData[col_name] = npdQ[col_name].get()
+        npInfo[col_name] = npiQ[col_name].get()
+
+        pdQ[col_name].close()
+        piQ[col_name].close()
+        npdQ[col_name].close()
+        npiQ[col_name].close()
 
     for proc in procs:
         proc.join()
 
-    return total_pattern, info_pattern
+    return pData, pInfo, npData, npInfo
 
 
 # ##### 속성별 클러스터링 usint K-Means and DTW algorithm #####
-def clusteringSegment(dataset, master_data, master_info, col_name, p_output, i_output):
+def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ, piQ, npdQ, npiQ):
     clusterer = KMeans(n_clusters=consts.ATTR_N_CLUSTER)
 
     logger.debug("extract all segment for [{}]".format(col_name))
@@ -166,7 +178,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, p_output, i_o
 
     # index rename
     for i in range(len(clusted_df.index)):
-        clusted_df = clusted_df.rename(index={i: "cluster_{}".format(i)})
+        clusted_df = clusted_df.rename(index={i: "cluster_{:03}".format(i)})
 
     logger.debug("Convert to labeled DataFrame for [{}]".format(col_name))
     labels_df = pd.DataFrame(clusted_segments.labels_)
@@ -196,18 +208,23 @@ def clusteringSegment(dataset, master_data, master_info, col_name, p_output, i_o
         fact_pattern[col]['center'] = center_df[col].tolist()
         fact_pattern[col]['lower'] = lower_df[col].tolist()
         fact_pattern[col]['min_value'] = min_df[col].tolist()
+        fact_pattern[col]['creationDate'] = save_day
 
-    p_output.put(fact_pattern)
+    pdQ.put(fact_pattern)
     logger.debug("Completed clustering for [{}]".format(col_name))
 
     # #### matching ####
     logger.debug("pattern matching with master pattern for [{}]".format(col_name))
-    meta_pattern = {}  # information about clustered pattern
+    info_pattern = {}  # information about clustered pattern
+    new_pattern = {}
+    new_info = {}
 
     if master_data is not None:
         master_df = pd.DataFrame()
         for cno in master_data.keys():
             master_df[cno] = pd.Series(master_data[cno]['center']).values
+
+        max_clustNo = int(heapq.nlargest(1,master_df.columns)[0].split('_')[1])
 
         for clustNo in center_df.columns:
             distance = {}
@@ -223,16 +240,25 @@ def clusteringSegment(dataset, master_data, master_info, col_name, p_output, i_o
             match_rate = 100.0 - (float(distance[min_dist[0]]) / percentile)
 
             if match_rate > 90.0:
-                meta_pattern[clustNo] = master_info[min_dist[0]]
-            else:
-                meta_pattern[clustNo] = "undefined"
+                info_pattern[clustNo] = master_info[min_dist[0]]
 
-        i_output.put(meta_pattern)
+            else:
+                info_pattern[clustNo] = "undefined"
+                max_clustNo += 1
+                new_pattern["cluster_{:03}".format(max_clustNo)] = fact_pattern[clustNo]
+                new_info["cluster_{:03}".format(max_clustNo)] = "undefined"
+                #new_pattern[col_name]["cluster_{:03}".format(max_clustNo)] = "test"
+
+        piQ.put(info_pattern)
+        npdQ.put(new_pattern)
+        npiQ.put(new_info)
 
     else:
         for clustNo in center_df.columns:
-            meta_pattern[clustNo] = "undefined"
-        i_output.put(meta_pattern)
+            info_pattern[clustNo] = "undefined"
+        piQ.put(info_pattern)
+        npdQ.put(new_pattern)
+        npiQ.put(new_info)
 
 
 # ##### 속성별 세그먼트 추출 #####
@@ -263,16 +289,17 @@ def computeThreshold(dataset, n_cluster):
                 min_value = df[i].min()
                 min_list.append(min_value)
                 lower = np.mean(df[i]) - (np.std(df[i]))
+                if lower < 0 : lower = 0
                 lower_list.append(lower)
                 max_value = df[i].max()
                 max_list.append(max_value)
                 upper = np.mean(df[i]) + np.std(df[i])
                 upper_list.append(upper)
 
-        min_dict["cluster_{}".format(cno)] = min_list
-        max_dict["cluster_{}".format(cno)] = max_list
-        lower_dict["cluster_{}".format(cno)] = lower_list
-        upper_dict["cluster_{}".format(cno)] = upper_list
+        min_dict["cluster_{:03}".format(cno)] = min_list
+        max_dict["cluster_{:03}".format(cno)] = max_list
+        lower_dict["cluster_{:03}".format(cno)] = lower_list
+        upper_dict["cluster_{:03}".format(cno)] = upper_list
 
     min_df = pd.DataFrame(min_dict)
     max_df = pd.DataFrame(max_dict)
@@ -286,18 +313,20 @@ def computeThreshold(dataset, n_cluster):
 if __name__ == '__main__':
     freeze_support()
 
-    from ad_logger import getAdLogger
-    logger = getAdLogger()
+    # from ad_logger import getAdLogger
+    # logger = getAdLogger()
 
     url = cfg['API']['url_get_pattern_data'] + consts.ATTR_MASTER_ID
+    print(url)
     resp = requests.get(url)
     import json
     dataset = json.loads(resp.text)
-
+    
     if dataset['rtnCode']['code'] == '0000':
         logger.debug("reload master pattern")
         master_data = dataset['rtnData']['pattern_data']
+        print("there is data")
     else:
         master_data = None
 
-    main('0002.00000039', '2017-10-23T00:00:00', '2017-10-24T02:00:00', master_data)
+    main('0002.00000039', '2017-10-31T00:00:00', '2017-11-01T02:00:00', master_data)
