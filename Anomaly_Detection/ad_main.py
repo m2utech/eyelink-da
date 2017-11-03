@@ -49,7 +49,7 @@ class AdSocketThread(object):
         while True:
             try:
                 data = client.recv(consts.BUFFER_SIZE)
-                print("received data from socket: {}".format(data))
+                logger.debug("received data from socket: {}".format(data))
                 if data:
                     self.jsonParsing(data)
                     response = data
@@ -75,9 +75,11 @@ class AdSocketThread(object):
             if 'None' not in json_dict.values():
                 logger.debug("start anomaly detection")
                 node_id = json_dict['node_id']
+                s_date = json_dict['s_date'] + 'Z'
+                e_date = json_dict['e_date'] + 'Z'
                 # convert UTC datetime
-                s_date = util.getLocalStr2Utc(json_dict['s_date'], consts.DATETIMEZERO)
-                e_date = util.getLocalStr2Utc(json_dict['e_date'], consts.DATETIMEZERO)
+                s_date = util.getLocalStr2Utc(s_date, consts.DATETIMEZERO)
+                e_date = util.getLocalStr2Utc(e_date, consts.DATETIMEZERO)
                 
                 if json_dict["type"] == "pattern":
                     if PATTERN_CODE is 1:
@@ -109,6 +111,7 @@ class AdSocketThread(object):
         global MASTER_DATA
         global PATTERN_CODE
         # master data load..
+        logger.debug("Checking Master pattern")
         url = cfg['API']['url_get_pattern_data'] + consts.ATTR_MASTER_ID
         resp = requests.get(url)
         dataset = json.loads(resp.text)
