@@ -35,11 +35,13 @@ def main(node_id, s_date, e_date, master_data):
             master_info = ad_dataConvert.loadPatternInfo(consts.ATTR_MASTER_ID)
             pData, pInfo, npData, npInfo = createPatternData(dataset, master_data, master_info, save_day, cfg)
             savePatternData(pData, pInfo, npData, npInfo, save_day, cfg, True)
+            logger.debug("Completed create pattern dataset [ID : {}]".format(save_day))
         else:
             logger.debug("master data is None ...")
             master_info = None
             pData, pInfo, npData, npInfo = createPatternData(dataset, master_data, master_info, save_day, cfg)
             savePatternData(pData, pInfo, npData, npInfo, save_day, cfg, False)
+            logger.debug("Completed create pattern dataset [ID : {}]".format(save_day))
 
         
 
@@ -56,8 +58,8 @@ def savePatternData(pattern, pattern_info, newPattern, newPattern_info, save_day
     pattern_info_json['pattern_info'] = pattern_info
     pattern_info_json['pattern_info']['creation_Date'] = creationDate
 
-    print(newPattern)
-    print(newPattern_info)
+    #print(newPattern)
+    #print(newPattern_info)
 
     #### 데이터 저장 #####
     pattern_url = cfg['API']['url_post_pattern_data']   # 'TEST' #save_day
@@ -69,6 +71,12 @@ def savePatternData(pattern, pattern_info, newPattern, newPattern_info, save_day
     if masterYN is False:
         requests.post(pattern_url+consts.ATTR_MASTER_ID, json=pattern_json)
         requests.post(pattern_info_url+consts.ATTR_MASTER_ID, json=pattern_info_json)
+    else:
+        logger.debug("inserted new pattern data : {}".format(newPattern_info))
+        url_pd_update = cfg['API']['url_update_pattern_data'].format(consts.ATTR_MASTER_ID)
+        url_pi_update = cfg['API']['url_update_pattern_info'].format(consts.ATTR_MASTER_ID)
+        requests.post(url_pd_update, json=newPattern)
+        requests.post(url_pi_update, json=newPattern_info)
 
 
 
@@ -81,7 +89,7 @@ def preprocessData(node_id, s_date, e_date, cfg):
 
     if dataset is not None:
         # 데이터 전처리(결측치 처리, 구간화, 디폴트값)
-        logger.debug("Data preprocessing ...")
+        logger.debug("Data preprocessing using multiprocessing ...")
         procs = []
         output = {}
         df = pd.DataFrame()
@@ -124,7 +132,7 @@ def createPatternData(dataset, master_data, master_info, save_day, cfg):
     pdQ, piQ, npdQ, npiQ = {}, {}, {}, {}
     # pattern data, pattern info, new pattern data, new pattern info
     pData, pInfo, npData, npInfo = {}, {}, {}, {}
-
+    logger.debug("create pattern data for each factors using multiprocessing ...")
     for col_name in dataset.columns:
         pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name] = Queue(), Queue(), Queue(), Queue()
         col_list.append(col_name)
@@ -186,7 +194,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ
     segment_df = pd.DataFrame(segments)
     lbl_dataset = pd.concat([segment_df, labels_df], axis=1)
 
-    logger.debug("Compute boundary threshold ...")
+    logger.debug("Compute boundary threshold for [{}]".format(col_name))
     min_df, max_df, lower_df, upper_df = computeThreshold(lbl_dataset, consts.ATTR_N_CLUSTER)
 
     pd.options.display.float_format = '{:,.4f}'.format
