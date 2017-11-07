@@ -75,8 +75,8 @@ class AdSocketThread(object):
             if 'None' not in json_dict.values():
                 logger.debug("start anomaly detection")
                 node_id = json_dict['node_id']
-                s_date = json_dict['s_date'] + 'Z'
-                e_date = json_dict['e_date'] + 'Z'
+                s_date = json_dict['s_date']
+                e_date = json_dict['e_date']
                 # convert UTC datetime
                 s_date = util.getLocalStr2Utc(s_date, consts.DATETIMEZERO)
                 e_date = util.getLocalStr2Utc(e_date, consts.DATETIMEZERO)

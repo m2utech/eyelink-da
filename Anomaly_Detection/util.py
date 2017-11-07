@@ -6,10 +6,12 @@ import consts
 
 
 # 타임존 확인
-def confirmTimezone():
+def getTimezone():
+    tz_list = []
     for tz in pytz.all_timezones:
-        print(tz)
-
+         tz_list.append(tz)
+    
+    return tz_list
 
 def getToday(utcYN, fm):
     if utcYN is True:
