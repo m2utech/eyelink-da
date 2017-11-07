@@ -19,7 +19,7 @@ s=socket.socket(socket.AF_INET, socket.SOCK_STREAM) #소켓생성
 s.connect((HOST,PORT))
 print("start test...")
 
-s.send(b'{"type":"pattern", "node_id": "0002.00000039", "s_date": "2017-11-01T00:00:00", "e_date": "2017-11-03T02:00:00"}') #문자를 보냄
+s.send(b'{"type":"pattern", "node_id": "0002.00000039", "s_date": "2017-11-05T00:00:00Z", "e_date": "2017-11-06T02:00:00Z"}') #문자를 보냄
 #s.send(b'{"type":"matching", "node_id": "0002.00000039", "s_date": "2017-11-01T17:20:00", "e_date": "2017-11-01T19:10:00"}') #문자를 보냄
 print("good?")
 data = s.recv(256) #서버로 부터 정보를 받음

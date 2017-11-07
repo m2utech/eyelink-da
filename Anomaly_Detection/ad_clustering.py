@@ -52,14 +52,12 @@ def savePatternData(pattern, pattern_info, newPattern, newPattern_info, save_day
 
     pattern_json = {}
     pattern_json['pattern_data'] = pattern
-    pattern_json['pattern_data']['creation_Date'] = creationDate
+    pattern_json['pattern_data']['createDate'] = creationDate
 
     pattern_info_json = {}
     pattern_info_json['pattern_info'] = pattern_info
-    pattern_info_json['pattern_info']['creation_Date'] = creationDate
+    pattern_info_json['pattern_info']['createDate'] = creationDate
 
-    #print(newPattern)
-    #print(newPattern_info)
 
     #### 데이터 저장 #####
     pattern_url = cfg['API']['url_post_pattern_data']   # 'TEST' #save_day
@@ -69,6 +67,7 @@ def savePatternData(pattern, pattern_info, newPattern, newPattern_info, save_day
     requests.post(pattern_info_url + save_day, json=pattern_info_json)
 
     if masterYN is False:
+        print("master save")
         requests.post(pattern_url+consts.ATTR_MASTER_ID, json=pattern_json)
         requests.post(pattern_info_url+consts.ATTR_MASTER_ID, json=pattern_info_json)
     else:
@@ -248,13 +247,26 @@ def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ
             match_rate = 100.0 - (float(distance[min_dist[0]]) / percentile)
 
             if match_rate > 90.0:
-                info_pattern[clustNo] = master_info[min_dist[0]]
+                info_pattern[clustNo] = {}
+                info_pattern[clustNo]["status"] = master_info[min_dist[0]]["status"]
+                info_pattern[clustNo]["masterCN"] = min_dist[0]
+                info_pattern[clustNo]["createDate"] = save_day
+                info_pattern[clustNo]["updateDate"] = save_day
 
             else:
-                info_pattern[clustNo] = "undefined"
+                info_pattern[clustNo] = {}
+                info_pattern[clustNo]["status"] = "undefined"
+                info_pattern[clustNo]["masterCN"] = "unknown"
+                info_pattern[clustNo]["createDate"] = save_day
+                info_pattern[clustNo]["updateDate"] = save_day
+
                 max_clustNo += 1
                 new_pattern["cluster_{:03}".format(max_clustNo)] = fact_pattern[clustNo]
-                new_info["cluster_{:03}".format(max_clustNo)] = "undefined"
+                new_info["cluster_{:03}".format(max_clustNo)] = {}
+                new_info["cluster_{:03}".format(max_clustNo)]["status"] = "undefined"
+                new_info["cluster_{:03}".format(max_clustNo)]["masterCN"] = "unknown"
+                new_info["cluster_{:03}".format(max_clustNo)]["createDate"] = save_day
+                new_info["cluster_{:03}".format(max_clustNo)]["updateDate"] = save_day
                 #new_pattern[col_name]["cluster_{:03}".format(max_clustNo)] = "test"
 
         piQ.put(info_pattern)
@@ -263,7 +275,12 @@ def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ
 
     else:
         for clustNo in center_df.columns:
-            info_pattern[clustNo] = "undefined"
+            info_pattern[clustNo] = {}
+            info_pattern[clustNo]["status"] = "undefined"
+            info_pattern[clustNo]["masterCN"] = "unknown"
+            info_pattern[clustNo]["createDate"] = save_day
+            info_pattern[clustNo]["updateDate"] = save_day
+
         piQ.put(info_pattern)
         npdQ.put(new_pattern)
         npiQ.put(new_info)
@@ -337,4 +354,4 @@ if __name__ == '__main__':
     else:
         master_data = None
 
-    main('0002.00000039', '2017-10-31T00:00:00', '2017-11-01T02:00:00', master_data)
+    main('0002.00000039', '2017-10-08T00:00:00Z', '2017-11-07T02:00:00Z', master_data)
