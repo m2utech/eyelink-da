@@ -1,15 +1,16 @@
 import sys
 from daemon import Daemon
 from ad_configParser import getConfig
-from ad_logger import getSchedulerLogger
+from ad_logger import getAdLogger
+import logging
 import socket
 import consts
 import util
-
 from apscheduler.schedulers.background import BackgroundScheduler
 
 # Server infomation for Socket
 cfg = getConfig()
+# logger = logging.getLogger(consts.LOGGER_NAME['AD'])
 host = consts.HOST
 port = consts.PORT
 
@@ -28,7 +29,6 @@ class Scheduler(object):
         self.sched.shutdown()
 
     def job_createPatterns(self):
-        logger.debug("Start construction of pattern dataset")
         # local time
         s_date, e_date = util.getStartEndDateByHour(consts.TIME_RANGE['HOUR'], False, consts.DATETIMEZERO)
         sendData = {
@@ -44,7 +44,6 @@ class Scheduler(object):
         s.close()
 
     def job_matchingPatterns(self):
-        logger.debug("Start pattern matching")
         # local time
         s_date, e_date = util.getStartEndDateByMinute(consts.TIME_RANGE['MINUTE'], False, consts.DATETIMEZERO)
         sendData = {
@@ -60,13 +59,11 @@ class Scheduler(object):
 
     def scheduler(self):
         self.sched.add_job(
-            self.job_matchingPatterns, "cron",
-            max_instances=consts.SCHE_MAX_INSTANCE,
+            self.job_matchingPatterns, "cron", max_instances=consts.SCHE_MAX_INSTANCE,
             minute=consts.SCHE_MINUTE
         )
         self.sched.add_job(
-            self.job_createPatterns, "cron",
-            max_instances=consts.SCHE_MAX_INSTANCE,
+            self.job_createPatterns, "cron", max_instances=consts.SCHE_MAX_INSTANCE,
             hour=consts.SCHE_HOUR
         )
 
@@ -82,7 +79,7 @@ class SchedulerDaemon(Daemon):
 
 
 if __name__ == "__main__":
-    logger = getSchedulerLogger()
+    logger = getAdLogger()
     daemon = SchedulerDaemon(cfg["FILE_PATH"]["path_scheduler_pid"])
 
     if len(sys.argv) == 2:
