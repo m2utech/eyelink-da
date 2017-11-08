@@ -17,7 +17,7 @@ import logging
 
 from multiprocessing import Process, Queue, freeze_support
 
-logger = logging.getLogger("anomalyDetection")
+logger = logging.getLogger(consts.LOGGER_NAME['AD'])
 cfg = getConfig()
 
 
@@ -57,6 +57,7 @@ def preprocessData(dataset, s_time, cfg):
 
     t_interval = consts.ATTR_TIME_INTERVAL
     window_len = consts.ATTR_WIN_LEN
+    ind = consts.FACTOR_INFO['INDEX']
 
     dataset = dataset.resample(str(t_interval)+'T').mean()
     dataset = dataset.reset_index()
@@ -65,12 +66,12 @@ def preprocessData(dataset, s_time, cfg):
     s_timestamp = datetime.strptime(s_timestamp, '%Y-%m-%d %H:%M:00')
 
     date_list = [s_timestamp + relativedelta(minutes=x) for x in range(0, window_len-10)]
-    date_list = pd.DataFrame(date_list, columns=['event_time'])
+    date_list = pd.DataFrame(date_list, columns=[ind])
 
-    dataset = date_list.set_index('event_time').join(dataset.set_index('event_time'))
+    dataset = date_list.set_index(ind).join(dataset.set_index(ind))
 
-    for key, factor_name in cfg['FACTORS'].items():
-        dataset[factor_name] = dataset[factor_name].fillna(float(cfg['FACTOR_DEFAULT'][key]))
+    for factor_name, val in consts.FACTOR_INFO['FACTORS'].items():
+        dataset[factor_name] = dataset[factor_name].fillna(val)
 
     dataset = dataset.reset_index(drop=True)
 
@@ -89,7 +90,7 @@ def patternMatching(dataset, master_data, master_info, timestamp, cfg):
         col_list.append(col_name)
 
         procs.append(Process(target=compareDistance,
-            args=(dataset[col_name], master_data[col_name], 
+            args=(dataset[col_name], master_data[col_name],
                 master_info[col_name], col_name, output[col_name], cfg)))
 
     for p in procs:
@@ -233,7 +234,7 @@ if __name__ == '__main__':
 
     if dataset['rtnCode']['code'] == '0000':
         logger.debug("reload master pattern")
-        master_data = dataset['rtnData']['pattern_data']
+        master_data = dataset['rtnData']['da_result']
     else:
         master_data = None
 

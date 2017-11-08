@@ -19,8 +19,7 @@ import util
 from multiprocessing import Process, Queue, freeze_support
 
 cfg = getConfig()
-
-logger = logging.getLogger("anomalyDetection")
+logger = logging.getLogger(consts.LOGGER_NAME['AD'])
 
 
 # ##### Main function #####
@@ -29,35 +28,33 @@ def main(node_id, s_date, e_date, master_data):
     save_day = util.getToday(True, consts.DATE)
 
     if (dataset is None) or (dataset.empty):
-        logger.warning("There is no dataset for clustering")
+        logger.warning("There is no dataset... skipping analysis")
     else:
         if master_data is not None:
+            logger.debug("load pattern info ....")
             master_info = ad_dataConvert.loadPatternInfo(consts.ATTR_MASTER_ID)
             pData, pInfo, npData, npInfo = createPatternData(dataset, master_data, master_info, save_day, cfg)
             savePatternData(pData, pInfo, npData, npInfo, save_day, cfg, True)
-            logger.debug("Completed create pattern dataset [ID : {}]".format(save_day))
+            logger.debug("==== Completed pattern generation [save ID : {}] ====".format(save_day))
+
         else:
-            logger.debug("master data is None ...")
             master_info = None
             pData, pInfo, npData, npInfo = createPatternData(dataset, master_data, master_info, save_day, cfg)
             savePatternData(pData, pInfo, npData, npInfo, save_day, cfg, False)
-            logger.debug("Completed create pattern dataset [ID : {}]".format(save_day))
-
+            logger.debug("==== Completed pattern matching [save ID : {}] ====".format(save_day))
         
 
 
 def savePatternData(pattern, pattern_info, newPattern, newPattern_info, save_day, cfg, masterYN):
+    logger.debug("upload result dataset to repository ....")
     creationDate = util.getToday(True, consts.DATETIME)
-    logger.debug("Uploading result dataset ... [ID : {}]".format(save_day))
-
     pattern_json = {}
-    pattern_json['pattern_data'] = pattern
-    pattern_json['pattern_data']['createDate'] = creationDate
+    pattern_json['da_result'] = pattern
+    pattern_json['da_result']['createDate'] = creationDate
 
     pattern_info_json = {}
-    pattern_info_json['pattern_info'] = pattern_info
-    pattern_info_json['pattern_info']['createDate'] = creationDate
-
+    pattern_info_json['da_result'] = pattern_info
+    pattern_info_json['da_result']['createDate'] = creationDate
 
     #### 데이터 저장 #####
     pattern_url = cfg['API']['url_post_pattern_data']   # 'TEST' #save_day
@@ -67,11 +64,10 @@ def savePatternData(pattern, pattern_info, newPattern, newPattern_info, save_day
     requests.post(pattern_info_url + save_day, json=pattern_info_json)
 
     if masterYN is False:
-        print("master save")
         requests.post(pattern_url+consts.ATTR_MASTER_ID, json=pattern_json)
         requests.post(pattern_info_url+consts.ATTR_MASTER_ID, json=pattern_info_json)
     else:
-        logger.debug("inserted new pattern data : {}".format(newPattern_info))
+        logger.debug("insert new pattern clusters ....")
         url_pd_update = cfg['API']['url_update_pattern_data'].format(consts.ATTR_MASTER_ID)
         url_pi_update = cfg['API']['url_update_pattern_info'].format(consts.ATTR_MASTER_ID)
         requests.post(url_pd_update, json=newPattern)
@@ -83,29 +79,25 @@ def savePatternData(pattern, pattern_info, newPattern, newPattern_info, save_day
 # ##### 초기 데이터 처리 ######
 def preprocessData(node_id, s_date, e_date, cfg):
     # 학습데이터 로드
-    logger.debug("Trainnig data loading ...")
+    logger.debug("trainnig dataset loading ....")
     dataset = ad_dataConvert.loadJsonData(node_id, s_date, e_date, cfg)
 
     if dataset is not None:
         # 데이터 전처리(결측치 처리, 구간화, 디폴트값)
-        logger.debug("Data preprocessing using multiprocessing ...")
+        logger.debug("data preprocessing by multiprocessing ....")
         procs = []
         output = {}
         df = pd.DataFrame()
-        for key, factor_name in cfg['FACTORS'].items():
+        for factor_name, val in consts.FACTOR_INFO['FACTORS'].items():
             output[factor_name] = Queue()
             procs.append(Process(target=ad_dataConvert.processResamplingAndMissingValue,
-                args=(dataset[factor_name], 
-                    float(cfg['FACTOR_DEFAULT'][key]), 
-                    consts.ATTR_TIME_INTERVAL, 
-                    output[factor_name]
-                )
-            ))
+                args=(dataset[factor_name], val, consts.ATTR_TIME_INTERVAL, output[factor_name]))
+            )
 
         for p in procs:
             p.start()
 
-        for key, factor_name in cfg['FACTORS'].items():
+        for factor_name in consts.FACTOR_INFO['FACTORS'].keys():
             if df.empty:
                 df = df.append(output[factor_name].get())
             else:
@@ -118,7 +110,7 @@ def preprocessData(node_id, s_date, e_date, cfg):
 
         # event_time 제거 (default index 사용)
         for col in df.columns:
-            if 'event_time' in col:
+            if consts.FACTOR_INFO['INDEX'] in col:
                 del df[col]
         return df
     else:
@@ -127,11 +119,12 @@ def preprocessData(node_id, s_date, e_date, cfg):
 
 # ##### 속성별 패턴생성 (multiprocessing) #####
 def createPatternData(dataset, master_data, master_info, save_day, cfg):
+    logger.debug("create pattern for each factors ....")
     procs, col_list = [], []
     pdQ, piQ, npdQ, npiQ = {}, {}, {}, {}
     # pattern data, pattern info, new pattern data, new pattern info
     pData, pInfo, npData, npInfo = {}, {}, {}, {}
-    logger.debug("create pattern data for each factors using multiprocessing ...")
+    
     for col_name in dataset.columns:
         pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name] = Queue(), Queue(), Queue(), Queue()
         col_list.append(col_name)
@@ -176,10 +169,10 @@ def createPatternData(dataset, master_data, master_info, save_day, cfg):
 def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ, piQ, npdQ, npiQ):
     clusterer = KMeans(n_clusters=consts.ATTR_N_CLUSTER)
 
-    logger.debug("extract all segment for [{}]".format(col_name))
+    logger.debug("extract all segment for [{}] ....".format(col_name))
     segments = extractSegment(dataset, col_name, consts.ATTR_WIN_LEN, consts.ATTR_SLIDE_LEN)
 
-    logger.debug("Run clustering about segments of [{}]".format(col_name))
+    logger.debug("segment clustering for [{}] ....".format(col_name))
     clusted_segments = clusterer.fit(segments)
     clusted_df = pd.DataFrame(clusted_segments.cluster_centers_)
 
@@ -187,13 +180,13 @@ def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ
     for i in range(len(clusted_df.index)):
         clusted_df = clusted_df.rename(index={i: "cluster_{:03}".format(i)})
 
-    logger.debug("Convert to labeled DataFrame for [{}]".format(col_name))
+    logger.debug("convert to labeled DataFrame for [{}] ....".format(col_name))
     labels_df = pd.DataFrame(clusted_segments.labels_)
     labels_df = labels_df.rename(columns={0: "cluster"})
     segment_df = pd.DataFrame(segments)
     lbl_dataset = pd.concat([segment_df, labels_df], axis=1)
 
-    logger.debug("Compute boundary threshold for [{}]".format(col_name))
+    logger.debug("compute boundary threshold for [{}] ....".format(col_name))
     min_df, max_df, lower_df, upper_df = computeThreshold(lbl_dataset, consts.ATTR_N_CLUSTER)
 
     pd.options.display.float_format = '{:,.4f}'.format
@@ -221,7 +214,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ
     logger.debug("Completed clustering for [{}]".format(col_name))
 
     # #### matching ####
-    logger.debug("pattern matching with master pattern for [{}]".format(col_name))
+    logger.debug("pattern matching with master pattern for [{}] ....".format(col_name))
     info_pattern = {}  # information about clustered pattern
     new_pattern = {}
     new_info = {}
@@ -346,12 +339,11 @@ if __name__ == '__main__':
     resp = requests.get(url)
     import json
     dataset = json.loads(resp.text)
-    
     if dataset['rtnCode']['code'] == '0000':
         logger.debug("reload master pattern")
-        master_data = dataset['rtnData']['pattern_data']
+        master_data = dataset['rtnData']['da_result']
         print("there is data")
     else:
         master_data = None
 
-    main('0002.00000039', '2017-10-08T00:00:00Z', '2017-11-07T02:00:00Z', master_data)
+    main('0002.00000039', '2017-10-07T00:00:00Z', '2017-11-08T02:00:00Z', master_data)

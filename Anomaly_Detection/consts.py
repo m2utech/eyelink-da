@@ -7,8 +7,8 @@ LOCAL_TIMEZONE = 'Asia/Seoul'
 
 # #### LOGGING ####
 LOGGER_NAME = {
-	'AD': 'anomalyDetection',
-	'SCHE': 'scheduler'
+    'AD': 'anomalyDetection',
+    'SCHE': 'scheduler'
 }
 LOG_FORMAT = '%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s'
 FILE_MAX_BYTE = 1024 * 1024 * 100
@@ -26,9 +26,9 @@ JOB_CODE = {
 
 # #### Date Range for Data Analysis ####
 TIME_RANGE = {
-	'HOUR': 26,
-	'MINUTE': 110,
-	'DAY': 10
+    'HOUR': 26,
+    'MINUTE': 110,
+    'DAY': 10
 }
 
 # #### SOCKET INFO ####
@@ -44,6 +44,16 @@ AGENT_ID = ''
 ALARM_TYPE = 'BATCH_ANOMALY'
 ALARM_TYPE_NAME = 'BATCH_ANOMALY'
 
+# #### factor information for AD ####
+FACTOR_INFO = {
+    'FACTORS': {
+        'ampere': 0.5,
+        'active_power': 110.0,
+        'power_factor': 0.9,
+        'voltage': 220.0
+        },
+    'INDEX': 'event_time'
+}
 
 # #### Attributes for anomaly detection ####
 ATTR_MASTER_ID = 'master'
