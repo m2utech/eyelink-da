@@ -37,7 +37,7 @@ def loadPatternInfo(id):
     if dataset['rtnCode']['code'] == '0001':
         dataset = None
     else:
-        dataset = dataset['rtnData']['da_result']
+        dataset = dataset['rtnData']
 
     return dataset
 
@@ -50,7 +50,7 @@ def loadPatternData(id):
     if dataset['rtnCode']['code'] == '0001':
         dataset = None
     else:
-        dataset = dataset['rtnData']['da_sult']
+        dataset = dataset['rtnData']
 
     return dataset
 
@@ -69,5 +69,5 @@ def extractAttribute(dataset, attr):
 
 if __name__ == "__main__":
     # dataset = loadJsonData('0002.00000039', '2017-10-08T00:00:00Z', '2017-11-07T02:00:00Z', cfg)
-    dataset = loadPatternInfo('master')
+    dataset = loadPatternData('master')
     print(dataset)

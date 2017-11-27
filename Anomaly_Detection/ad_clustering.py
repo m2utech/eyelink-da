@@ -173,6 +173,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ
     segments = extractSegment(dataset, col_name, consts.ATTR_WIN_LEN, consts.ATTR_SLIDE_LEN)
 
     logger.debug("segment clustering for [{}] ....".format(col_name))
+
     clusted_segments = clusterer.fit(segments)
     clusted_df = pd.DataFrame(clusted_segments.cluster_centers_)
 
@@ -247,13 +248,14 @@ def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ
                 info_pattern[clustNo]["updateDate"] = save_day
 
             else:
+                max_clustNo += 1
+
                 info_pattern[clustNo] = {}
                 info_pattern[clustNo]["status"] = "undefined"
-                info_pattern[clustNo]["masterCN"] = "unknown"
+                info_pattern[clustNo]["masterCN"] = "cluster_{:03}".format(max_clustNo)
                 info_pattern[clustNo]["createDate"] = save_day
                 info_pattern[clustNo]["updateDate"] = save_day
-
-                max_clustNo += 1
+            
                 new_pattern["cluster_{:03}".format(max_clustNo)] = fact_pattern[clustNo]
                 new_info["cluster_{:03}".format(max_clustNo)] = {}
                 new_info["cluster_{:03}".format(max_clustNo)]["status"] = "undefined"
@@ -339,11 +341,13 @@ if __name__ == '__main__':
     resp = requests.get(url)
     import json
     dataset = json.loads(resp.text)
+
     if dataset['rtnCode']['code'] == '0000':
         logger.debug("reload master pattern")
-        master_data = dataset['rtnData']['da_result']
+        master_data = dataset['rtnData']
         print("there is data")
     else:
         master_data = None
 
-    main('0002.00000039', '2017-10-07T00:00:00Z', '2017-11-08T02:00:00Z', master_data)
+    print(master_data)
+    main('0002.00000039', '2017-11-21T00:00:00Z', '2017-11-22T02:00:00Z', master_data)
