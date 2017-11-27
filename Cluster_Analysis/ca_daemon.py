@@ -1,38 +1,35 @@
 import sys
 from daemon import Daemon
-# import logging
-# import logging.handlers
-import ad_logger as adLogging
-from config_parser import cfg
+from ca_logger import getCaLogger
+import ca_main
+import consts
 
 
 class Start_daemon(object):
     def run(self):
         while True:
-            import ad_main
+            ca_main.CaSocketThread(consts.HOST, consts.PORT).listen()
 
 
-class adDaemon(Daemon):
+class CaDaemon(Daemon):
     def run(self):
         startdaemon = Start_daemon()
         startdaemon.run()
 
 
 if __name__ == '__main__':
-    # pidfile_path = '/home/Toven/da/ad_daemon.pid'
-    # daemon = adDaemon(pidfile_path)
-    logger = adLogging.get_daemon_logger()
-    
-    daemon = adDaemon(cfg['DAEMON']['ad_pid_path'])
+    logger = getCaLogger()
+    daemon = CaDaemon(consts.PATH['DAEMON_PID'])
+
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
-            logger.info("Started Anomaly Detection daemon ...")
+            logger.info("Started Cluster Analysis daemon ...")
             daemon.start()
         elif 'stop' == sys.argv[1]:
-            logger.info("Stopped Anomaly Detection daemon ...")
+            logger.info("Stopped Cluster Analysis daemon ...")
             daemon.stop()
         elif 'restart' == sys.argv[1]:
-            logger.info("Restarted Anomaly Detection daemon ...")
+            logger.info("Restarted Cluster Analysis daemon ...")
             daemon.restart()
         else:
             print("unknown command")

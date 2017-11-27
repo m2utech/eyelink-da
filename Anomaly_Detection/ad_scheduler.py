@@ -2,7 +2,6 @@ import sys
 from daemon import Daemon
 from ad_configParser import getConfig
 from ad_logger import getAdLogger
-import logging
 import socket
 import consts
 import util

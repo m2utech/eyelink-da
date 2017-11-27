@@ -116,7 +116,7 @@ class AdSocketThread(object):
 
         if dataset['rtnCode']['code'] == '0000':
             logger.debug("reload master pattern ....")
-            MASTER_DATA = dataset['rtnData']['da_result']
+            MASTER_DATA = dataset['rtnData']
             PATTERN_CODE = 1
         else:
             logger.debug("master pattern is None ....")

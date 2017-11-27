@@ -51,6 +51,7 @@ def data_load(s_date, e_date, t_iterval):
         dataset['active_power'] = dataset['active_power'].apply(pd.to_numeric, errors='ignore')
         dataset['power_factor'] = dataset['power_factor'].apply(pd.to_numeric, errors='ignore')
         dataset['event_time'] = pd.to_datetime(dataset['event_time'], format='%Y-%m-%d %H:%M:%S.%f')
+
         #print(list(dataset.keys()))
 
         ################## 피벗 및 클러스터링 ####################
@@ -213,5 +214,5 @@ def data_load(s_date, e_date, t_iterval):
 ####################################
 if __name__ == '__main__':
     # pass
-    data_load('2017-01-04T00:00:00', '2017-01-05T00:00:00', 15)
+    data_load('2017-10-04T00:00:00', '2017-10-05T00:00:00', 15)
     # data_load(config.cfg['s_date'], config.cfg['e_date'], int(config.cfg['t_interval']))

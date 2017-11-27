@@ -49,6 +49,8 @@ def saveMatchingResult(assign_result, e_time, cfg):
 
     anomaly_pattern_url = cfg['API']['url_post_anomaly_pattern'] + e_time
     logger.debug("save_info: {}".format(anomaly_pattern_url))
+
+    # print(assign_json)
     requests.post(anomaly_pattern_url, json=assign_json)
 
 
@@ -146,9 +148,11 @@ def compareDistance(test_data, master_data, master_info, col_name, output, cfg):
     percentile = float(distance[max_dist[0]]) / 100.0
 
     result = {}
+    result["realValue"] = test_data[:110].tolist()
 
     for k in range(topK):
         result["top_{}".format(k+1)] = topK_list[k]
+        result["top_{}_value".format(k+1)] = master_center[topK_list[k]].tolist()
         result["top_{}_rate".format(k+1)] = 100.0 - (float(distance[topK_list[k]]) / percentile)
 
     logger.debug("compare boundary threshould ...")
@@ -209,11 +213,11 @@ def DTWDistance(s1, s2, w):
     for i in range(len(s1)):
         if w:
             for j in range(max(0, i-w), min(len(s2), i+w)):
-                dist = float((s1[i] - s2[j]))**2
+                dist = float((float(s1[i]) - float(s2[j])))**2
                 DTW[(i, j)] = dist + min(DTW[(i-1, j)], DTW[(i, j-1)], DTW[(i-1, j-1)])
         else:
             for j in range(len(s2)):
-                dist = (s1[i]-s2[j])**2
+                dist = float((float(s1[i]) - float(s2[j])))**2
                 DTW[(i, j)] = dist + min(DTW[(i-1, j)], DTW[(i, j-1)], DTW[(i-1, j-1)])
 
     return np.sqrt(DTW[len(s1)-1, len(s2)-1])
@@ -234,9 +238,9 @@ if __name__ == '__main__':
 
     if dataset['rtnCode']['code'] == '0000':
         logger.debug("reload master pattern")
-        master_data = dataset['rtnData']['da_result']
+        master_data = dataset['rtnData']
     else:
         master_data = None
 
-    main('0002.00000039', '2017-10-10T00:00:00', '2017-10-20T02:00:00', master_data)
+    main('0002.00000039', '2017-11-22T07:00:00', '2017-11-22T08:50:00', master_data)
     # main(node_id, s_time, e_time, pattern_data)
