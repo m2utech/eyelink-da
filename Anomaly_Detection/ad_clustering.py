@@ -234,10 +234,13 @@ def clusteringSegment(dataset, master_data, master_info, col_name, save_day, pdQ
                 cur_dist = DTWDistance(center_df[clustNo], master_df[m_clustNo], 1)
                 distance[m_clustNo] = cur_dist
 
-            max_dist = heapq.nlargest(1, distance, key=distance.get)
+            # max_dist = heapq.nlargest(1, distance, key=distance.get)
             min_dist = heapq.nsmallest(1, distance, key=distance.get)
 
-            percentile = float(distance[max_dist[0]]) / 100.0
+            # percentile = float(distance[max_dist[0]]) / 100.0
+            valRange = consts.FACTOR_INFO['RANGE'][col_name]
+            percentile = (valRange[1] - valRange[0]) / 100.0
+            
             match_rate = 100.0 - (float(distance[min_dist[0]]) / percentile)
 
             if match_rate > 90.0:
