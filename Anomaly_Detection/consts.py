@@ -46,13 +46,19 @@ ALARM_TYPE_NAME = 'BATCH_ANOMALY'
 
 # #### factor information for AD ####
 FACTOR_INFO = {
+    'INDEX': 'event_time',
     'FACTORS': {
         'ampere': 0.5,
         'active_power': 110.0,
         'power_factor': 0.9,
         'voltage': 220.0
-        },
-    'INDEX': 'event_time'
+    },
+    'RANGE': {
+        'ampere': [0.0, 1.0],
+        'active_power': [0.0, 200.0],
+        'power_factor': [0.0, 1.0],
+        'voltage': [0.0, 240.0]
+    }
 }
 
 # #### Attributes for anomaly detection ####

@@ -7,6 +7,7 @@ from sklearn.cluster import KMeans
 import pandas as pd
 import requests
 import logging
+from datetime import datetime, timedelta
 # ### import module ###
 import consts
 import ca_dataConvert
@@ -19,11 +20,18 @@ def main(sDate, eDate, tInterval):
     nowtime = util.getToday(True, consts.DATETIME)
     sDate = util.checkDatetime(sDate, consts.DATETIME)
     eDate = util.checkDatetime(eDate, consts.DATETIME)
-    print(nowtime, sDate, eDate)
+    # print(nowtime, sDate, eDate)
+
+    s_dt = datetime.strptime(sDate.replace('T', ' ').replace('Z', ''), consts.LOCAL_ZERO_TIME)
+    e_dt = datetime.strptime(eDate.replace('T', ' ').replace('Z', ''), consts.LOCAL_ZERO_TIME)
+    dateRange = []
+    for dt in util.datetime_range(s_dt, e_dt, {'minutes': tInterval}):
+        dateRange.append(dt)
+    dateRange = pd.DataFrame(dateRange, columns=[consts.FACTOR_INFO["INDEX"]])
+
 
     logger.debug("trainnig dataset loading ....")
     dataset = ca_dataConvert.loadJsonData(sDate, eDate)
-
     logger.debug("Clustering by multiprocessing ....")
     procs, factorList = [], []
     indexQ, masterQ, detailQ = {}, {}, {}
@@ -35,7 +43,7 @@ def main(sDate, eDate, tInterval):
         factorList.append(factor_name)
 
         procs.append(Process(target=clusterAnalysis,
-            args=(targetData, nodeId, factor_name, val, tInterval, masterQ[factor_name], detailQ[factor_name], indexQ[factor_name])))
+            args=(dateRange, targetData, nodeId, factor_name, val, tInterval, masterQ[factor_name], detailQ[factor_name], indexQ[factor_name])))
 
     for p in procs:
         p.start()
@@ -51,6 +59,8 @@ def main(sDate, eDate, tInterval):
         indexQ[col_name].close()
     for proc in procs:
         proc.join()
+
+    timeIndex = [dt.replace(' ', 'T') + 'Z' for dt in timeIndex]
 
     masterDict['da_time'], detailDict['da_time'] = nowtime, nowtime
     masterDict['start_date'], detailDict['start_date'] = sDate, sDate
@@ -68,8 +78,8 @@ def saveResult(masterDict, detailDict, saveId):
     masterJson['master_result'] = masterDict
     detailJson['detail_result'] = detailDict
 
-    print(masterDict)
-    print(detailDict)
+    # print(masterDict)
+    # print(detailDict)
     masterApi = consts.API['UPLOAD_MASTER'] + saveId
     detailApi = consts.API['UPLOAD_DETAIL'] + saveId
 
@@ -77,8 +87,8 @@ def saveResult(masterDict, detailDict, saveId):
     requests.post(detailApi, json=detailJson)
 
 
-def clusterAnalysis(dataset, nodeId, factor, val, tInterval, masterQ, detailQ, indexQ):
-    dataset = ca_dataConvert.preprocessing(dataset, nodeId, factor, val, tInterval)
+def clusterAnalysis(dateRange, dataset, nodeId, factor, val, tInterval, masterQ, detailQ, indexQ):
+    dataset = ca_dataConvert.preprocessing(dateRange, dataset, nodeId, factor, val, tInterval)
     # dataset = dataset.reset_index()
     # dataset = dataset.set_index('node_id')
     timeIndex = dataset[consts.FACTOR_INFO['INDEX']].astype(str).tolist()
@@ -115,4 +125,4 @@ def clusterAnalysis(dataset, nodeId, factor, val, tInterval, masterQ, detailQ, i
 ####################################
 if __name__ == '__main__':
     freeze_support()
-    main('2017-11-21T00:00:00', '2017-11-22T00:00:00', 15)
+    main('2017-11-28T00:00:00', '2017-11-29T00:00:00', 30)

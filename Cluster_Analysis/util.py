@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 import pytz
@@ -68,3 +68,20 @@ def checkDatetime(strDate, fm):
         strDate = strDate + 'Z'
         strDate = getLocalStr2Utc(strDate, fm+'Z')
         return strDate
+
+def datetime_range(start, end, delta):
+    current = start
+    if not isinstance(delta, timedelta):
+        delta = timedelta(**delta)
+    while current < end:
+        yield current
+        current += delta
+
+
+if __name__ == '__main__':
+    sDate, eDate = getTimeRangeByDay(consts.TIME_RANGE['DAY'], consts.DATETIME)
+    print("by Day: ", sDate, eDate)
+    sDate, eDate = getTimeRangeByWeek(consts.TIME_RANGE['WEEK'], consts.DATETIME)
+    print("by Week: ", sDate, eDate)
+    sDate, eDate = getTimeRangeByMonth(consts.TIME_RANGE['MONTH'], consts.DATETIME)
+    print("by Month: ", sDate, eDate)

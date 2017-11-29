@@ -142,10 +142,12 @@ def compareDistance(test_data, master_data, master_info, col_name, output, cfg):
         cur_dist = DTWDistance(test_data[:110], match_data[:110], 1)
         distance[clust_name] = cur_dist
 
-    max_dist = heapq.nlargest(1, distance, key=distance.get)
+    # max_dist = heapq.nlargest(1, distance, key=distance.get)
     topK_list = heapq.nsmallest(topK, distance, key=distance.get)
 
-    percentile = float(distance[max_dist[0]]) / 100.0
+    # percentile = float(distance[max_dist[0]]) / 100.0
+    valRange = consts.FACTOR_INFO['RANGE'][col_name]
+    percentile = (valRange[1] - valRange[0]) / 100.0
 
     result = {}
     result["realValue"] = test_data[:110].tolist()

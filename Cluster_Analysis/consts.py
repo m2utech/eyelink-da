@@ -3,6 +3,7 @@ DATE = '%Y-%m-%d'
 DATETIME = '%Y-%m-%dT%H:%M:%S'
 DATETIMEZERO = '%Y-%m-%dT%H:%M:00'
 DATETIMEMILLI = '%Y-%m-%dT%H:%M:%S.%f'
+LOCAL_ZERO_TIME = '%Y-%m-%d %H:%M:00'
 LOCAL_TIMEZONE = 'Asia/Seoul'
 
 # #### LOGGING ####

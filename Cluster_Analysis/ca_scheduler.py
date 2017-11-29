@@ -54,7 +54,7 @@ class Scheduler(object):
         s.close()
 
     def job_test(self):
-        logger.info("===== test 1 minute =====")
+        logger.info("===== test check 30 minute =====")
 
     def scheduler(self):
         self.sched.add_job(
@@ -63,15 +63,15 @@ class Scheduler(object):
         )
         self.sched.add_job(
             self.job_week, "cron", max_instances=consts.SCHEDULER['MAX_INSTANCE'],
-            day_of_week=consts.SCHEDULER['DAY_OF_WEEK'], hour=consts.SCHEDULER['HOUR']
+            day_of_week=consts.SCHEDULER['DAY_OF_WEEK']
         )
         self.sched.add_job(
             self.job_month, "cron", max_instances=consts.SCHEDULER['MAX_INSTANCE'],
-            day=consts.SCHEDULER['DAY'], hour=consts.SCHEDULER['HOUR']
+            day=consts.SCHEDULER['DAY']
         )
-        # self.sched.add_job(
-        #     self.job_test, "cron", max_instances=consts.SCHEDULER['MAX_INSTANCE'],
-        #     minute='*/1')
+        self.sched.add_job(
+            self.job_test, "cron", max_instances=consts.SCHEDULER['MAX_INSTANCE'],
+            minute=30)
 
 
 class SchedulerDaemon(Daemon):

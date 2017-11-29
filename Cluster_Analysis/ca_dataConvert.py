@@ -25,12 +25,15 @@ def loadJsonData(sDate, eDate):
     return dataset
 
 
-def preprocessing(data, col, factor, val, tInterval):
+def preprocessing(dateRange, data, col, factor, val, tInterval):
     data = data.pivot_table(index=data.index, columns=col, values=factor)
     data = data.resample(str(tInterval)+'T').mean()
-    data = data.fillna(val)
     data = data.reset_index()
-    return data
+    ind = [consts.FACTOR_INFO['INDEX']]
+    dataset = dateRange.set_index(ind).join(data.set_index(ind))
+    dataset = dataset.fillna(val)
+    dataset = dataset.reset_index()
+    return dataset
 
 
 ##################
