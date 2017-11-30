@@ -26,7 +26,7 @@ class Scheduler(object):
     def job_day(self):
         logger.info("===== Start cluster analysis for one day =====")
         s_date, e_date = util.getTimeRangeByDay(consts.TIME_RANGE['DAY'], consts.DATETIME)
-        sendData = {"s_date": s_date, "e_date": e_date, "tInterval": consts.TIME_INTERVAL['DAY']}
+        sendData = {"sDate": s_date, "eDate": e_date, "tInterval": consts.TIME_INTERVAL['DAY']}
         sendData = str(sendData).encode()
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # 소켓생성
         s.connect((host, port))
@@ -36,7 +36,7 @@ class Scheduler(object):
     def job_week(self):
         logger.info("===== Start cluster analysis for one week =====")
         s_date, e_date = util.getTimeRangeByWeek(consts.TIME_RANGE['WEEK'], consts.DATETIME)
-        sendData = {"s_date": s_date, "e_date": e_date, "tInterval": consts.TIME_INTERVAL['WEEK']}
+        sendData = {"sDate": s_date, "eDate": e_date, "tInterval": consts.TIME_INTERVAL['WEEK']}
         sendData = str(sendData).encode()
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # 소켓생성
         s.connect((host, port))
@@ -46,7 +46,7 @@ class Scheduler(object):
     def job_month(self):
         logger.info("===== Start cluster analysis for one month =====")
         s_date, e_date = util.getTimeRangeByMonth(consts.TIME_RANGE['MONTH'], consts.DATETIME)
-        sendData = {"s_date": s_date, "e_date": e_date, "tInterval": consts.TIME_INTERVAL['MONTH']}
+        sendData = {"sDate": s_date, "eDate": e_date, "tInterval": consts.TIME_INTERVAL['MONTH']}
         sendData = str(sendData).encode()
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # 소켓생성
         s.connect((host, port))
