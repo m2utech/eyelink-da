@@ -9,9 +9,9 @@ import consts
 def getTimezone():
     tz_list = []
     for tz in pytz.all_timezones:
-         tz_list.append(tz)
-    
+        tz_list.append(tz)
     return tz_list
+
 
 def getToday(utcYN, fm):
     if utcYN is True:

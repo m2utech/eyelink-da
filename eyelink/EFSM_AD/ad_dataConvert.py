@@ -68,6 +68,6 @@ def extractAttribute(dataset, attr):
 
 
 if __name__ == "__main__":
-    dataset = loadJsonData('0002.00000039', '2017-11-28T00:00:00Z', '2017-11-29T02:00:00Z', cfg)
-    # dataset = loadPatternData('master')
+    # dataset = loadJsonData('0002.00000039', '2017-11-28T00:00:00Z', '2017-11-29T02:00:00Z', cfg)
+    dataset = loadPatternInfo('master')
     print(dataset)
