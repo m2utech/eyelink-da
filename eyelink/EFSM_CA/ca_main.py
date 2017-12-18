@@ -70,5 +70,5 @@ class CaSocketThread(object):
 
 if __name__ == '__main__':
     # CaSocketThread(consts.LOCAL_HOST, consts.PORT).listen()
-    data = b'{"sDate": "2017-11-21T00:00:00", "eDate": "2017-11-22T00:00:00", "tInterval": 15}'
+    data = b'{"sDate": "2017-11-29T00:00:00", "eDate": "2017-11-30T00:00:00", "tInterval": 15}'
     CaSocketThread(consts.LOCAL_HOST, consts.PORT).jsonParsing(data)
