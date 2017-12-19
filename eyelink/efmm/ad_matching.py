@@ -209,8 +209,8 @@ if __name__ == '__main__':
     freeze_support()
     esIndex = 'notching'
     docType = 'oee'
-    sDate = "2017-12-18T09:49:00Z"
-    eDate = "2017-12-18T10:49:00Z"
+    sDate = "2017-12-19T01:41:00Z"
+    eDate = "2017-12-19T02:41:00Z"
     query = efmm_query.getDataById(config.da_opt['masterID'])
     masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.da_opt['masterID'])
     main(esIndex, docType, sDate, eDate, masterData)

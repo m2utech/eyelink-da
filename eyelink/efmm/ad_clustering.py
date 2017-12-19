@@ -31,20 +31,26 @@ def main(esIndex, docType, sDate, eDate, masterData):
 
     if (dataset is None) or (dataset.empty):
         logger.warn("There is no dataset... skipping analysis")
+        print("There is no dataset... skipping analysis")
     else:
         if masterData is not None:
             logger.debug("load pattern info[ID:{}]".format(MASTER_ID))
+            print("load pattern info[ID:{}]".format(MASTER_ID))
             query = efmm_query.getDataById(MASTER_ID)
             masterInfo = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], query, MASTER_ID)
             logger.debug("== Start create pattern ...")
+            print("== Start create pattern ...")
             pData, pInfo, npData, npInfo = startAnalysis(dataset, masterData, masterInfo, saveID)
-            logger.debug("== Save result of pattern matching ...")
+            logger.debug("== Save result of create pattern ...")
+            print("== Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, True, esIndex, docType)
         else:
             masterInfo = None
             logger.debug("== Start create pattern ...")
+            print("== Start create pattern ...")
             pData, pInfo, npData, npInfo = startAnalysis(dataset, masterData, masterInfo, saveID)
-            logger.debug("== Save result of pattern matching ...")
+            logger.debug("== Save result of create pattern ...")
+            print("== Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, False, esIndex, docType)
 
 
@@ -305,8 +311,8 @@ if __name__ == '__main__':
     freeze_support()
     esIndex = 'notching'
     docType = 'oee'
-    sDate = "2017-12-16T15:00:00Z"
-    eDate = "2017-12-17T15:00:00Z"
+    sDate = "2017-12-17T15:00:00Z"
+    eDate = "2017-12-18T15:00:00Z"
 
     query = efmm_query.getDataById(config.da_opt['masterID'])
     masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.da_opt['masterID'])

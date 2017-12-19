@@ -59,6 +59,15 @@ def getStartEndDateByDay(timeRange, utcYN, fm):
     endDate = today.strftime(fm)
     return startDate, endDate
 
+def getStartEndDateByHour(timeRange, utcYN, fm):
+    if utcYN is True:
+        today = datetime.now(pytz.UTC)
+    else:
+        today = datetime.now()
+    startDate = (today - relativedelta(hours=timeRange)).strftime(fm)
+    endDate = today.strftime(fm)
+    return startDate, endDate
+
 
 def getStartEndDateByMinute(timeRange, utcYN, fm):
     if utcYN is True:
@@ -71,5 +80,6 @@ def getStartEndDateByMinute(timeRange, utcYN, fm):
 
 
 if __name__ == '__main__':
-    s, e = getStartEndDateByMinute(60, False, consts.DATETIMEZERO)
+    # s, e = getStartEndDateByMinute(60, False, consts.DATETIMEZERO)
+    s, e = getStartEndDateByHour(24, False, consts.DATETIMEZERO)
     print(s, e)

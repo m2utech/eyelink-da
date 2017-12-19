@@ -10,8 +10,8 @@ import da_util as util
 import da_config as config
 import da_consts as consts
 
-import efmm_clustering
-import efmm_matching
+import ad_clustering
+import ad_matching
 
 
 NOTCHING_MASTER = None
@@ -159,23 +159,19 @@ class EfmmSocketThread(object):
     def createPattern(self, esIndex, docType, sDate, eDate):
         logger.debug("==== Start pattern generation from [{}] to [{}] ====".format(sDate, eDate))
         if esIndex == 'notching':
-            efmm_clustering.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER)
+            ad_clustering.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER)
         elif esIndex == 'stacking':
-            efmm_clustering.main(esIndex, docType, sDate, eDate, STACKING_MASTER)
+            ad_clustering.main(esIndex, docType, sDate, eDate, STACKING_MASTER)
 
     def matchPattern(self, esIndex, docType, sDate, eDate):
         logger.debug("==== Start pattern matching from [{}] to [{}] ====".format(sDate, eDate))
         if esIndex == 'notching':
-            efmm_matching.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER)
+            ad_matching.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER)
         elif esIndex == 'stacking':
-            efmm_matching.main(esIndex, docType, sDate, eDate, STACKING_MASTER)
+            ad_matching.main(esIndex, docType, sDate, eDate, STACKING_MASTER)
 
 
 ######################################
 if __name__ == '__main__':
-    esIndex = 'notching'
-    docType = 'oee'
-    sDate = '2017-12-08T00:00:00'
-    eDate = '2017-12-08T01:00:00'
-    data = b'{"type": "matching", "esIndex": "notching", "docType": "oee", "sDate": "2017-12-08T00:00:00", "eDate": "2017-12-08T01:00:00"}'
+    data = b'{"type": "pattern", "esIndex": "notching", "docType": "oee", "sDate": "2017-12-18T00:00:00", "eDate": "2017-12-19T00:00:00"}'
     EfmmSocketThread(consts.LOCAL_HOST, consts.PORT).jsonParsing(data)

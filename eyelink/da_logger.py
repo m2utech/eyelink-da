@@ -12,9 +12,9 @@ def getEfmmLogger():
     fileHandler.setFormatter(formatter)
     logger.addHandler(fileHandler)
 
-    # streamHandler = logging.StreamHandler()
-    # streamHandler.setFormatter(formatter)
-    # logger.addHandler(streamHandler)
+    streamHandler = logging.StreamHandler()
+    streamHandler.setFormatter(formatter)
+    logger.addHandler(streamHandler)
     logger.setLevel(logging.DEBUG)
 
     return logger

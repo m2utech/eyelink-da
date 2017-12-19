@@ -7,8 +7,8 @@ logger_name = {
 }
 
 file_path = {
-    "efmm_log": "/home/Toven/da/logs/efmm.log",
-    "efmm_pid": "/home/Toven/da/PID/efmm.pid",
+    "efmm_log": "/home/Toven/da/logs/efmm_ad.log",
+    "efmm_pid": "/home/Toven/da/PID/efmm_ad.pid",
     "efmm_sche_pid": "/home/Toven/da/PID/efmmScheduler.pid"
 }
 

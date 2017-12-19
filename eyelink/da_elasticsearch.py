@@ -64,10 +64,10 @@ def updateDataById(index, docType, sid, body):
 
 if __name__ == '__main__':
     index = config.efmm_index['notching']['oee']['INDEX']
-    idx_list = [index+'-2017.12.06', index+'-2017.12.07']
+    idx_list = [index+'-2017.12.18', index+'-2017.12.19']
     docType = config.efmm_index['notching']['oee']['TYPE']
-    sDate = "2017-12-06T15:00:00Z"
-    eDate = "2017-12-06T16:00:00Z"
+    sDate = "2017-12-17T15:00:00Z"
+    eDate = "2017-12-18T15:00:00Z"
     body = {
         # "size": 100000,
         "_source": ["data.dtSensed", "cid", "data.availability",
