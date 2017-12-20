@@ -16,6 +16,26 @@ def getOeeDataByRange(sDate, eDate):
     }
     return body
 
+
+def getStatusDataByRange(sDate, eDate):
+    body = {
+        "size": 100000,
+        "_source": ["cid", "data"],
+        "sort": {"dtTransmitted": "asc"},
+        "query": {
+            "bool": {
+                "must": {"term": {"sensorType": "motor"}},
+                "filter": {
+                    "range": {
+                        "dtTransmitted": {"gte": sDate, "lte": eDate}
+                    }
+                }
+            }
+        }
+    }
+    return body
+
+
 def getDataById(id):
     body = {
         "query": {

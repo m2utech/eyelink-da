@@ -5,12 +5,12 @@ import da_config as config
 import da_consts as consts
 
 logger = logging.getLogger(config.logger_name['efmm'])
-es = elasticsearch.Elasticsearch(config.es_url, timeout=30)
+es = elasticsearch.Elasticsearch(config.es_url, timeout=180)
 
 
 def getOeeData(index, docType, body):
     dataset = []
-    docs = es.search(index=index, doc_type=docType, body=body, scroll='30s', size=100000)
+    docs = es.search(index=index, doc_type=docType, body=body, scroll='3m', size=100000)
     scroll_id = docs['_scroll_id']
     while len(docs['hits']['hits']) > 0:
         for item in docs['hits']['hits']:
@@ -18,8 +18,24 @@ def getOeeData(index, docType, body):
                 data = element
                 data['cid'] = item['_source']['cid']
                 dataset.append(data)
-        docs = es.scroll(scroll_id=scroll_id, scroll='30s')
+        docs = es.scroll(scroll_id=scroll_id, scroll='3m')
     dataset = dataConvert(dataset)
+    return dataset
+
+
+def getStatusData(index, docType, body):
+    dataset = []
+    docs = es.search(index=index, doc_type=docType, body=body, scroll='3m', size=100000)
+    scroll_id = docs['_scroll_id']
+    
+    while len(docs['hits']['hits']) > 0:
+        for item in docs['hits']['hits']:
+            for element in item['_source']['data']:
+                data = element
+                data['cid'] = item['_source']['cid']
+                dataset.append(data)
+        docs = es.scroll(scroll_id=scroll_id, scroll='3m')
+    dataset = statusDataConvert(dataset)
     return dataset
 
 
@@ -30,6 +46,12 @@ def dataConvert(dataset):
     dataset = dataset.set_index(config.da_opt['index'])
     return dataset
 
+def statusDataConvert(dataset):
+    ind = config.clustering_opt['index']
+    dataset = pd.DataFrame(dataset)
+    dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
+    dataset = dataset.set_index(ind)
+    return dataset
 
 def getDataById(index, docType, body, masterId):
     check = es.exists_source(index=index, doc_type=docType, id=masterId)

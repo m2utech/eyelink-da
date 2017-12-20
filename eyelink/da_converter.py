@@ -31,6 +31,23 @@ def targetSampling(dataset, tInterval, eDate, output):
     dataset = dataset.reset_index(drop=True)
     output.put(dataset)
 
+def preprocessClustering(dataset, dateRange, timeUnit, tInterval, output):
+    char = ''
+    if timeUnit == 'seconds':
+        char = 'S'
+    elif timeUnit == 'minutes':
+        char = 'T'
+    elif timeUnit == 'hours':
+        char = 'H'
+    dataset = dataset.resample(str(tInterval) + char).mean()
+    dataset = dataset.reset_index()
+    ind = [config.clustering_opt['index']]
+    dataset = dateRange.set_index(ind).join(dataset.set_index(ind))
+    dataset = dataset.interpolate(method=config.mv_method)
+    dataset = dataset.reset_index()
+    del dataset[config.clustering_opt['index']]
+    output.put(dataset.T)
+
 
 if __name__ == '__main__':
     cid = 200

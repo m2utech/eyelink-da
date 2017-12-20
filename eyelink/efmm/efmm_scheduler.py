@@ -25,43 +25,67 @@ class Scheduler(object):
     def shutdown(self):
         self.sched.shutdown()
 
-    def job_notchingCreatePattern(self):
-        logger.info("== start createPatterns for Notching OEE ==")
+    def job_notching_CP(self):
+        logger.info("== start CreatePatterns for Notching OEE ==")
         sDate, eDate = util.getStartEndDateByHour(config.scheduler_opt['time_range_pattern'], False, consts.DATETIMEZERO)
-        self.sendMessage("0000", "notching", "oee", sDate, eDate)
+        self.sendData("0000", "notching", "oee", sDate, eDate, None)
 
-    def job_stackingCreatePattern(self):
-        logger.info("== start createPatterns for Stacking OEE ==")
+    def job_notching_PM(self):
+        logger.info("== start PatternMatching for Notching OEE ==")
+        sDate, eDate = util.getStartEndDateByMinute(config.scheduler_opt['time_range_matching'], False, consts.DATETIMEZERO)
+        self.sendData("1000", "notching", "oee", sDate, eDate, None)
+
+    def job_stacking_CP(self):
+        logger.info("== start CreatePatterns for Stacking OEE ==")
         sDate, eDate = util.getStartEndDateByHour(config.scheduler_opt['time_range_pattern'], False, consts.DATETIMEZERO)
-        self.sendMessage("0000", "stacking", "oee", sDate, eDate)
+        self.sendData("0000", "stacking", "oee", sDate, eDate, None)
 
-    def job_notchingPatternMatching(self):
-        logger.info("== start patternMatching for Notching OEE ==")
+    def job_stacking_PM(self):
+        logger.info("== start PatternMatching for Stacking OEE ==")
         sDate, eDate = util.getStartEndDateByMinute(config.scheduler_opt['time_range_matching'], False, consts.DATETIMEZERO)
-        self.sendMessage("1000", "notching", "oee", sDate, eDate)
+        self.sendData("1000", "stacking", "oee", sDate, eDate, None)
 
-    def job_stackingPatternMatching(self):
-        logger.info("== start patternMatching for Stacking OEE ==")
-        sDate, eDate = util.getStartEndDateByMinute(config.scheduler_opt['time_range_matching'], False, consts.DATETIMEZERO)
-        self.sendMessage("1000", "stacking", "oee", sDate, eDate)
+    def job_stacking_CA_day(self):
+        logger.info("== start Daily CA for Stacking STATUS ==")
+        sDate, eDate = util.getTimeRangeByDay(config.clustering_opt['byDay']['range'], consts.DATETIMEZERO)
+        self.sendData("2000", "stacking", "status", sDate, eDate, config.clustering_opt['byDay']['interval'])
 
-    def sendMessage(self, jobcode, esIndex, docType, sDate, eDate):
-        sendData = {"type": config.scheduler_opt['job_code'][jobcode], "esIndex": esIndex,
-                    "docType": docType, "sDate": sDate, "eDate": eDate}
+    def job_stacking_CA_week(self):
+        logger.info("== start Weekly CA for Stacking STATUS ==")
+        sDate, eDate = util.getTimeRangeByDay(config.clustering_opt['byWeek']['range'], consts.DATETIMEZERO)
+        self.sendData("2000", "stacking", "status", sDate, eDate, config.clustering_opt['byWeek']['interval'])
+
+
+    def sendData(self, jobcode, esIndex, docType, sDate, eDate, tInterval):
+        sendData = ''
+        if tInterval is not None:
+            sendData = {"type": config.scheduler_opt['job_code'][jobcode], "esIndex": esIndex,
+                        "docType": docType, "sDate": sDate, "eDate": eDate, "tInterval": tInterval}
+        else:
+            sendData = {"type": config.scheduler_opt['job_code'][jobcode], "esIndex": esIndex,
+                        "docType": docType, "sDate": sDate, "eDate": eDate}
         sendData = str(sendData).encode()
+        self.sendMessage(sendData)
+
+
+    def sendMessage(self, sendData):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((host, port))
         s.send(sendData)
         s.close()
 
+    # ##### SCHEDULER #####
     def scheduler(self):
         maxInstances = config.scheduler_opt['max_instance']
         hour = config.scheduler_opt['hour']
         minute = config.scheduler_opt['minute']
-        self.sched.add_job(self.job_notchingCreatePattern, "cron", max_instances=maxInstances, hour=hour)
-        self.sched.add_job(self.job_stackingCreatePattern, "cron", max_instances=maxInstances, hour=hour)
-        self.sched.add_job(self.job_notchingPatternMatching, "cron", max_instances=maxInstances, minute=minute)
-        self.sched.add_job(self.job_stackingPatternMatching, "cron", max_instances=maxInstances, minute=minute)
+        week = config.scheduler_opt['week']
+        self.sched.add_job(self.job_notching_CP, "cron", max_instances=maxInstances, hour=hour)
+        self.sched.add_job(self.job_stacking_CP, "cron", max_instances=maxInstances, hour=hour)
+        self.sched.add_job(self.job_notching_PM, "cron", max_instances=maxInstances, minute=minute)
+        self.sched.add_job(self.job_stacking_PM, "cron", max_instances=maxInstances, minute=minute)
+        self.sched.add_job(self.job_stacking_CA_day, "cron", max_instances=maxInstances, hour=hour)
+        self.sched.add_job(self.job_stacking_CA_week, "cron", max_instances=maxInstances, day_of_week=week)
 
 
 class SchedulerDaemon(Daemon):

@@ -78,8 +78,23 @@ def getStartEndDateByMinute(timeRange, utcYN, fm):
     endDate = today.strftime(fm)
     return startDate, endDate
 
+# for job_day
+def getTimeRangeByDay(timeRange, fm):
+    today = datetime.now()
+    startDate = (today - relativedelta(days=timeRange)).strftime(fm)
+    endDate = today.strftime(fm)
+    return startDate, endDate
+
+def datetime_range(start, end, delta):
+    current = start
+    if not isinstance(delta, timedelta):
+        delta = timedelta(**delta)
+    while current < end:
+        yield current
+        current += delta
 
 if __name__ == '__main__':
     # s, e = getStartEndDateByMinute(60, False, consts.DATETIMEZERO)
-    s, e = getStartEndDateByHour(24, False, consts.DATETIMEZERO)
+    # s, e = getStartEndDateByHour(24, False, consts.DATETIMEZERO)
+    s, e = getTimeRangeByDay(1, consts.DATETIMEZERO)
     print(s, e)

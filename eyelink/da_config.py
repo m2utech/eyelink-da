@@ -15,10 +15,12 @@ file_path = {
 scheduler_opt = {
     "max_instance": 10,
     "minute": '*/2',
-    "hour": 9,
+    "hour": 9,          # Local time (every day 09:00)
+    "week": 'mon',
     "job_code": {
         '0000': 'pattern',
-        '1000': 'matching'
+        '1000': 'matching',
+        '2000': 'clustering'
     },
     "time_range_pattern": 24,     #24 hours
     "time_range_matching": 60     #60 minutes --> 55min matching
@@ -46,6 +48,14 @@ da_opt = {
     'match_rate_threshold': 95.0    # 95%
 }
 
+clustering_opt = {
+    'index': 'measure_time',
+    'timeUnit': 'minutes',   #seconds, minutes, hours ...
+    'n_cluster': 10,
+    'byDay': {'range': 1, 'interval': '1T'},    # 1 minute
+    'byWeek': {'range': 1, 'interval': '10T'}
+}
+
 efmm_index = {
     'notching': {
         'oee': {'INDEX': 'efmm_notching_oee', 'TYPE': 'oee'},
@@ -62,24 +72,22 @@ da_index = {
         'oee': {
             'PD': {'INDEX': 'efmm_notching_oee_pattern_data', 'TYPE': 'pattern_data'},
             'PI': {'INDEX': 'efmm_notching_oee_pattern_info', 'TYPE': 'pattern_info'},
-            'PM': {'INDEX': 'efmm_notching_oee_pattern_matching', 'TYPE': 'pattern_matching'},
+            'PM': {'INDEX': 'efmm_notching_oee_pattern_matching', 'TYPE': 'pattern_matching'}
         },
         'status': {
-            'PD': {'INDEX': 'efmm_notching_status_pattern_data', 'TYPE': 'pattern_data'},
-            'PI': {'INDEX': 'efmm_notching_status_pattern_info', 'TYPE': 'pattern_info'},
-            'PM': {'INDEX': 'efmm_notching_status_pattern_matching', 'TYPE': 'pattern_matching'},
+            'master': {'INDEX': 'efmm_notching_status_clustering_master', 'TYPE': 'master'},
+            'detail': {'INDEX': 'efmm_notching_status_clustering_detail', 'TYPE': 'detail'}
         }
     },
     'stacking': {
         'oee': {
             'PD': {'INDEX': 'efmm_stacking_oee_pattern_data', 'TYPE': 'pattern_data'},
             'PI': {'INDEX': 'efmm_stacking_oee_pattern_info', 'TYPE': 'pattern_info'},
-            'PM': {'INDEX': 'efmm_stacking_oee_pattern_matching', 'TYPE': 'pattern_matching'},
+            'PM': {'INDEX': 'efmm_stacking_oee_pattern_matching', 'TYPE': 'pattern_matching'}
         },
         'status': {
-            'PD': {'INDEX': 'efmm_stacking_status_pattern_data', 'TYPE': 'pattern_data'},
-            'PI': {'INDEX': 'efmm_stacking_status_pattern_info', 'TYPE': 'pattern_info'},
-            'PM': {'INDEX': 'efmm_stacking_status_pattern_matching', 'TYPE': 'pattern_matching'},
+            'master': {'INDEX': 'efmm_stacking_status_clustering_master', 'TYPE': 'master'},
+            'detail': {'INDEX': 'efmm_stacking_status_clustering_detail', 'TYPE': 'detail'}
         }
     }
 

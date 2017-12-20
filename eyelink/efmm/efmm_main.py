@@ -12,6 +12,7 @@ import da_consts as consts
 
 import ad_clustering
 import ad_matching
+import ca_clustering
 
 
 NOTCHING_MASTER = None
@@ -80,18 +81,20 @@ class EfmmSocketThread(object):
                 docType = json_dict['docType']
                 sDate = json_dict['sDate']
                 eDate = json_dict['eDate']
-                # convert UTC datetime
-                sDate = util.getLocalStr2Utc(sDate, consts.DATETIME)
-                eDate = util.getLocalStr2Utc(eDate, consts.DATETIME)
+                # check dateformat and convert UTC datetime
+                sDate = util.checkDatetime(sDate, consts.DATETIME)
+                eDate = util.checkDatetime(eDate, consts.DATETIME)
 
+                ##### Create Patterns #####
                 if json_dict["type"] == "pattern":
-                    logger.debug("create pattern ....")
+                    logger.debug("#### [create pattern] ####")
                     self.loadMasterPattern(esIndex, docType)
                     self.createPattern(esIndex, docType, sDate, eDate)
                     self.loadMasterPattern(esIndex, docType)
-
+               
+                ##### Pattern Matching #####
                 elif json_dict["type"] == "matching":
-                    logger.debug("pattern matching ....")
+                    logger.debug("#### [pattern matching] ####")
                     if esIndex == 'notching':
                         if NOTCHING_CODE is 1:
                             self.matchPattern(esIndex, docType, sDate, eDate)
@@ -118,10 +121,17 @@ class EfmmSocketThread(object):
                                 self.matchPattern(esIndex, docType, sDate, eDate)
                     else:
                         logger.warn("Sensor type is invalid, please check sensor type ...")
+
+                ##### Clustering Analysis #####
+                elif json_dict["type"] == "clustering":
+                    logger.debug("#### [Clustering Analysis] ####")
+                    tInterval = json_dict['tInterval']
+                    ca_clustering.main(esIndex, docType, sDate, eDate, tInterval)
+
                 else:
                     logger.warn("The type is invalid")
             else:
-                logger.warn("Any key has a None value. please check message")
+                logger.warn("Any key has a None value. please check message data")
         else:
             logger.warn("Message format is incorrect")
 
