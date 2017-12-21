@@ -11,6 +11,7 @@ def getEfmmLogger():
     fileHandler = logging.handlers.RotatingFileHandler(config.file_path['efmm_log'], maxBytes=fileMaxByte, backupCount=backupCount)
     fileHandler.setFormatter(formatter)
     logger.addHandler(fileHandler)
+    logger.setLevel(logging.DEBUG)
     return logger
 
 # stream logger for local test

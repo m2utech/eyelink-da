@@ -28,43 +28,17 @@ def main(esIndex, docType, sDate, eDate, tInterval):
 
     logger.debug("create time range by time interval ...")
     dateRange = getDateRange(sDate, eDate, timeUnit, tInterval)
-    print(dateRange)
-    print(type(dateRange))
-
-    logger.debug("trainnig dataset loading ....")
-    efmm_index = config.efmm_index[esIndex][docType]['INDEX']
-    idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
-    body = efmm_query.getStatusDataByRange(sDate, eDate)
-    logger.debug("INDEX : {} | QUERY: {}".format(idxList, body))
-    dataset = efmm_es.getStatusData(idxList, docType, body)
+    logger.debug("get trainning dataset by multiprocessing")
+    dataset = getDataset(sDate, eDate, esIndex, docType)
 
     if (dataset is None) or (dataset.empty):
         logger.warn("There is no target dataset... skipping analysis")
     else:
-        logger.debug("start cluster analysis ....")
+        logger.debug("start cluster analysis by multiprocessing")
         masterDict, detailDict = startAnalysis(dataset, dateRange, timeUnit, tInterval)
 
         logger.debug("save cluster analysis result ....")
         saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterval, esIndex, docType)
-
-
-def saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterval, esIndex, docType):
-    timeIndex = dateRange[config.clustering_opt['index']].astype(str).tolist()
-    timeIndex = [dt.replace(' ', 'T') + 'Z' for dt in timeIndex]
-
-    masterDict['da_time'], detailDict['da_time'] = daTime, daTime
-    masterDict['start_date'], detailDict['start_date'] = sDate, sDate
-    masterDict['end_date'], detailDict['end_date'] = eDate, eDate
-    masterDict['time_interval'], detailDict['time_interval'] = tInterval, tInterval
-    detailDict['event_time'] = timeIndex
-
-    efmm_es.insertDataById(DA_INDEX[esIndex][docType]['master']['INDEX'],
-        DA_INDEX[esIndex][docType]['master']['TYPE'], daTime, masterDict)
-    efmm_es.insertDataById(DA_INDEX[esIndex][docType]['detail']['INDEX'],
-        DA_INDEX[esIndex][docType]['detail']['TYPE'], daTime, detailDict)
-
-    logger.debug("==== completed cluster analysis [save ID : {}] ====".format(daTime))
-
 
 
 def getDateRange(sDate, eDate, timeUnit, tInterval):
@@ -77,23 +51,43 @@ def getDateRange(sDate, eDate, timeUnit, tInterval):
     return dateRange
 
 
-def startAnalysis(dataset, dateRange, timeUnit, tInterval):
-    dataset = preprocessing(dataset, dateRange, timeUnit, tInterval)
-
-    procs, cid_list = [], []
-    masterQ, detailQ = {}, {}
-
-    for cid in dataset.keys():
-        masterQ[cid], detailQ[cid] = Queue(), Queue()
-        cid_list.append(cid)
-
-        procs.append(Process(target=clusterAnalysis,
-            args=(dataset[cid],masterQ[cid], detailQ[cid])))
-
+def getDataset(sDate, eDate, esIndex, docType):
+    efmm_index = config.efmm_index[esIndex][docType]['INDEX']
+    idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
+    body = efmm_query.getStatusDataByRange(sDate, eDate)
+    procs = []
+    dataQ = {}
+    dataset = pd.DataFrame()
+    for idx in idxList:
+        logger.debug("get dataset about index [{}]".format(idx))
+        dataQ[idx] = Queue()
+        procs.append(Process(target=efmm_es.getStatusData, args=(idx, docType, body, dataQ[idx])))
     for p in procs:
         p.start()
 
+    for idx in idxList:
+        dataset = dataset.append(dataQ[idx].get())
+        dataQ[idx].close()
+    for proc in procs:
+        proc.join()
+    return dataset
+
+
+def startAnalysis(dataset, dateRange, timeUnit, tInterval):
+    dataset = preprocessing(dataset, dateRange, timeUnit, tInterval)
+    procs, cid_list = [], []
+    masterQ, detailQ = {}, {}
     masterDict, detailDict = {}, {}
+
+    for cid in dataset.keys():
+        logger.debug("Cluster analysis about cid [{}]".format(cid))
+        masterQ[cid], detailQ[cid] = Queue(), Queue()
+        cid_list.append(cid)
+        procs.append(Process(target=clusterAnalysis,
+            args=(dataset[cid], masterQ[cid], detailQ[cid])))
+
+    for p in procs:
+        p.start()
 
     for cid in cid_list:
         masterDict[cid] = masterQ[cid].get()
@@ -104,8 +98,28 @@ def startAnalysis(dataset, dateRange, timeUnit, tInterval):
     for proc in procs:
         proc.join()
 
-    print(masterDict)
     return masterDict, detailDict
+
+
+def preprocessing(dataset, dateRange, timeUnit, tInterval):
+    logger.debug("=== dataset preprocessing ===")
+    cid_list = set(dataset['cid'])
+    logger.debug("cid list ==> {}".format(cid_list))
+    data, output, df = {}, {}, {}
+    procs = []
+    for cid in cid_list:
+        data[cid] = dataset[dataset['cid'] == cid]
+        output[cid] = Queue()
+        procs.append(Process(target=efmm_convert.preprocessClustering,
+            args=(data[cid], dateRange, timeUnit, tInterval, output[cid])))
+    for p in procs:
+        p.start()
+    for cid in cid_list:
+        df[cid] = output[cid].get()
+        output[cid].close()
+    for proc in procs:
+        proc.join()
+    return df
 
 
 def clusterAnalysis(dataset, masterQ, detailQ):
@@ -133,47 +147,30 @@ def clusterAnalysis(dataset, masterQ, detailQ):
     for i in clusted_df.columns:
         detailList[i] = clusted_df[i].tolist()
 
-    print("##########################################")
-    print(clusted_df)
-    print(labels_df)
-    # print(assignList)
-    # print(detailList)
-
     masterQ.put(assignList)
     detailQ.put(detailList)
 
 
-def preprocessing(dataset, dateRange, timeUnit, tInterval):
-    logger.debug("=== dataset preprocessing ===")
-    cid_list = set(dataset['cid'])
-    print(cid_list)
-    data, output, df = {}, {}, {}
-    procs = []
-    for cid in cid_list:
-        data[cid] = dataset[dataset['cid'] == cid]
-        output[cid] = Queue()
-        procs.append(Process(target=efmm_convert.preprocessClustering,
-            args=(data[cid], dateRange, timeUnit, tInterval, output[cid])))
-    for p in procs:
-        p.start()
-    for cid in cid_list:
-        df[cid] = output[cid].get()
-        output[cid].close()
-    for proc in procs:
-        proc.join()
-    return df
+def saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterval, esIndex, docType):
+    timeIndex = dateRange[config.clustering_opt['index']].astype(str).tolist()
+    timeIndex = [dt.replace(' ', 'T') + 'Z' for dt in timeIndex]
 
+    masterDict['da_time'], detailDict['da_time'] = daTime, daTime
+    masterDict['start_date'], detailDict['start_date'] = sDate, sDate
+    masterDict['end_date'], detailDict['end_date'] = eDate, eDate
+    masterDict['time_interval'], detailDict['time_interval'] = tInterval, tInterval
+    detailDict['event_time'] = timeIndex
 
-    # dataset = ca_dataConvert.loadJsonData(sDate, eDate)
-    # logger.debug("Clustering by multiprocessing ....")
-    # procs, factorList = [], []
-    # indexQ, masterQ, detailQ = {}, {}, {}
-    # nodeId = consts.FACTOR_INFO['NODE_ID']
+    efmm_es.insertDataById(DA_INDEX[esIndex][docType]['master']['INDEX'],
+        DA_INDEX[esIndex][docType]['master']['TYPE'], daTime, masterDict)
+    efmm_es.insertDataById(DA_INDEX[esIndex][docType]['detail']['INDEX'],
+        DA_INDEX[esIndex][docType]['detail']['TYPE'], daTime, detailDict)
 
+    logger.debug("==== completed cluster analysis [save ID : {}] ====".format(daTime))
 
 
 if __name__ == '__main__':
     freeze_support()
     from da_logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-18T15:00:00Z', '2017-12-19T15:00:00Z', 15)
+    main('stacking', 'status', '2017-12-14T00:00:00Z', '2017-12-21T00:00:00Z', 30)

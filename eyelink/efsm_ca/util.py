@@ -56,7 +56,7 @@ def getTimeRangeByWeek(timeRange, fm):
 # for job_month
 def getTimeRangeByMonth(timeRange, fm):
     today = datetime.now()
-    startDate = (today - relativedelta(weeks=timeRange)).strftime(fm)
+    startDate = (today - relativedelta(months=timeRange)).strftime(fm)
     endDate = today.strftime(fm)
     return startDate, endDate
 
