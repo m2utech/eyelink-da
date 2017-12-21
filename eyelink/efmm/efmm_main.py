@@ -183,5 +183,5 @@ class EfmmSocketThread(object):
 
 ######################################
 if __name__ == '__main__':
-    data = b'{"type": "pattern", "esIndex": "notching", "docType": "oee", "sDate": "2017-12-18T00:00:00", "eDate": "2017-12-19T00:00:00"}'
+    data = b'{"type": "clustering", "esIndex": "stacking", "docType": "status", "sDate": "2017-12-18T00:00:00", "eDate": "2017-12-18T01:00:00", "tInterval": 5}'
     EfmmSocketThread(consts.LOCAL_HOST, consts.PORT).jsonParsing(data)

@@ -12,19 +12,20 @@ file_path = {
     "efmm_sche_pid": "/home/Toven/eyelink-da/pid/efmmScheduler.pid"
 }
 
-scheduler_opt = {
-    "max_instance": 10,
-    "minute": '*/2',
-    "hour": 9,          # Local time (every day 09:00)
-    "week": 'mon',
+sched_opt = {
+    "max_instances": 10,
+    "trigger": "cron",          # e.g. 'date', 'interval', 'cron'
+    "CP_cycle": 9,              # 09:00 every day
+    "CP_range": 24,             # 24 hours
+    "PM_cycle": '*/2',          # every 2 minutes
+    "PM_range": 60,             # 60 minutes
+    "CA_daily_cycle": 9,        # 09:00 every day
+    "CA_weekly_cycle": 'mon',   # every monday
     "job_code": {
         '0000': 'pattern',
         '1000': 'matching',
         '2000': 'clustering'
-    },
-    "time_range_pattern": 24,     #24 hours
-    "time_range_matching": 60     #60 minutes --> 55min matching
-
+    }
 }
 
 es_url = 'http://m2u-parstream.eastus.cloudapp.azure.com:9200'
@@ -52,8 +53,8 @@ clustering_opt = {
     'index': 'measure_time',
     'timeUnit': 'minutes',   #seconds, minutes, hours ...
     'n_cluster': 10,
-    'byDay': {'range': 1, 'interval': '1T'},    # 1 minute
-    'byWeek': {'range': 1, 'interval': '10T'}
+    'byDay': {'range': 1, 'interval': 1},   # 1 day, 1 minute
+    'byWeek': {'range': 7, 'interval': 10}  # 7 days, 10 minutes
 }
 
 efmm_index = {

@@ -13,11 +13,13 @@ def getTimezone():
 
 
 def getToday(utcYN, fm):
+    today = ""
     if utcYN is True:
         today = datetime.now(pytz.UTC)
+        today = today.strftime(fm) + 'Z'
     else:
         today = datetime.now()
-    today = today.strftime(fm)
+        today = today.strftime(fm)
     return today
 
 

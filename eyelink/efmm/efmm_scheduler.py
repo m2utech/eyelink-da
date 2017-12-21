@@ -27,22 +27,22 @@ class Scheduler(object):
 
     def job_notching_CP(self):
         logger.info("== start CreatePatterns for Notching OEE ==")
-        sDate, eDate = util.getStartEndDateByHour(config.scheduler_opt['time_range_pattern'], False, consts.DATETIMEZERO)
+        sDate, eDate = util.getStartEndDateByHour(config.sched_opt['CP_range'], False, consts.DATETIMEZERO)
         self.sendData("0000", "notching", "oee", sDate, eDate, None)
 
     def job_notching_PM(self):
         logger.info("== start PatternMatching for Notching OEE ==")
-        sDate, eDate = util.getStartEndDateByMinute(config.scheduler_opt['time_range_matching'], False, consts.DATETIMEZERO)
+        sDate, eDate = util.getStartEndDateByMinute(config.sched_opt['PM_range'], False, consts.DATETIMEZERO)
         self.sendData("1000", "notching", "oee", sDate, eDate, None)
 
     def job_stacking_CP(self):
         logger.info("== start CreatePatterns for Stacking OEE ==")
-        sDate, eDate = util.getStartEndDateByHour(config.scheduler_opt['time_range_pattern'], False, consts.DATETIMEZERO)
+        sDate, eDate = util.getStartEndDateByHour(config.sched_opt['CP_range'], False, consts.DATETIMEZERO)
         self.sendData("0000", "stacking", "oee", sDate, eDate, None)
 
     def job_stacking_PM(self):
         logger.info("== start PatternMatching for Stacking OEE ==")
-        sDate, eDate = util.getStartEndDateByMinute(config.scheduler_opt['time_range_matching'], False, consts.DATETIMEZERO)
+        sDate, eDate = util.getStartEndDateByMinute(config.sched_opt['PM_range'], False, consts.DATETIMEZERO)
         self.sendData("1000", "stacking", "oee", sDate, eDate, None)
 
     def job_stacking_CA_day(self):
@@ -54,7 +54,6 @@ class Scheduler(object):
         logger.info("== start Weekly CA for Stacking STATUS ==")
         sDate, eDate = util.getTimeRangeByDay(config.clustering_opt['byWeek']['range'], consts.DATETIMEZERO)
         self.sendData("2000", "stacking", "status", sDate, eDate, config.clustering_opt['byWeek']['interval'])
-
 
     def sendData(self, jobcode, esIndex, docType, sDate, eDate, tInterval):
         sendData = ''
@@ -76,16 +75,18 @@ class Scheduler(object):
 
     # ##### SCHEDULER #####
     def scheduler(self):
-        maxInstances = config.scheduler_opt['max_instance']
-        hour = config.scheduler_opt['hour']
-        minute = config.scheduler_opt['minute']
-        week = config.scheduler_opt['week']
-        self.sched.add_job(self.job_notching_CP, "cron", max_instances=maxInstances, hour=hour)
-        self.sched.add_job(self.job_stacking_CP, "cron", max_instances=maxInstances, hour=hour)
-        self.sched.add_job(self.job_notching_PM, "cron", max_instances=maxInstances, minute=minute)
-        self.sched.add_job(self.job_stacking_PM, "cron", max_instances=maxInstances, minute=minute)
-        self.sched.add_job(self.job_stacking_CA_day, "cron", max_instances=maxInstances, hour=hour)
-        self.sched.add_job(self.job_stacking_CA_week, "cron", max_instances=maxInstances, day_of_week=week)
+        maxInstances = config.sched_opt['max_instances']
+        trigger = config.sched_opt['trigger']
+        cpCycle = config.sched_opt['CP_cycle']
+        pmCycle = config.sched_opt['PM_cycle']
+        caDaily = config.sched_opt['CA_daily_cycle']
+        caWeekly = config.sched_opt['CA_weekly_cycle']
+        self.sched.add_job(self.job_notching_CP, trigger, max_instances=maxInstances, hour=cpCycle)
+        self.sched.add_job(self.job_stacking_CP, trigger, max_instances=maxInstances, hour=cpCycle)
+        self.sched.add_job(self.job_notching_PM, trigger, max_instances=maxInstances, minute=pmCycle)
+        self.sched.add_job(self.job_stacking_PM, trigger, max_instances=maxInstances, minute=pmCycle)
+        self.sched.add_job(self.job_stacking_CA_day, trigger, max_instances=maxInstances, hour=caDaily)
+        self.sched.add_job(self.job_stacking_CA_week, trigger, max_instances=maxInstances, day_of_week=caWeekly, hour=caDaily)
 
 
 class SchedulerDaemon(Daemon):

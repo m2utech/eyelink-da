@@ -23,7 +23,7 @@ def getOeeData(index, docType, body):
     return dataset
 
 
-def getStatusData(index, docType, body):
+def getStatusData(index, docType, body, dataQ):
     dataset = []
     docs = es.search(index=index, doc_type=docType, body=body, scroll='3m', size=100000)
     scroll_id = docs['_scroll_id']
@@ -36,7 +36,8 @@ def getStatusData(index, docType, body):
                 dataset.append(data)
         docs = es.scroll(scroll_id=scroll_id, scroll='3m')
     dataset = statusDataConvert(dataset)
-    return dataset
+    # return dataset
+    dataQ.put(dataset)
 
 
 def dataConvert(dataset):

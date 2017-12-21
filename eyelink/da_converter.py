@@ -44,6 +44,7 @@ def preprocessClustering(dataset, dateRange, timeUnit, tInterval, output):
     ind = [config.clustering_opt['index']]
     dataset = dateRange.set_index(ind).join(dataset.set_index(ind))
     dataset = dataset.interpolate(method=config.mv_method)
+    dataset = dataset.fillna(dataset.mean(), inplace=True)
     dataset = dataset.reset_index()
     del dataset[config.clustering_opt['index']]
     output.put(dataset.T)
