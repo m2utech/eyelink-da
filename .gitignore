@@ -3,8 +3,10 @@ drivers/
 build/
 dist/
 ELDA/__pycache__
-tests/
+example/
 *.log
 *.pyc
 *.csv
-
+__pycache__/
+.ipynb_checkpoints/
+*.ipynb

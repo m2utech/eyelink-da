@@ -1,31 +1,43 @@
-# SERVER
 import socket
-import json
+import threading
 
-#HOST='192.168.10.27' 
-HOST = 'localhost'
-PORT=5229 #포트지정
+class ThreadedServer(object):
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.bind((self.host, self.port))
 
-s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    def listen(self):
+        self.sock.listen(5)
+        while True:
+            client, address = self.sock.accept()
+            client.settimeout(60)
+            threading.Thread(target = self.listenToClient,args = (client,address)).start()
 
-s.bind((HOST,PORT))
+    def listenToClient(self, client, address):
+        size = 1024
+        while True:
+            try:
+                data = client.recv(size)
+                if data:
+                    # Set the response to echo back the recieved data 
+                    response = data
+                    client.send(response)
+                else:
+                    raise error('Client disconnected')
+            except:
+                client.close()
+                return False
 
-s.listen(1) #접속이 있을때까지 기다림
+if __name__ == "__main__":
+    # while True:
+    #     port_num = input("Port? ")
+    #     try:
+    #         port_num = int(port_num)
+    #         break
+    #     except ValueError:
+    #         pass
 
-print('The server is ready to receive')
-
-while 1:
-	conn, addr=s.accept() #접속 승인
-	print('accepted connection')
-
-	data=conn.recv(1024)
-	dict = json.loads(data.decode("utf-8"))
-
-	print("data:" + data.decode("utf-8"))
-	print(dict['start_date'])
-
-	if not data: break
-
-	conn.send(data) #받은 데이터를 그대로 클라이언트에 전송
-
-conn.close()
+    ThreadedServer('',5555).listen()
