@@ -7,9 +7,9 @@ logger_name = {
 }
 
 file_path = {
-    "efmm_log": "/home/Toven/da/logs/efmm_ad.log",
-    "efmm_pid": "/home/Toven/da/PID/efmm_ad.pid",
-    "efmm_sche_pid": "/home/Toven/da/PID/efmmScheduler.pid"
+    "efmm_log": "/home/Toven/eyelink-da/logs/efmm.log",
+    "efmm_pid": "/home/Toven/eyelink-da/pid/efmm.pid",
+    "efmm_sche_pid": "/home/Toven/eyelink-da/pid/efmmScheduler.pid"
 }
 
 scheduler_opt = {
