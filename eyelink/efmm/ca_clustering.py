@@ -2,6 +2,7 @@
 # Cluster Analysis for Eyelink using clustering algorithm
 
 # ### required library ###
+from socketIO_client import SocketIO
 from multiprocessing import Process, Queue, freeze_support
 from sklearn.cluster import KMeans
 import pandas as pd
@@ -38,6 +39,21 @@ def main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
 
         logger.debug("save cluster analysis result ....")
         saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterval, esIndex, docType)
+        sendAlarm(daTime)
+
+def sendAlarm(daTime):
+    logger.debug("send Alarm message for completion of CA")
+    sendData = {}
+    sendData['applicationType'] = config.CA_alarm_info['appType']
+    sendData['agentId'] = config.CA_alarm_info['agentId']
+    sendData['alarmType'] = config.CA_alarm_info['alarmType']
+    sendData['alarmTypeName'] = config.CA_alarm_info['alarmTypeName']
+    sendData['message'] = 'Cluster analysis is completed [requested time: {}]'.format(daTime)
+    socketIO = SocketIO(config.CA_alarm_info['host'], config.CA_alarm_info['port'])
+    socketIO.emit('receiveAlarmData', sendData)
+    print(sendData)
+    socketIO.wait(seconds=1)
+
 
 
 def getDateRange(sDate, eDate, timeUnit, tInterval):

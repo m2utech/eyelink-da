@@ -59,6 +59,16 @@ CA_opt = {
     'weekly': {'cycle': 'mon', 'range': 7, 'interval': 10}  # monday, 7 days, 10 minutes
 }
 
+CA_alarm_info = {
+    'host': 'http://m2utech.eastus.cloudapp.azure.com',
+    'port': 5224,
+    'appType': 'CA',
+    'agentId': 'TEST',
+    'alarmType': 'BATCH_CA',
+    'alarmTypeName': 'BATCH_CA'
+}
+
+
 efmm_index = {
     'notching': {
         'oee': {'INDEX': 'efmm_notching_oee', 'TYPE': 'oee'},
