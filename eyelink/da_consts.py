@@ -12,6 +12,7 @@ ALARM_TYPE = 'BATCH_ANOMALY'
 ALARM_TYPE_NAME = 'BATCH_ANOMALY'
 ALARM_HOST = 'http://m2utech.eastus.cloudapp.azure.com'
 ALARM_PORT = 5224
+
 # #### SOCKET INFO ####
 BUFFER_SIZE = 256
 HOST = 'DataAnalyzer'
