@@ -75,26 +75,28 @@ class EfmmSocketThread(object):
         print(json_dict)
 
         # message set check
-        if set(('type', 'esIndex', 'docType', 'sDate', 'eDate')) <= set(json_dict):
+        if set(('type', 'esIndex', 'docType', 'sDate', 'eDate', 'tInterval', 'cid', 'nCluster')) <= set(json_dict):
             if 'None' not in json_dict.values():
                 esIndex = json_dict['esIndex']
                 docType = json_dict['docType']
                 sDate = json_dict['sDate']
                 eDate = json_dict['eDate']
+                tInterval = json_dict['tInterval']
+                cid = json_dict['cid']
+                nCluster = json_dict['nCluster']
                 # check dateformat and convert UTC datetime
                 sDate = util.checkDatetime(sDate, consts.DATETIME)
                 eDate = util.checkDatetime(eDate, consts.DATETIME)
 
+
                 ##### Create Patterns #####
                 if json_dict["type"] == "pattern":
-                    logger.debug("#### [create pattern] ####")
                     self.loadMasterPattern(esIndex, docType)
                     self.createPattern(esIndex, docType, sDate, eDate)
                     self.loadMasterPattern(esIndex, docType)
                
                 ##### Pattern Matching #####
                 elif json_dict["type"] == "matching":
-                    logger.debug("#### [pattern matching] ####")
                     if esIndex == 'notching':
                         if NOTCHING_CODE is 1:
                             self.matchPattern(esIndex, docType, sDate, eDate)
@@ -124,10 +126,7 @@ class EfmmSocketThread(object):
 
                 ##### Clustering Analysis #####
                 elif json_dict["type"] == "clustering":
-                    logger.debug("#### [Clustering Analysis] ####")
-                    tInterval = json_dict['tInterval']
-                    ca_clustering.main(esIndex, docType, sDate, eDate, tInterval)
-
+                    ca_clustering.main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster)
                 else:
                     logger.warn("The type is invalid")
             else:
@@ -141,10 +140,10 @@ class EfmmSocketThread(object):
         global STACKING_MASTER
         global NOTCHING_CODE
         global STACKING_CODE
-        query = es_query.getDataById(config.da_opt['masterID'])
+        query = es_query.getDataById(config.AD_opt['masterID'])
         dataset = es_module.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'],
                                         DA_INDEX[esIndex][docType]['PD']['TYPE'],
-                                        query, config.da_opt['masterID'])
+                                        query, config.AD_opt['masterID'])
         if dataset is not None:
             logger.debug("reload latest master pattern ....")
             if esIndex == 'notching':

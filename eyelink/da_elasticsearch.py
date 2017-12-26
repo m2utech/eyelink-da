@@ -41,14 +41,14 @@ def getStatusData(index, docType, body, dataQ):
 
 
 def dataConvert(dataset):
-    ind = config.da_opt['index']
+    ind = config.AD_opt['index']
     dataset = pd.DataFrame(dataset)
     dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
-    dataset = dataset.set_index(config.da_opt['index'])
+    dataset = dataset.set_index(config.AD_opt['index'])
     return dataset
 
 def statusDataConvert(dataset):
-    ind = config.clustering_opt['index']
+    ind = config.CA_opt['index']
     dataset = pd.DataFrame(dataset)
     dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
     dataset = dataset.set_index(ind)

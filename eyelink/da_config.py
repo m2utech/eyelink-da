@@ -19,8 +19,6 @@ sched_opt = {
     "CP_range": 24,             # 24 hours
     "PM_cycle": '*/2',          # every 2 minutes
     "PM_range": 60,             # 60 minutes
-    "CA_daily_cycle": 9,        # 09:00 every day
-    "CA_weekly_cycle": 'mon',   # every monday
     "job_code": {
         '0000': 'pattern',
         '1000': 'matching',
@@ -34,27 +32,31 @@ es_url = 'http://m2u-parstream.eastus.cloudapp.azure.com:9200'
 mv_method = 'linear'    # Option : 'linear', 'time', 'index', 'values', 'nearest', 'zero'
 
 
-da_opt = {
+AD_opt = {
     'time_interval': '30S', # 30 seconds
     'range_sec': 30,
     'index': 'dtSensed',
     'factors': ['cid', 'availability', 'overall_oee', 'performance', 'quality'],
     'masterID': 'master',
     'n_cluster': 30,
+    'cid': 'all',
     'top_k': 3,
-    'slide_len': 2,    # 1m
-    'win_len': 120,     # 1h
-    'match_len': 110,    # 55m
-    'value_range': [0.0, 1.0],
-    'match_rate_threshold': 95.0    # 95%
+    'slide_len': 2,                             # 1m
+    'win_len': 120,                             # 1h
+    'match_len': 110,                           # 55m
+    'value_range': [0.0, 1.0],                  # range of occurrence 
+    'match_rate_threshold': 95.0,               # range of value [min, max]
+    'cpSchedule': {'cycle': 9, 'range': 24},    # sched opt for create pattern
+    'pmSchedule': {'cycle': '*/2', 'range': 60} # sched opt for pattern matching
 }
 
-clustering_opt = {
+CA_opt = {
     'index': 'measure_time',
-    'timeUnit': 'minutes',   #seconds, minutes, hours ...
-    'n_cluster': 10,
-    'byDay': {'range': 1, 'interval': 1},   # 1 day, 1 minute
-    'byWeek': {'range': 7, 'interval': 10}  # 7 days, 10 minutes
+    'timeUnit': 'minutes',      # seconds, minutes, hours ...
+    'cid': 'all',               # all cids
+    'n_cluster': 5,
+    'daily': {'cycle': 9, 'range': 1, 'interval': 1},   # 09:00, 1 day, 1 minute
+    'weekly': {'cycle': 'mon', 'range': 7, 'interval': 10}  # monday, 7 days, 10 minutes
 }
 
 efmm_index = {

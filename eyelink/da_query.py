@@ -17,22 +17,44 @@ def getOeeDataByRange(sDate, eDate):
     return body
 
 
-def getStatusDataByRange(sDate, eDate):
-    body = {
-        "size": 100000,
-        "_source": ["cid", "data"],
-        "sort": {"dtTransmitted": "asc"},
-        "query": {
-            "bool": {
-                "must": {"term": {"sensorType": "motor"}},
-                "filter": {
-                    "range": {
-                        "dtTransmitted": {"gte": sDate, "lte": eDate}
+def getStatusDataByRange(sDate, eDate, cid):
+    body = {}
+    if cid == "all" or cid == "All" or cid == "ALL":
+        body = {
+            "size": 100000,
+            "_source": ["cid", "data"],
+            "sort": {"dtTransmitted": "asc"},
+            "query": {
+                "bool": {
+                    "must": {"term": {"sensorType": "motor"}},
+                    "filter": {
+                        "range": {
+                            "dtTransmitted": {"gte": sDate, "lte": eDate}
+                        }
                     }
                 }
             }
         }
-    }
+    else:
+        body = {
+            "size": 100000,
+            "_source": ["cid", "data"],
+            "sort": {"dtTransmitted": "asc"},
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"sensorType": "motor"}},
+                        {"term": {"cid": cid}}
+                    ],
+                    "filter": {
+                        "range": {
+                            "dtTransmitted": {"gte": sDate, "lte": eDate}
+                        }
+                    }
+                }
+            }
+        }
+
     return body
 
 

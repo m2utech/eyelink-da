@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pytz
 import da_consts as consts
+import da_config as config
 
 
 # 타임존 확인
@@ -98,5 +99,6 @@ def datetime_range(start, end, delta):
 if __name__ == '__main__':
     # s, e = getStartEndDateByMinute(60, False, consts.DATETIMEZERO)
     # s, e = getStartEndDateByHour(24, False, consts.DATETIMEZERO)
-    s, e = getTimeRangeByDay(1, consts.DATETIMEZERO)
+    #s, e = getTimeRangeByDay(1, consts.DATETIMEZERO)
+    s, e = getStartEndDateByMinute(config.sched_opt['PM_range'], False, consts.DATETIMEZERO)
     print(s, e)
