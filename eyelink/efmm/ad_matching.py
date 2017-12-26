@@ -17,7 +17,7 @@ import da_config as config
 import da_util as util
 
 DA_INDEX = config.da_index
-MASTER_ID = config.da_opt['masterID']
+MASTER_ID = config.AD_opt['masterID']
 logger = logging.getLogger(config.logger_name['efmm'])
 
 
@@ -54,7 +54,7 @@ def preprocessing(dataset, eDate):
         data[cid] = dataset[dataset['cid'] == cid]
         output[cid] = Queue()
         procs.append(Process(target=efmm_convert.targetSampling,
-            args=(data[cid], config.da_opt['time_interval'], eDate, output[cid])))
+            args=(data[cid], config.AD_opt['time_interval'], eDate, output[cid])))
     for p in procs:
         p.start()
     for cid in cid_list:
@@ -126,8 +126,8 @@ def compareDistance(test_data, master_data, master_info, col_name, output):
     logger.debug("compare distance between patterns of {} ...".format(col_name))
     # max_clustNo = int(heapq.nlargest(1,master_center.columns)[0].split('_')[1])
     distance = {}
-    topK = config.da_opt['top_k']
-    match_len = config.da_opt['match_len']
+    topK = config.AD_opt['top_k']
+    match_len = config.AD_opt['match_len']
 
     for clust_name in master_center.columns:
         match_data = master_center[clust_name]
@@ -136,7 +136,7 @@ def compareDistance(test_data, master_data, master_info, col_name, output):
         distance[clust_name] = cur_dist
 
     topK_list = heapq.nsmallest(topK, distance, key=distance.get)
-    valRange = config.da_opt['value_range']
+    valRange = config.AD_opt['value_range']
     percentile = np.sqrt(((valRange[1] - valRange[0])**2)*match_len) / 100.0
 
     result = {}
@@ -152,7 +152,7 @@ def compareDistance(test_data, master_data, master_info, col_name, output):
     # result = {}
     # result["realValue"] = test_data.tail(match_len).tolist()
 
-    # if match_rate > config.da_opt['match_rate_threshold']:
+    # if match_rate > config.AD_opt['match_rate_threshold']:
     #     for k in range(topK):
     #         result["top_{}".format(k+1)] = topK_list[k]
     #         result["top_{}_value".format(k+1)] = master_center[topK_list[k]].tolist()
@@ -211,6 +211,6 @@ if __name__ == '__main__':
     docType = 'oee'
     sDate = "2017-12-19T01:41:00Z"
     eDate = "2017-12-19T02:41:00Z"
-    query = efmm_query.getDataById(config.da_opt['masterID'])
-    masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.da_opt['masterID'])
+    query = efmm_query.getDataById(config.AD_opt['masterID'])
+    masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
     main(esIndex, docType, sDate, eDate, masterData)

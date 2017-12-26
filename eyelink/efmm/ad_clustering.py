@@ -17,7 +17,7 @@ import da_util as util
 
 
 DA_INDEX = config.da_index
-MASTER_ID = config.da_opt['masterID']
+MASTER_ID = config.AD_opt['masterID']
 logger = logging.getLogger(config.logger_name['efmm'])
 
 
@@ -97,7 +97,7 @@ def preprocessing(dataset):
         data[cid] = dataset[dataset['cid'] == cid]
         output[cid] = Queue()
         procs.append(Process(target=efmm_convert.sampling,
-            args=(data[cid], config.da_opt['time_interval'], output[cid])))
+            args=(data[cid], config.AD_opt['time_interval'], output[cid])))
     for p in procs:
         p.start()
     for cid in cid_list:
@@ -159,9 +159,9 @@ def createPatternData(dataset, masterData, masterInfo, saveID, c_pdQ, c_piQ, c_n
 
 # ##### 속성별 클러스터링 usint K-Means and DTW algorithm #####
 def clusteringSegment(dataset, master_data, master_info, col_name, saveID, pdQ, piQ, npdQ, npiQ):
-    clusterer = KMeans(n_clusters=config.da_opt['n_cluster'])
+    clusterer = KMeans(n_clusters=config.AD_opt['n_cluster'])
     logger.debug("extract all segment for [{}] ....".format(col_name))
-    segments = extractSegment(dataset, col_name, config.da_opt['win_len'], config.da_opt['slide_len'])
+    segments = extractSegment(dataset, col_name, config.AD_opt['win_len'], config.AD_opt['slide_len'])
     logger.debug("segment clustering for [{}] ....".format(col_name))
     clusted_segments = clusterer.fit(segments)
     clusted_df = pd.DataFrame(clusted_segments.cluster_centers_)
@@ -176,7 +176,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, saveID, pdQ, 
     lbl_dataset = pd.concat([segment_df, labels_df], axis=1)
 
     logger.debug("compute boundary threshold for [{}] ....".format(col_name))
-    min_df, max_df, lower_df, upper_df = computeThreshold(lbl_dataset, config.da_opt['n_cluster'])
+    min_df, max_df, lower_df, upper_df = computeThreshold(lbl_dataset, config.AD_opt['n_cluster'])
     pd.options.display.float_format = '{:,.4f}'.format
     clusted_df = clusted_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
     min_df = min_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
@@ -212,12 +212,12 @@ def clusteringSegment(dataset, master_data, master_info, col_name, saveID, pdQ, 
 
             min_dist = heapq.nsmallest(1, distance, key=distance.get)
 
-            match_len = config.da_opt['match_len']
-            valRange = config.da_opt['value_range']
+            match_len = config.AD_opt['match_len']
+            valRange = config.AD_opt['value_range']
             percentile = np.sqrt(((valRange[1] - valRange[0])**2)*match_len) / 100.0
             match_rate = 100.0 - (float(distance[min_dist[0]]) / percentile)
 
-            if match_rate > config.da_opt['match_rate_threshold']:
+            if match_rate > config.AD_opt['match_rate_threshold']:
                 info_pattern[clustNo] = {}
                 info_pattern[clustNo]["status"] = master_info[min_dist[0]]["status"]
                 info_pattern[clustNo]["masterCN"] = min_dist[0]
@@ -314,6 +314,6 @@ if __name__ == '__main__':
     sDate = "2017-12-17T15:00:00Z"
     eDate = "2017-12-18T15:00:00Z"
 
-    query = efmm_query.getDataById(config.da_opt['masterID'])
-    masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.da_opt['masterID'])
+    query = efmm_query.getDataById(config.AD_opt['masterID'])
+    masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
     main(esIndex, docType, sDate, eDate, masterData)

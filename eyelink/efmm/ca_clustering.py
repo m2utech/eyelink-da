@@ -6,7 +6,6 @@ from multiprocessing import Process, Queue, freeze_support
 from sklearn.cluster import KMeans
 import pandas as pd
 import numpy as np
-import heapq
 import logging
 from datetime import datetime
 
@@ -22,14 +21,14 @@ import da_util as util
 DA_INDEX = config.da_index
 logger = logging.getLogger(config.logger_name['efmm'])
 
-def main(esIndex, docType, sDate, eDate, tInterval):
+def main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
     daTime = util.getToday(True, consts.DATETIME)
-    timeUnit = config.clustering_opt['timeUnit']
+    timeUnit = config.CA_opt['timeUnit']
 
     logger.debug("create time range by time interval ...")
     dateRange = getDateRange(sDate, eDate, timeUnit, tInterval)
     logger.debug("get trainning dataset by multiprocessing")
-    dataset = getDataset(sDate, eDate, esIndex, docType)
+    dataset = getDataset(sDate, eDate, esIndex, docType, cid)
 
     if (dataset is None) or (dataset.empty):
         logger.warn("There is no target dataset... skipping analysis")
@@ -47,14 +46,14 @@ def getDateRange(sDate, eDate, timeUnit, tInterval):
     dateRange = []
     for dt in util.datetime_range(s_dt, e_dt, {timeUnit: tInterval}):
         dateRange.append(dt)
-    dateRange = pd.DataFrame(dateRange, columns=[config.clustering_opt['index']])
+    dateRange = pd.DataFrame(dateRange, columns=[config.CA_opt['index']])
     return dateRange
 
 
-def getDataset(sDate, eDate, esIndex, docType):
+def getDataset(sDate, eDate, esIndex, docType, cid):
     efmm_index = config.efmm_index[esIndex][docType]['INDEX']
     idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
-    body = efmm_query.getStatusDataByRange(sDate, eDate)
+    body = efmm_query.getStatusDataByRange(sDate, eDate, cid)
     procs = []
     dataQ = {}
     dataset = pd.DataFrame()
@@ -123,7 +122,7 @@ def preprocessing(dataset, dateRange, timeUnit, tInterval):
 
 
 def clusterAnalysis(dataset, masterQ, detailQ):
-    clusterer = KMeans(config.clustering_opt['n_cluster'])
+    clusterer = KMeans(config.CA_opt['n_cluster'])
     learnData = clusterer.fit(dataset)
     clusted_df = pd.DataFrame(learnData.cluster_centers_)
     clusted_df = clusted_df.T
@@ -152,7 +151,7 @@ def clusterAnalysis(dataset, masterQ, detailQ):
 
 
 def saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterval, esIndex, docType):
-    timeIndex = dateRange[config.clustering_opt['index']].astype(str).tolist()
+    timeIndex = dateRange[config.CA_opt['index']].astype(str).tolist()
     timeIndex = [dt.replace(' ', 'T') + 'Z' for dt in timeIndex]
 
     masterDict['da_time'], detailDict['da_time'] = daTime, daTime
@@ -173,4 +172,4 @@ if __name__ == '__main__':
     freeze_support()
     from da_logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-14T00:00:00Z', '2017-12-21T00:00:00Z', 30)
+    main('stacking', 'status', '2017-12-21T00:00:00Z', '2017-12-21T01:00:00Z', 5, '100', 7)
