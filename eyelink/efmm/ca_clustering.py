@@ -29,7 +29,7 @@ def main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
     dateRange = getDateRange(sDate, eDate, timeUnit, tInterval)
     logger.debug("get trainning dataset by multiprocessing")
     dataset = getDataset(sDate, eDate, esIndex, docType, cid)
-
+    print(dataset)
     if (dataset is None) or (dataset.empty):
         logger.warn("There is no target dataset... skipping analysis")
     else:
@@ -65,8 +65,12 @@ def getDataset(sDate, eDate, esIndex, docType, cid):
         p.start()
 
     for idx in idxList:
-        dataset = dataset.append(dataQ[idx].get())
-        dataQ[idx].close()
+        if dataQ[idx] is None:
+            logger.debug("[{}] dataset is None".format(idx))
+            dataQ[idx].close()
+        else:
+            dataset = dataset.append(dataQ[idx].get())
+            dataQ[idx].close()
     for proc in procs:
         proc.join()
     return dataset
@@ -172,4 +176,4 @@ if __name__ == '__main__':
     freeze_support()
     from da_logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-21T00:00:00Z', '2017-12-21T01:00:00Z', 5, '100', 7)
+    main('stacking', 'status', '2017-12-25T23:00:00Z', '2017-12-26T00:00:00Z', 15, '100', 5)

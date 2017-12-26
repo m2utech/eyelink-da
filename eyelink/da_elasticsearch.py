@@ -5,7 +5,7 @@ import da_config as config
 import da_consts as consts
 
 logger = logging.getLogger(config.logger_name['efmm'])
-es = elasticsearch.Elasticsearch(config.es_url, timeout=180)
+es = elasticsearch.Elasticsearch(config.es_url)
 
 
 def getOeeData(index, docType, body):
@@ -47,12 +47,17 @@ def dataConvert(dataset):
     dataset = dataset.set_index(config.AD_opt['index'])
     return dataset
 
+
 def statusDataConvert(dataset):
-    ind = config.CA_opt['index']
-    dataset = pd.DataFrame(dataset)
-    dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
-    dataset = dataset.set_index(ind)
+    if not dataset:
+        dataset = None
+    else:
+        ind = config.CA_opt['index']
+        dataset = pd.DataFrame(dataset)
+        dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
+        dataset = dataset.set_index(ind)
     return dataset
+
 
 def getDataById(index, docType, body, masterId):
     check = es.exists_source(index=index, doc_type=docType, id=masterId)

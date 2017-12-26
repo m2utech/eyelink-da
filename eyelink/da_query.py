@@ -29,7 +29,7 @@ def getStatusDataByRange(sDate, eDate, cid):
                     "must": {"term": {"sensorType": "motor"}},
                     "filter": {
                         "range": {
-                            "dtTransmitted": {"gte": sDate, "lte": eDate}
+                            "dtTransmitted": {"gte": sDate, "lt": eDate}
                         }
                     }
                 }
@@ -48,7 +48,7 @@ def getStatusDataByRange(sDate, eDate, cid):
                     ],
                     "filter": {
                         "range": {
-                            "dtTransmitted": {"gte": sDate, "lte": eDate}
+                            "dtTransmitted": {"gte": sDate, "lt": eDate}
                         }
                     }
                 }
