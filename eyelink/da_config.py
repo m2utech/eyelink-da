@@ -26,12 +26,15 @@ sched_opt = {
     }
 }
 
-es_url = 'http://m2u-parstream.eastus.cloudapp.azure.com:9200'
-
+es_opt = {
+    'url': 'http://m2u-parstream.eastus.cloudapp.azure.com:9200',
+    'scroll_time': '1m',
+    'scroll_size': 100000
+}
 # ### interpolation method for missing value ###
 mv_method = 'linear'    # Option : 'linear', 'time', 'index', 'values', 'nearest', 'zero'
 
-
+ss
 AD_opt = {
     'time_interval': '30S', # 30 seconds
     'range_sec': 30,
