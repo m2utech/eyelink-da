@@ -34,7 +34,6 @@ es_opt = {
 # ### interpolation method for missing value ###
 mv_method = 'linear'    # Option : 'linear', 'time', 'index', 'values', 'nearest', 'zero'
 
-ss
 AD_opt = {
     'time_interval': '30S', # 30 seconds
     'range_sec': 30,

@@ -31,7 +31,8 @@ def main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
     dateRange = getDateRange(sDate, eDate, timeUnit, tInterval)
     logger.debug("[CA] get trainning dataset by multiprocessing")
     dataset = getDataset(sDate, eDate, esIndex, docType, cid)
-
+    dataset = dataset.sort_index()
+    
     if dataset.empty:
         logger.warn("[CA] There is no target dataset... skipping analysis")
     else:
@@ -46,6 +47,7 @@ def main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
 def sendAlarm(daTime):
     logger.debug("[CA] send Alarm message for analysis completion")
     sendData = {}
+    sendData['timestamp'] = util.getToday(True, consts.DATETIME)
     sendData['applicationType'] = config.alarm_info['CA']['appType']
     sendData['agentId'] = config.alarm_info['CA']['agentId']
     sendData['alarmType'] = config.alarm_info['CA']['alarmType']
@@ -53,7 +55,6 @@ def sendAlarm(daTime):
     sendData['message'] = 'Cluster analysis is completed [requested time: {}]'.format(daTime)
     socketIO = SocketIO(config.alarm_info['host'], config.alarm_info['port'])
     socketIO.emit('receiveAlarmData', sendData)
-    print(sendData)
     socketIO.wait(seconds=1)
 
 
@@ -180,7 +181,6 @@ def saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterva
     masterDict['end_date'], detailDict['end_date'] = eDate, eDate
     masterDict['time_interval'], detailDict['time_interval'] = tInterval, tInterval
     detailDict['event_time'] = timeIndex
-
     efmm_es.insertDataById(DA_INDEX[esIndex][docType]['master']['INDEX'],
         DA_INDEX[esIndex][docType]['master']['TYPE'], daTime, masterDict)
     efmm_es.insertDataById(DA_INDEX[esIndex][docType]['detail']['INDEX'],
@@ -193,4 +193,4 @@ if __name__ == '__main__':
     freeze_support()
     from da_logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-23T00:00:00Z', '2017-12-23T01:00:00Z', 1, 'all', 5)
+    main('stacking', 'status', '2017-12-27T00:00:00Z', '2017-12-27T00:10:00Z', 1, 'all', 5)
