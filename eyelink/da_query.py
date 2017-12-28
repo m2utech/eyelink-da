@@ -21,7 +21,7 @@ def getStatusDataByRange(sDate, eDate, cid):
     body = {}
     if cid == "all" or cid == "All" or cid == "ALL":
         body = {
-            "size": 100000,
+            "size": 1000,
             "_source": ["cid", "data"],
             "sort": {"dtTransmitted": "asc"},
             "query": {

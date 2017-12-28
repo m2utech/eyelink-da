@@ -193,4 +193,4 @@ if __name__ == '__main__':
     freeze_support()
     from da_logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-25T23:00:00Z', '2017-12-26T00:00:00Z', 15, 'all', 5)
+    main('stacking', 'status', '2017-12-23T00:00:00Z', '2017-12-23T01:00:00Z', 1, 'all', 5)

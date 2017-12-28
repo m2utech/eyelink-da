@@ -5,12 +5,14 @@ import da_config as config
 import da_consts as consts
 
 logger = logging.getLogger(config.logger_name['efmm'])
-es = elasticsearch.Elasticsearch(config.es_url)
+es = elasticsearch.Elasticsearch(config.es_opt['url'])
+scroll_time = config.es_opt['scroll_time']
+scroll_size = config.es_opt['scroll_size']
 
 
 def getOeeData(index, docType, body):
     dataset = []
-    docs = es.search(index=index, doc_type=docType, body=body, scroll='3m', size=100000)
+    docs = es.search(index=index, doc_type=docType, body=body, scroll=scroll_time, size=scroll_size)
     scroll_id = docs['_scroll_id']
     while len(docs['hits']['hits']) > 0:
         for item in docs['hits']['hits']:
@@ -18,14 +20,16 @@ def getOeeData(index, docType, body):
                 data = element
                 data['cid'] = item['_source']['cid']
                 dataset.append(data)
-        docs = es.scroll(scroll_id=scroll_id, scroll='3m')
+        docs = es.scroll(scroll_id=scroll_id, scroll='1m')
+    print("clear_scroll")
+    es.clear_scroll(body={'scroll_id': scroll_id})
     dataset = dataConvert(dataset)
     return dataset
 
 
 def getStatusData(index, docType, body, dataQ):
     dataset = []
-    docs = es.search(index=index, doc_type=docType, body=body, scroll='3m', size=100000)
+    docs = es.search(index=index, doc_type=docType, body=body, scroll=scroll_time, size=scroll_size)
     scroll_id = docs['_scroll_id']
     
     while len(docs['hits']['hits']) > 0:
@@ -34,7 +38,9 @@ def getStatusData(index, docType, body, dataQ):
                 data = element
                 data['cid'] = item['_source']['cid']
                 dataset.append(data)
-        docs = es.scroll(scroll_id=scroll_id, scroll='3m')
+        docs = es.scroll(scroll_id=scroll_id, scroll='1m')
+    print("clear_scroll")
+    es.clear_scroll(body={'scroll_id': scroll_id})
     dataset = statusDataConvert(dataset)
     # return dataset
     dataQ.put(dataset)
