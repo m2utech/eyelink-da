@@ -8,7 +8,7 @@ def getOeeDataByRange(sDate, eDate):
             "bool": {
                 "filter": {
                     "range": {
-                        "dtTransmitted": {"gte": sDate, "lte": eDate}
+                        "dtTransmitted": {"gte": sDate, "lt": eDate}
                     }
                 }
             }
@@ -65,6 +65,7 @@ def getDataById(id):
         }
     }
     return body
+
 
 def insertDataById(index, docType, saveID, body):
     # docs = {
