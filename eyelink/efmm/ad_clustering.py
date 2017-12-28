@@ -21,42 +21,36 @@ MASTER_ID = config.AD_opt['masterID']
 logger = logging.getLogger(config.logger_name['efmm'])
 
 
-def main(esIndex, docType, sDate, eDate, masterData):
+def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = util.getToday(True, consts.DATE)
     efmm_index = config.efmm_index[esIndex][docType]['INDEX']
     idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
     body = efmm_query.getOeeDataByRange(sDate, eDate)
-    logger.debug("INDEX : {} | QUERY: {}".format(idxList, body))
+    logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
     dataset = efmm_es.getOeeData(idxList, docType, body)
 
     if (dataset is None) or (dataset.empty):
-        logger.warn("There is no dataset... skipping analysis")
-        print("There is no dataset... skipping analysis")
+        logger.warn("[AD] There is no dataset... skipping analysis")
     else:
         if masterData is not None:
-            logger.debug("load pattern info[ID:{}]".format(MASTER_ID))
-            print("load pattern info[ID:{}]".format(MASTER_ID))
+            logger.debug("[AD] load pattern info[ID:{}]".format(MASTER_ID))
             query = efmm_query.getDataById(MASTER_ID)
             masterInfo = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], query, MASTER_ID)
-            logger.debug("== Start create pattern ...")
-            print("== Start create pattern ...")
-            pData, pInfo, npData, npInfo = startAnalysis(dataset, masterData, masterInfo, saveID)
-            logger.debug("== Save result of create pattern ...")
-            print("== Save result of create pattern ...")
+            logger.debug("[AD] ### Start create pattern ...")
+            pData, pInfo, npData, npInfo = startAnalysis(dataset, masterData, masterInfo, saveID, tInterval)
+            logger.debug("[AD] Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, True, esIndex, docType)
         else:
             masterInfo = None
-            logger.debug("== Start create pattern ...")
-            print("== Start create pattern ...")
-            pData, pInfo, npData, npInfo = startAnalysis(dataset, masterData, masterInfo, saveID)
-            logger.debug("== Save result of create pattern ...")
-            print("== Save result of create pattern ...")
+            logger.debug("[AD] ### Start create pattern ...")
+            pData, pInfo, npData, npInfo = startAnalysis(dataset, masterData, masterInfo, saveID, tInterval)
+            logger.debug("[AD] Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, False, esIndex, docType)
 
 
-def startAnalysis(dataset, masterData, masterInfo, saveID):
-    logger.debug("== Dataset preprocessing ...")
-    dataset = preprocessing(dataset)
+def startAnalysis(dataset, masterData, masterInfo, saveID, tInterval):
+    logger.debug("[AD] Dataset preprocessing ...")
+    dataset = preprocessing(dataset, tInterval)
     procs, cid_list = [], []
     c_pdQ, c_piQ, c_npdQ, c_npiQ = {}, {}, {}, {}
     pData, pInfo, npData, npInfo = {}, {}, {}, {}
@@ -89,7 +83,7 @@ def startAnalysis(dataset, masterData, masterInfo, saveID):
     return pData, pInfo, npData, npInfo
 
 
-def preprocessing(dataset):
+def preprocessing(dataset, tInterval):
     cid_list = set(dataset['cid'])
     data, output, df = {}, {}, {}
     procs = []
@@ -97,7 +91,7 @@ def preprocessing(dataset):
         data[cid] = dataset[dataset['cid'] == cid]
         output[cid] = Queue()
         procs.append(Process(target=efmm_convert.sampling,
-            args=(data[cid], config.AD_opt['time_interval'], output[cid])))
+            args=(data[cid], tInterval, output[cid])))
     for p in procs:
         p.start()
     for cid in cid_list:
@@ -111,7 +105,7 @@ def preprocessing(dataset):
 
 # cid별 multiprocessing
 def createPatternData(dataset, masterData, masterInfo, saveID, c_pdQ, c_piQ, c_npdQ, c_npiQ):
-    logger.debug("== create pattern for each factors .... ")
+    logger.debug("[AD] create pattern for each factors .... ")
     procs, col_list = [], []
     pdQ, piQ, npdQ, npiQ = {}, {}, {}, {}
     pData, pInfo, npData, npInfo = {}, {}, {}, {}
@@ -160,22 +154,22 @@ def createPatternData(dataset, masterData, masterInfo, saveID, c_pdQ, c_piQ, c_n
 # ##### 속성별 클러스터링 usint K-Means and DTW algorithm #####
 def clusteringSegment(dataset, master_data, master_info, col_name, saveID, pdQ, piQ, npdQ, npiQ):
     clusterer = KMeans(n_clusters=config.AD_opt['n_cluster'])
-    logger.debug("extract all segment for [{}] ....".format(col_name))
+    logger.debug("[AD] extract all segment for [{}] ....".format(col_name))
     segments = extractSegment(dataset, col_name, config.AD_opt['win_len'], config.AD_opt['slide_len'])
-    logger.debug("segment clustering for [{}] ....".format(col_name))
+    logger.debug("[AD] segment clustering for [{}] ....".format(col_name))
     clusted_segments = clusterer.fit(segments)
     clusted_df = pd.DataFrame(clusted_segments.cluster_centers_)
 
     for i in range(len(clusted_df.index)):
         clusted_df = clusted_df.rename(index={i: "cluster_{:03}".format(i)})
 
-    logger.debug("convert to labeled DataFrame for [{}] ....".format(col_name))
+    logger.debug("[AD] convert to labeled DataFrame for [{}] ....".format(col_name))
     labels_df = pd.DataFrame(clusted_segments.labels_)
     labels_df = labels_df.rename(columns={0: "cluster"})
     segment_df = pd.DataFrame(segments)
     lbl_dataset = pd.concat([segment_df, labels_df], axis=1)
 
-    logger.debug("compute boundary threshold for [{}] ....".format(col_name))
+    logger.debug("[AD] compute boundary threshold for [{}] ....".format(col_name))
     min_df, max_df, lower_df, upper_df = computeThreshold(lbl_dataset, config.AD_opt['n_cluster'])
     pd.options.display.float_format = '{:,.4f}'.format
     clusted_df = clusted_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
@@ -196,7 +190,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, saveID, pdQ, 
         fact_pattern[col]['creationDate'] = saveID
 
     pdQ.put(fact_pattern)
-    logger.debug("Completed clustering, and then process pattern matching for [{}]".format(col_name))
+    logger.debug("[AD] Completed clustering, and then process pattern matching for [{}]".format(col_name))
     info_pattern, new_pattern, new_info = {}, {}, {}
     if master_data is not None:
         master_df = pd.DataFrame()
@@ -258,7 +252,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, saveID, pdQ, 
 # ##### 속성별 세그먼트 추출 #####
 def extractSegment(dataset, col_name, window_len, slide_len):
     segment = learn_utils.sliding_chunker(dataset, window_len, slide_len)
-    logger.debug("Produced {} waveform {}-segments".format(len(segment), col_name))
+    logger.debug("[AD] Produced {} waveform {}-segments".format(len(segment), col_name))
     return segment
 
 
@@ -301,7 +295,7 @@ def savePatternData(pData, pInfo, npData, npInfo, saveID, masterYN, esIndex, doc
         efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], MASTER_ID, pData)
         efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], MASTER_ID, pInfo)
     else:
-        print("insert new pattern clusters to master patterns ....")
+        logger.debug("[AD] insert new pattern clusters to master patterns ....")
         efmm_es.updateDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], MASTER_ID, npData)
         efmm_es.updateDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], MASTER_ID, npInfo)
 

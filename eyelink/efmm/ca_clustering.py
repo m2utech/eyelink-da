@@ -22,38 +22,39 @@ import da_util as util
 DA_INDEX = config.da_index
 logger = logging.getLogger(config.logger_name['efmm'])
 
+
 def main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
     daTime = util.getToday(True, consts.DATETIME)
     timeUnit = config.CA_opt['timeUnit']
 
-    logger.debug("create time range by time interval ...")
+    logger.debug("[CA] create time range by time interval ...")
     dateRange = getDateRange(sDate, eDate, timeUnit, tInterval)
-    logger.debug("get trainning dataset by multiprocessing")
+    logger.debug("[CA] get trainning dataset by multiprocessing")
     dataset = getDataset(sDate, eDate, esIndex, docType, cid)
-    print(dataset)
-    if (dataset is None) or (dataset.empty):
-        logger.warn("There is no target dataset... skipping analysis")
-    else:
-        logger.debug("start cluster analysis by multiprocessing")
-        masterDict, detailDict = startAnalysis(dataset, dateRange, timeUnit, tInterval)
 
-        logger.debug("save cluster analysis result ....")
+    if dataset.empty:
+        logger.warn("[CA] There is no target dataset... skipping analysis")
+    else:
+        logger.debug("[CA] start cluster analysis by multiprocessing")
+        masterDict, detailDict = startAnalysis(dataset, dateRange, timeUnit, tInterval, nCluster)
+
+        logger.debug("[CA] save cluster analysis result ....")
         saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterval, esIndex, docType)
         sendAlarm(daTime)
 
+
 def sendAlarm(daTime):
-    logger.debug("send Alarm message for completion of CA")
+    logger.debug("[CA] send Alarm message for analysis completion")
     sendData = {}
-    sendData['applicationType'] = config.CA_alarm_info['appType']
-    sendData['agentId'] = config.CA_alarm_info['agentId']
-    sendData['alarmType'] = config.CA_alarm_info['alarmType']
-    sendData['alarmTypeName'] = config.CA_alarm_info['alarmTypeName']
+    sendData['applicationType'] = config.alarm_info['CA']['appType']
+    sendData['agentId'] = config.alarm_info['CA']['agentId']
+    sendData['alarmType'] = config.alarm_info['CA']['alarmType']
+    sendData['alarmTypeName'] = config.alarm_info['CA']['alarmTypeName']
     sendData['message'] = 'Cluster analysis is completed [requested time: {}]'.format(daTime)
-    socketIO = SocketIO(config.CA_alarm_info['host'], config.CA_alarm_info['port'])
+    socketIO = SocketIO(config.alarm_info['host'], config.alarm_info['port'])
     socketIO.emit('receiveAlarmData', sendData)
     print(sendData)
     socketIO.wait(seconds=1)
-
 
 
 def getDateRange(sDate, eDate, timeUnit, tInterval):
@@ -74,7 +75,7 @@ def getDataset(sDate, eDate, esIndex, docType, cid):
     dataQ = {}
     dataset = pd.DataFrame()
     for idx in idxList:
-        logger.debug("get dataset about index [{}]".format(idx))
+        logger.debug("[CA] get dataset about index [{}]".format(idx))
         dataQ[idx] = Queue()
         procs.append(Process(target=efmm_es.getStatusData, args=(idx, docType, body, dataQ[idx])))
     for p in procs:
@@ -82,7 +83,7 @@ def getDataset(sDate, eDate, esIndex, docType, cid):
 
     for idx in idxList:
         if dataQ[idx] is None:
-            logger.debug("[{}] dataset is None".format(idx))
+            logger.debug("[CA] dataset of {} is None".format(idx))
             dataQ[idx].close()
         else:
             dataset = dataset.append(dataQ[idx].get())
@@ -92,18 +93,18 @@ def getDataset(sDate, eDate, esIndex, docType, cid):
     return dataset
 
 
-def startAnalysis(dataset, dateRange, timeUnit, tInterval):
+def startAnalysis(dataset, dateRange, timeUnit, tInterval, nCluster):
     dataset = preprocessing(dataset, dateRange, timeUnit, tInterval)
     procs, cid_list = [], []
     masterQ, detailQ = {}, {}
     masterDict, detailDict = {}, {}
 
     for cid in dataset.keys():
-        logger.debug("Cluster analysis about cid [{}]".format(cid))
+        logger.debug("[CA] Cluster analysis about cid [{}]".format(cid))
         masterQ[cid], detailQ[cid] = Queue(), Queue()
         cid_list.append(cid)
         procs.append(Process(target=clusterAnalysis,
-            args=(dataset[cid], masterQ[cid], detailQ[cid])))
+            args=(dataset[cid], nCluster, masterQ[cid], detailQ[cid])))
 
     for p in procs:
         p.start()
@@ -121,9 +122,9 @@ def startAnalysis(dataset, dateRange, timeUnit, tInterval):
 
 
 def preprocessing(dataset, dateRange, timeUnit, tInterval):
-    logger.debug("=== dataset preprocessing ===")
+    logger.debug("[CA] preprocessing for dataset")
     cid_list = set(dataset['cid'])
-    logger.debug("cid list ==> {}".format(cid_list))
+    logger.debug("[CA] cid list : {}".format(cid_list))
     data, output, df = {}, {}, {}
     procs = []
     for cid in cid_list:
@@ -141,8 +142,8 @@ def preprocessing(dataset, dateRange, timeUnit, tInterval):
     return df
 
 
-def clusterAnalysis(dataset, masterQ, detailQ):
-    clusterer = KMeans(config.CA_opt['n_cluster'])
+def clusterAnalysis(dataset, nCluster, masterQ, detailQ):
+    clusterer = KMeans(nCluster)
     learnData = clusterer.fit(dataset)
     clusted_df = pd.DataFrame(learnData.cluster_centers_)
     clusted_df = clusted_df.T
@@ -185,11 +186,11 @@ def saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterva
     efmm_es.insertDataById(DA_INDEX[esIndex][docType]['detail']['INDEX'],
         DA_INDEX[esIndex][docType]['detail']['TYPE'], daTime, detailDict)
 
-    logger.debug("==== completed cluster analysis [save ID : {}] ====".format(daTime))
+    logger.debug("[CA] ### Completed cluster analysis [save ID : {}] ###".format(daTime))
 
 
 if __name__ == '__main__':
     freeze_support()
     from da_logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-25T23:00:00Z', '2017-12-26T00:00:00Z', 15, '100', 5)
+    main('stacking', 'status', '2017-12-25T23:00:00Z', '2017-12-26T00:00:00Z', 15, 'all', 5)

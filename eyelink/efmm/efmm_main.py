@@ -4,8 +4,8 @@ import logging
 import logging.handlers
 
 import common_modules
-import da_elasticsearch as es_module
-import da_query as es_query
+import da_elasticsearch as efmm_es
+import da_query as efmm_query
 import da_util as util
 import da_config as config
 import da_consts as consts
@@ -92,35 +92,35 @@ class EfmmSocketThread(object):
                 ##### Create Patterns #####
                 if json_dict["type"] == "pattern":
                     self.loadMasterPattern(esIndex, docType)
-                    self.createPattern(esIndex, docType, sDate, eDate)
+                    self.createPattern(esIndex, docType, sDate, eDate, tInterval)
                     self.loadMasterPattern(esIndex, docType)
                
                 ##### Pattern Matching #####
                 elif json_dict["type"] == "matching":
                     if esIndex == 'notching':
                         if NOTCHING_CODE is 1:
-                            self.matchPattern(esIndex, docType, sDate, eDate)
+                            self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                         else:
                             self.loadMasterPattern(esIndex, docType)
                             if NOTCHING_CODE is 1:
-                                self.matchPattern(esIndex, docType, sDate, eDate)
+                                self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                             else:
                                 new_sDate, new_eDate = util.getStartEndDateByDay(1, True, consts.DATETIME)
-                                self.createPattern(esIndex, docType, new_sDate, new_eDate)
+                                self.createPattern(esIndex, docType, new_sDate, new_eDate, tInterval)
                                 self.loadMasterPattern(esIndex, docType)
-                                self.matchPattern(esIndex, docType, sDate, eDate)
+                                self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                     elif esIndex == 'stacking':
                         if STACKING_CODE is 1:
-                            self.matchPattern(esIndex, docType, sDate, eDate)
+                            self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                         else:
                             self.loadMasterPattern(esIndex, docType)
                             if STACKING_CODE is 1:
-                                self.matchPattern(esIndex, docType, sDate, eDate)
+                                self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                             else:
                                 new_sDate, new_eDate = util.getStartEndDateByDay(1, True, consts.DATETIME)
-                                self.createPattern(esIndex, docType, new_sDate, new_eDate)
+                                self.createPattern(esIndex, docType, new_sDate, new_eDate, tInterval)
                                 self.loadMasterPattern(esIndex, docType)
-                                self.matchPattern(esIndex, docType, sDate, eDate)
+                                self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                     else:
                         logger.warn("Sensor type is invalid, please check sensor type ...")
 
@@ -134,14 +134,13 @@ class EfmmSocketThread(object):
         else:
             logger.warn("Message format is incorrect")
 
-
     def loadMasterPattern(self, esIndex, docType):
         global NOTCHING_MASTER
         global STACKING_MASTER
         global NOTCHING_CODE
         global STACKING_CODE
-        query = es_query.getDataById(config.AD_opt['masterID'])
-        dataset = es_module.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'],
+        query = efmm_query.getDataById(config.AD_opt['masterID'])
+        dataset = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'],
                                         DA_INDEX[esIndex][docType]['PD']['TYPE'],
                                         query, config.AD_opt['masterID'])
         if dataset is not None:
@@ -165,19 +164,19 @@ class EfmmSocketThread(object):
             else:
                 logger.warn("Sensor type is invalid, please check sensor type ...")
 
-    def createPattern(self, esIndex, docType, sDate, eDate):
+    def createPattern(self, esIndex, docType, sDate, eDate, tInterval):
         logger.debug("==== Start pattern generation from [{}] to [{}] ====".format(sDate, eDate))
         if esIndex == 'notching':
-            ad_clustering.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER)
+            ad_clustering.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER, tInterval)
         elif esIndex == 'stacking':
-            ad_clustering.main(esIndex, docType, sDate, eDate, STACKING_MASTER)
+            ad_clustering.main(esIndex, docType, sDate, eDate, STACKING_MASTER, tInterval)
 
-    def matchPattern(self, esIndex, docType, sDate, eDate):
+    def matchPattern(self, esIndex, docType, sDate, eDate, tInterval):
         logger.debug("==== Start pattern matching from [{}] to [{}] ====".format(sDate, eDate))
         if esIndex == 'notching':
-            ad_matching.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER)
+            ad_matching.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER, tInterval)
         elif esIndex == 'stacking':
-            ad_matching.main(esIndex, docType, sDate, eDate, STACKING_MASTER)
+            ad_matching.main(esIndex, docType, sDate, eDate, STACKING_MASTER, tInterval)
 
 
 ######################################

@@ -56,16 +56,25 @@ CA_opt = {
     'cid': 'all',               # all cids
     'n_cluster': 5,
     'daily': {'cycle': 9, 'range': 1, 'interval': 1},   # 09:00, 1 day, 1 minute
-    'weekly': {'cycle': 'mon', 'range': 7, 'interval': 10}  # monday, 7 days, 10 minutes
+    'weekly': {'cycle': 'mon', 'range': 7, 'interval': 15}  # monday, 7 days, 10 minutes
 }
 
-CA_alarm_info = {
+# ### ALARM MESSAGE ###
+alarm_info = {
     'host': 'http://m2utech.eastus.cloudapp.azure.com',
     'port': 5224,
-    'appType': 'CA',
-    'agentId': 'TEST',
-    'alarmType': 'BATCH_CA',
-    'alarmTypeName': 'BATCH_CA'
+    'AD': {
+        'appType': 'CA',
+        'agentId': 'TEST',
+        'alarmType': 'CA',
+        'alarmTypeName': 'CLUSTER_ANALYSIS'
+    },
+    'CA': {
+        'appType': 'AD',
+        'agentId': 'TEST',
+        'alarmType': 'AD',
+        'alarmTypeName': 'ANOMALY_DETECTION'
+    }
 }
 
 
