@@ -72,27 +72,13 @@ def getDataset(sDate, eDate, esIndex, docType, cid):
     efmm_index = config.efmm_index[esIndex][docType]['INDEX']
     idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
     body = efmm_query.getStatusDataByRange(sDate, eDate, cid)
-    procs = []
-    dataQ = {}
+
     dataset = pd.DataFrame()
     for idx in idxList:
         logger.debug("[CA] get dataset about index [{}]".format(idx))
-        dataQ[idx] = Queue()
-        procs.append(Process(target=efmm_es.getStatusData, args=(idx, docType, body, dataQ[idx])))
-    for p in procs:
-        p.start()
-
-    for idx in idxList:
-        if dataQ[idx] is None:
-            logger.debug("[CA] dataset of {} is None".format(idx))
-            dataQ[idx].close()
-        else:
-            dataset = dataset.append(dataQ[idx].get())
-            dataQ[idx].close()
-    for proc in procs:
-        proc.join()
+        data = efmm_es.getStatusData(idx, docType, body)
+        dataset = dataset.append(data)
     return dataset
-
 
 def startAnalysis(dataset, dateRange, timeUnit, tInterval, nCluster):
     dataset = preprocessing(dataset, dateRange, timeUnit, tInterval)
@@ -193,4 +179,4 @@ if __name__ == '__main__':
     freeze_support()
     from da_logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-27T00:00:00Z', '2017-12-27T00:10:00Z', 1, 'all', 5)
+    main('stacking', 'status', '2017-12-24T23:50:00Z', '2017-12-25T00:00:00Z', 1, 'all', 5)
