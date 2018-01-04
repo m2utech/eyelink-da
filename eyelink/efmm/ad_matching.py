@@ -7,14 +7,13 @@ import heapq
 import logging
 
 import common_modules
-import da_elasticsearch as efmm_es
-import da_query as efmm_query
-import da_converter as efmm_convert
-import da_learn_utils as learn_utils
-
-import da_consts as consts
-import da_config as config
-import da_util as util
+from common import es_api as efmm_es
+from common import es_query as efmm_query
+from common import converter as efmm_convert
+from common import learn_utils
+from config import config
+from consts import consts
+from common import util
 
 DA_INDEX = config.da_index
 MASTER_ID = config.AD_opt['masterID']
@@ -186,4 +185,4 @@ if __name__ == '__main__':
     eDate = "2017-12-19T02:41:00Z"
     query = efmm_query.getDataById(config.AD_opt['masterID'])
     masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
-    main(esIndex, docType, sDate, eDate, masterData)
+    main(esIndex, docType, sDate, eDate, masterData, '30S')

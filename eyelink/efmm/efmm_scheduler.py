@@ -1,12 +1,11 @@
 import sys
-import common_modules
-
-from da_daemon import Daemon
-from da_logger import getEfmmLogger
 import socket
-import da_util as util
-import da_consts as consts
-import da_config as config
+import common_modules
+from common.daemon import Daemon
+from common.logger import getEfmmLogger
+from config import config
+from consts import consts
+from common import util
 
 from apscheduler.schedulers.background import BackgroundScheduler
 

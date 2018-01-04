@@ -1,10 +1,10 @@
 import sys
-import common_modules
 
-from da_daemon import Daemon
-from da_logger import getEfmmLogger
-import da_config as config
-import da_consts as consts
+import common_modules
+from common.daemon import Daemon
+from common.logger import getEfmmLogger
+from config import config
+from consts import consts
 import efmm_main
 
 

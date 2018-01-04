@@ -11,13 +11,13 @@ import logging
 from datetime import datetime
 
 import common_modules
-import da_elasticsearch as efmm_es
-import da_query as efmm_query
-import da_converter as efmm_convert
-import da_learn_utils as learn_utils
-import da_config as config
-import da_consts as consts
-import da_util as util
+from common import es_api as efmm_es
+from common import es_query as efmm_query
+from common import converter as efmm_convert
+from common import learn_utils
+from config import config
+from consts import consts
+from common import util
 
 DA_INDEX = config.da_index
 logger = logging.getLogger(config.logger_name['efmm'])
@@ -177,6 +177,7 @@ def saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterva
 
 if __name__ == '__main__':
     freeze_support()
-    from da_logger import getStreamLogger
+    from common.logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-24T23:50:00Z', '2017-12-25T00:00:00Z', 1, 'all', 5)
+    print(config.test)
+    # main('stacking', 'status', '2017-12-24T23:50:00Z', '2017-12-25T00:00:00Z', 1, 'all', 5)

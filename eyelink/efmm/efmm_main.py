@@ -4,11 +4,11 @@ import logging
 import logging.handlers
 
 import common_modules
-import da_elasticsearch as efmm_es
-import da_query as efmm_query
-import da_util as util
-import da_config as config
-import da_consts as consts
+from common import es_api as efmm_es
+from common import es_query as efmm_query
+from config import config
+from consts import consts
+from common import util
 
 import ad_clustering
 import ad_matching
