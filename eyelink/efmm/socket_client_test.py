@@ -31,4 +31,4 @@ def sendMessage(sendData):
 
 
 if __name__ == '__main__':
-    sendData('clustering', 'stacking', 'status', '2018-01-02T00:00:00Z', '2018-01-03T00:00:00Z', 15, 'all',5)
+    sendData('pattern', 'stacking', 'oee', '2017-12-25T09:00:00', '2011-12-26T09:00:00Z', '30S', 'all',30)
