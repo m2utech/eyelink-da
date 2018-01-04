@@ -1,6 +1,6 @@
 import pandas as pd
-import da_consts as consts
-import da_config as config
+from consts import consts
+from config import config
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
