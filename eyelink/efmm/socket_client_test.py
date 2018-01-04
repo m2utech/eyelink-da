@@ -18,6 +18,7 @@ def sendData(jobcode, esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
         "nCluster": nCluster
     }
     sendData = str(sendData).encode()
+    print(sendData)
     sendMessage(sendData)
 
 
@@ -31,4 +32,4 @@ def sendMessage(sendData):
 
 
 if __name__ == '__main__':
-    sendData('pattern', 'stacking', 'oee', '2017-12-25T09:00:00', '2011-12-26T09:00:00Z', '30S', 'all',30)
+    sendData('pattern', 'notching', 'oee', '2017-12-25T09:00:00', '2017-12-26T09:00:00', '30S', 'all',50)

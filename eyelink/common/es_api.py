@@ -7,7 +7,7 @@ from config import config
 from consts import consts
 
 logger = logging.getLogger(config.logger_name['efmm'])
-es = elasticsearch.Elasticsearch(config.es_opt['url'], timeout=300)
+es = elasticsearch.Elasticsearch(config.es_opt['url'])
 scroll_time = config.es_opt['scroll_time']
 scroll_size = config.es_opt['scroll_size']
 
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     esIndex = 'notching'
     docType = 'oee'
     sDate = "2017-12-26T00:00:00Z"
-    eDate = "2017-12-27T00:00:00Z"
+    eDate = "2017-12-26T05:00:00Z"
     efmm_index = config.efmm_index[esIndex][docType]['INDEX']
     idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
     body = efmm_query.getOeeDataByRange(sDate, eDate)
