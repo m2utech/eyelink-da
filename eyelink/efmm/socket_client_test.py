@@ -1,9 +1,5 @@
 # CLIENT
 # coding: utf-8
-import common_modules
-import da_util as util
-import da_config as config
-import da_consts as consts
 import socket
 
 host = 'm2u-da.eastus.cloudapp.azure.com'
@@ -35,4 +31,4 @@ def sendMessage(sendData):
 
 
 if __name__ == '__main__':
-    sendData('clustering', 'stacking', 'status', '2017-12-24T00:00:00Z', '2017-12-30T00:00:00Z', 1, 'all',5)
+    sendData('clustering', 'stacking', 'status', '2018-01-02T00:00:00Z', '2018-01-03T00:00:00Z', 15, 'all',5)
