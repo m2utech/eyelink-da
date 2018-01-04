@@ -2,8 +2,8 @@ import elasticsearch
 from elasticsearch.helpers import scan
 import pandas as pd
 import logging
-import da_config as config
-import da_consts as consts
+from config import config
+from consts import consts
 
 logger = logging.getLogger(config.logger_name['efmm'])
 es = elasticsearch.Elasticsearch(config.es_opt['url'])

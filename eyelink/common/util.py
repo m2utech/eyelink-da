@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pytz
-import da_consts as consts
-import da_config as config
+from consts import consts
+from config import config
 
 
 # 타임존 확인

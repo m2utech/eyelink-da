@@ -1,7 +1,7 @@
 import common_modules
 import logging
 import logging.handlers
-import da_config as config
+from config import config
 
 
 def getEfmmLogger():
