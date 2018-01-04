@@ -1,7 +1,9 @@
 def getOeeDataByRange(sDate, eDate):
     body = {
+        "size": 100000,
         "_source": ["data.dtSensed", "cid", "data.availability",
             "data.performance", "data.quality", "data.overall_oee"],
+        "sort": {"dtTransmitted": "asc"},
         "query": {
             "bool": {
                 "filter": {
@@ -19,7 +21,9 @@ def getStatusDataByRange(sDate, eDate, cid):
     body = {}
     if cid == "all" or cid == "All" or cid == "ALL":
         body = {
+            "size": 1000,
             "_source": ["cid", "data"],
+            "sort": {"dtTransmitted": "asc"},
             "query": {
                 "bool": {
                     "must": {"term": {"sensorType": "motor"}},
@@ -33,7 +37,9 @@ def getStatusDataByRange(sDate, eDate, cid):
         }
     else:
         body = {
+            "size": 100000,
             "_source": ["cid", "data"],
+            "sort": {"dtTransmitted": "asc"},
             "query": {
                 "bool": {
                     "must": [

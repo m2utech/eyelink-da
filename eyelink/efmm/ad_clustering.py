@@ -25,10 +25,11 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = util.getToday(True, consts.DATE)
     saveID = saveID.replace('Z', '')
     efmm_index = config.efmm_index[esIndex][docType]['INDEX']
+    print(efmm_index)
     idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
     body = efmm_query.getOeeDataByRange(sDate, eDate)
     logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
-    
+
     dataset = efmm_es.getOeeData(idxList, docType, body)
     dataset = dataset.sort_index()
 
@@ -310,8 +311,8 @@ if __name__ == '__main__':
     logger = getStreamLogger()
     esIndex = 'notching'
     docType = 'oee'
-    sDate = "2017-12-26T00:00:00Z"
-    eDate = "2017-12-27T00:00:00Z"
+    sDate = "2018-01-01T00:00:00Z"
+    eDate = "2018-01-01T03:00:00Z"
 
     query = efmm_query.getDataById(config.AD_opt['masterID'])
     masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
