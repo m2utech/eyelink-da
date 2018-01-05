@@ -28,7 +28,7 @@ sched_opt = {
 
 es_opt = {
     'url': 'http://m2u-parstream.eastus.cloudapp.azure.com:9200',
-    'scroll_time': '1m',
+    'scroll_time': '3m',
     'scroll_size': 10000
 }
 # ### interpolation method for missing value ###
@@ -40,7 +40,7 @@ AD_opt = {
     'index': 'dtSensed',
     'factors': ['cid', 'availability', 'overall_oee', 'performance', 'quality'],
     'masterID': 'master',
-    'n_cluster': 30,
+    'n_cluster': 10,
     'cid': 'all',
     'top_k': 3,
     'slide_len': 2,                             # 1m

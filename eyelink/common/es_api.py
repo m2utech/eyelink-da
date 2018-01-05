@@ -2,6 +2,7 @@ import elasticsearch
 from elasticsearch.helpers import scan
 import pandas as pd
 import logging
+import common_modules
 from config import config
 from consts import consts
 
@@ -13,17 +14,12 @@ scroll_size = config.es_opt['scroll_size']
 
 def getOeeData(index, docType, body):
     dataset = []
-    docs = es.search(index=index, doc_type=docType, body=body, scroll=scroll_time, size=scroll_size)
-    scroll_id = docs['_scroll_id']
-    while len(docs['hits']['hits']) > 0:
-        for item in docs['hits']['hits']:
-            for element in item['_source']['data']:
-                data = element
-                data['cid'] = item['_source']['cid']
-                dataset.append(data)
-        docs = es.scroll(scroll_id=scroll_id, scroll='1m')
-    print("clear_scroll")
-    es.clear_scroll(body={'scroll_id': scroll_id})
+    scroller = scan(es, body, index=index, doc_type=docType, scroll=scroll_time, size=scroll_size)
+    for doc in scroller:
+        for element in doc['_source']['data']:
+            data = element
+            data['cid'] = doc['_source']['cid']
+            dataset.append(data)
     dataset = dataConvert(dataset)
     return dataset
 
@@ -35,16 +31,19 @@ def getStatusData(index, docType, body):
         for element in doc['_source']['data']:
             data = element
             data['cid'] = doc['_source']['cid']
-        dataset.append(data)
+            dataset.append(data)
     dataset = statusDataConvert(dataset)
     return dataset
 
 
 def dataConvert(dataset):
-    ind = config.AD_opt['index']
-    dataset = pd.DataFrame(dataset)
-    dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
-    dataset = dataset.set_index(config.AD_opt['index'])
+    if not dataset:
+        dataset = None
+    else:
+        ind = config.AD_opt['index']
+        dataset = pd.DataFrame(dataset)
+        dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
+        dataset = dataset.set_index(ind)
     return dataset
 
 
@@ -91,4 +90,15 @@ def updateDataById(index, docType, sid, body):
 
 
 if __name__ == '__main__':
-    pass
+    import util as util
+    import es_query as efmm_query
+    esIndex = 'notching'
+    docType = 'oee'
+    sDate = "2017-12-26T00:00:00Z"
+    eDate = "2017-12-26T05:00:00Z"
+    efmm_index = config.efmm_index[esIndex][docType]['INDEX']
+    idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
+    body = efmm_query.getOeeDataByRange(sDate, eDate)
+    logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
+    dataset = getOeeData(idxList, docType, body)
+    print(dataset)

@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 def sampling(dataset, tInterval, output):
     dataset = dataset.resample(tInterval).mean()
     dataset = dataset.interpolate(method=config.mv_method)
+    # dataset = dataset.fillna(0)
     output.put(dataset)
 
 
