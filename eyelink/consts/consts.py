@@ -7,7 +7,22 @@ LOCAL_TIMEZONE = 'Asia/Seoul'
 
 # #### SOCKET INFO ####
 BUFFER_SIZE = 256
+CONN_TIMEOUT = 60
 HOST = 'DataAnalyzer'
 PORT = 5224
 LOCAL_HOST = 'localhost'
-CONN_TIMEOUT = 60
+
+
+# efsl
+PRODUCTS = {
+    'efsl': {
+        'productName': 'EFSL',
+        'host': 'm2u-da.eastus.cloudapp.azure.com',
+        'port': 5225
+    },
+    'efmm': {
+        'productName': 'EFMM',
+        'host': 'DataAnalyzer',
+        'port': 5224
+    }
+}

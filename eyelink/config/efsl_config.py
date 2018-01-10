@@ -2,10 +2,14 @@
 log_format = '%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s'
 file_max_byte = 1024 * 1024 * 100
 backup_count = 10
-logger_name = {
-    "efmm": "efmm_log"
-}
+logger_name = "efsl_log"
+logging_level = "DEBUG"  # CRITCAL(50), ERROR(40), WARNING(30), INFO(20), DEBUG(10), NOTSET(0)
+log_file = "/home/Toven/eyelink-da/logs/efsl.log"
+pid_file = "/home/Toven/eyelink-da/pid/efsl.pid"
+sched_pid_file = "/home/Toven/eyelink-da/pid/efslScheduler.pid"
 
+
+### 안쓰임!!!s
 file_path = {
     "efmm_log": "/home/Toven/eyelink-da/logs/efmm.log",
     "efmm_pid": "/home/Toven/eyelink-da/pid/efmm.pid",
@@ -52,10 +56,12 @@ AD_opt = {
     'pmSchedule': {'cycle': '*/2', 'range': 60} # sched opt for pattern matching
 }
 
+### used
 CA_opt = {
-    'index': 'measure_time',
+    'id': 'node_id',
+    'index': 'event_time',
+    'factors': ['ampere', 'active_power', 'power_factor', 'voltage'],
     'timeUnit': 'minutes',      # seconds, minutes, hours ...
-    'cid': 'all',               # all cids
     'n_cluster': 5,
     'daily': {'cycle': 9, 'range': 1, 'interval': 1},   # 09:00, 1 day, 1 minute
     'weekly': {'cycle': 'mon', 'range': 7, 'interval': 15}  # monday, 7 days, 10 minutes
@@ -79,41 +85,11 @@ alarm_info = {
     }
 }
 
-
-efmm_index = {
-    'notching': {
-        'oee': {'INDEX': 'efmm_notching_oee', 'TYPE': 'oee'},
-        'status': {'INDEX': 'efmm_notching_status', 'TYPE': 'status'}
-    },
-    'stacking': {
-        'oee': {'INDEX': 'efmm_stacking_oee', 'TYPE': 'oee'},
-        'status': {'INDEX': 'efmm_stacking_status', 'TYPE': 'status'}
-    }
-}
-
-da_index = {
-    'notching': {
-        'oee': {
-            'PD': {'INDEX': 'efmm_notching_oee_pattern_data', 'TYPE': 'pattern_data'},
-            'PI': {'INDEX': 'efmm_notching_oee_pattern_info', 'TYPE': 'pattern_info'},
-            'PM': {'INDEX': 'efmm_notching_oee_pattern_matching', 'TYPE': 'pattern_matching'}
-        },
-        'status': {
-            'master': {'INDEX': 'efmm_notching_status_clustering_master', 'TYPE': 'master'},
-            'detail': {'INDEX': 'efmm_notching_status_clustering_detail', 'TYPE': 'detail'}
-        }
-    },
-    'stacking': {
-        'oee': {
-            'PD': {'INDEX': 'efmm_stacking_oee_pattern_data', 'TYPE': 'pattern_data'},
-            'PI': {'INDEX': 'efmm_stacking_oee_pattern_info', 'TYPE': 'pattern_info'},
-            'PM': {'INDEX': 'efmm_stacking_oee_pattern_matching', 'TYPE': 'pattern_matching'}
-        },
-        'status': {
-            'master': {'INDEX': 'efmm_stacking_status_clustering_master', 'TYPE': 'master'},
-            'detail': {'INDEX': 'efmm_stacking_status_clustering_detail', 'TYPE': 'detail'}
+es_index = {
+    'corecode': {
+        'corecode': {
+            'master': {'INDEX': 'efsl_clustering_master', 'TYPE': 'master'},
+            'detail': {'INDEX': 'efsl_clustering_detail', 'TYPE': 'detail'}
         }
     }
-
-
 }

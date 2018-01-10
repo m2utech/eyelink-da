@@ -7,8 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 def sampling(dataset, tInterval, output):
     dataset = dataset.resample(tInterval).mean()
-    dataset = dataset.interpolate(method=config.mv_method)
-    # dataset = dataset.fillna(0)
+    dataset = dataset.interpolate(method=config.mv_method).bfill().ffill()
     output.put(dataset)
 
 
@@ -27,7 +26,7 @@ def targetSampling(dataset, tInterval, eDate, output):
     for factor_name in config.AD_opt['factors']:
         if factor_name is not 'cid':
             # dataset[factor_name] = dataset[factor_name].fillna(0)
-            dataset[factor_name] = dataset[factor_name].interpolate(method=config.mv_method)
+            dataset[factor_name] = dataset[factor_name].interpolate(method=config.mv_method).bfill().ffill()
 
     dataset = dataset.reset_index(drop=True)
     output.put(dataset)
@@ -44,11 +43,29 @@ def preprocessClustering(dataset, dateRange, timeUnit, tInterval, output):
     dataset = dataset.reset_index()
     ind = [config.CA_opt['index']]
     dataset = dateRange.set_index(ind).join(dataset.set_index(ind))
-    dataset = dataset.interpolate(method=config.mv_method)
-    dataset = dataset.fillna(dataset.mean(), inplace=True)
+    dataset = dataset.interpolate(method=config.mv_method).bfill().ffill()
     dataset = dataset.reset_index()
     del dataset[config.CA_opt['index']]
     output.put(dataset.T)
+
+
+# ### For EFSL or all
+def efsl_preprocessing(dataset, dateRange, dataId, dataIndex, factor, tInterval, timeUnit, mv_method):
+    char = ''
+    if timeUnit == 'seconds':
+        char = 'S'
+    elif timeUnit == 'minutes':
+        char = 'T'
+    elif timeUnit == 'hours':
+        char = 'H'
+    dataset = dataset.pivot_table(index=dataset.index, columns=dataId, values=factor)
+    dataset = dataset.resample(str(tInterval) + char).mean()
+    dataset = dataset.reset_index()
+    dataset = dateRange.set_index(dataIndex).join(dataset.set_index(dataIndex))
+    dataset = dataset.interpolate(method=mv_method).bfill().ffill()
+    dataset = dataset.reset_index()
+    del dataset[dataIndex]
+    return dataset.T
 
 
 if __name__ == '__main__':
