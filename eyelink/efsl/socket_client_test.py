@@ -4,9 +4,9 @@ import socket
 
 host = 'm2u-da.eastus.cloudapp.azure.com'
 #HOST = 'DataAnalyzer'
-port = 5224     # 포트지정
+port = 5225     # 포트지정
 
-def sendData(jobcode, esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
+def sendData(jobcode, esIndex, docType, sDate, eDate, tInterval, nCluster):
     sendData = {
         "type": jobcode,
         "esIndex": esIndex,
@@ -14,7 +14,6 @@ def sendData(jobcode, esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
         "sDate": sDate,
         "eDate": eDate,
         "tInterval": tInterval,
-        "cid": cid,
         "nCluster": nCluster
     }
     sendData = str(sendData).encode()
@@ -32,4 +31,4 @@ def sendMessage(sendData):
 
 
 if __name__ == '__main__':
-    sendData('pattern', 'stacking', 'oee', '2018-01-03T09:00:00', '2018-01-04T09:00:00', '30S', 'all',10)
+    sendData('clustering', 'corecode', 'corecode', '2018-01-09T00:00:00', '2018-01-10T09:00:00', 5, 6)

@@ -15,6 +15,7 @@ def getEfmmLogger():
     logger.setLevel(logging.DEBUG)
     return logger
 
+
 # stream logger for local test
 def getStreamLogger():
     logger = logging.getLogger(config.logger_name['efmm'])
@@ -24,6 +25,7 @@ def getStreamLogger():
     logger.addHandler(streamHandler)
     logger.setLevel(logging.DEBUG)
     return logger
+
 
 # efsl
 def getLogger(logger_name, log_file, log_format, file_size, backup_cnt):
