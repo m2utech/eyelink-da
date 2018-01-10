@@ -36,6 +36,25 @@ def getStatusData(index, docType, body):
     return dataset
 
 
+# ### for EFSL ###
+def getCorecodeData(index, docType, body, dataIndex):
+    dataset = []
+    scroller = scan(es, body, index=index, doc_type=docType, scroll=scroll_time, size=scroll_size)
+
+    for doc in scroller:
+        dataset.append(doc['_source'])
+    dataset = convertToDataFrame(dataset, dataIndex)
+    return dataset
+
+def convertToDataFrame(dataset, ind):
+    if not dataset:
+        dataset = None
+    else:
+        dataset = pd.DataFrame(dataset)
+        dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
+        dataset = dataset.set_index(ind)
+    return dataset
+
 def dataConvert(dataset):
     if not dataset:
         dataset = None

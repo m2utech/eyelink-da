@@ -58,6 +58,25 @@ def getStatusDataByRange(sDate, eDate, cid):
     return body
 
 
+# EFSL raw data
+def getCorecodeDataByRange(sDate, eDate):
+    body = {
+        "_source": ["event_time", "active_power", "ampere", "power_factor", "voltage", "node_id"],
+        "sort": {"event_time": {"order": "asc"}},
+        "query": {
+            "bool": {
+                "must": {"match": {"event_type": "1"}},
+                "filter": {
+                    "range": {
+                        "event_time": {"gte": sDate, "lt": eDate}
+                    }
+                }
+            }
+        }
+    }
+    return body
+
+
 def getDataById(id):
     body = {
         "query": {

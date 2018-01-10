@@ -65,9 +65,9 @@ FACTOR_INFO = {
 
 # #### Configuration ####
 API = {
-    'LOAD_DATA': 'http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/getClusterRawData',
-    'UPLOAD_MASTER': 'http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterMaster/',
-    'UPLOAD_DETAIL': 'http://m2utech.eastus.cloudapp.azure.com:5223/analysis/restapi/insertClusterDetail/'
+    'LOAD_DATA': 'http://m2utech.eastus.cloudapp.azure.com:5225/analysis/restapi/getClusterRawData',
+    'UPLOAD_MASTER': 'http://m2utech.eastus.cloudapp.azure.com:5225/analysis/restapi/insertClusterMaster/',
+    'UPLOAD_DETAIL': 'http://m2utech.eastus.cloudapp.azure.com:5225/analysis/restapi/insertClusterDetail/'
 }
 PATH = {
     'DAEMON_PID': '/home/Toven/da/PID/ca_daemon.pid',

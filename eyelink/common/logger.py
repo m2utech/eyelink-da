@@ -25,6 +25,17 @@ def getStreamLogger():
     logger.setLevel(logging.DEBUG)
     return logger
 
+# efsl
+def getLogger(logger_name, log_file, log_format, file_size, backup_cnt):
+    logger = logging.getLogger(logger_name)
+    formatter = logging.Formatter(log_format)
+    fileHandler = logging.handlers.RotatingFileHandler(log_file, maxBytes=file_size, backupCount=backup_cnt)
+    fileHandler.setFormatter(formatter)
+    logger.addHandler(fileHandler)
+    logger.setLevel(logging.DEBUG)
+    return logger
+
+
 if __name__ == '__main__':
     pass
     print(config.backup_count)

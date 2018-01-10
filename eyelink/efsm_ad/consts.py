@@ -34,7 +34,7 @@ TIME_RANGE = {
 # #### SOCKET INFO ####
 BUFFER_SIZE = 256
 HOST = 'DataAnalyzer'
-PORT = 5226
+PORT = 5225
 LOCAL_HOST = 'localhost'
 CONN_TIMEOUT = 60
 
