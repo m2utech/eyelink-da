@@ -17,7 +17,7 @@ LOCAL_HOST = 'localhost'
 PRODUCTS = {
     'efsl': {
         'productName': 'EFSL',
-        'host': 'm2u-da.eastus.cloudapp.azure.com',
+        'host': 'DataAnalyzer',
         'port': 5225
     },
     'efmm': {
