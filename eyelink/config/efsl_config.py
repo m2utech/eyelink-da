@@ -3,7 +3,7 @@ log_format = '%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s'
 file_max_byte = 1024 * 1024 * 100
 backup_count = 10
 logger_name = "efsl_log"
-logging_level = "DEBUG"  # CRITCAL(50), ERROR(40), WARNING(30), INFO(20), DEBUG(10), NOTSET(0)
+logging_level = "DEBUG"  # CRITCAL, ERROR, WARNING, INFO, DEBUG, NOTSET
 log_file = "/home/Toven/eyelink-da/logs/efsl.log"
 pid_file = "/home/Toven/eyelink-da/pid/efsl.pid"
 sched_pid_file = "/home/Toven/eyelink-da/pid/efslScheduler.pid"
@@ -16,6 +16,7 @@ file_path = {
     "efmm_sche_pid": "/home/Toven/eyelink-da/pid/efmmScheduler.pid"
 }
 
+# used
 sched_opt = {
     "max_instances": 10,
     "trigger": "cron",          # e.g. 'date', 'interval', 'cron'
@@ -30,6 +31,7 @@ sched_opt = {
     }
 }
 
+# used
 es_opt = {
     'url': 'http://m2u-parstream.eastus.cloudapp.azure.com:9200',
     'scroll_time': '3m',
@@ -63,7 +65,8 @@ CA_opt = {
     'factors': ['ampere', 'active_power', 'power_factor', 'voltage'],
     'timeUnit': 'minutes',      # seconds, minutes, hours ...
     'n_cluster': 5,
-    'daily': {'cycle': 9, 'range': 1, 'interval': 1},   # 09:00, 1 day, 1 minute
+    # CA scheduler
+    'daily': {'cycle': 0, 'range': 1, 'interval': 1},   # 09:00, 1 day, 1 minute
     'weekly': {'cycle': 'mon', 'range': 7, 'interval': 15}  # monday, 7 days, 10 minutes
 }
 
@@ -85,6 +88,7 @@ alarm_info = {
     }
 }
 
+#used
 es_index = {
     'corecode': {
         'corecode': {

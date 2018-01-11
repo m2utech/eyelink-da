@@ -28,13 +28,13 @@ def getStreamLogger():
 
 
 # efsl
-def getLogger(logger_name, log_file, log_format, file_size, backup_cnt):
+def getLogger(logger_name, log_file, log_format, file_size, backup_cnt, log_level):
     logger = logging.getLogger(logger_name)
     formatter = logging.Formatter(log_format)
     fileHandler = logging.handlers.RotatingFileHandler(log_file, maxBytes=file_size, backupCount=backup_cnt)
     fileHandler.setFormatter(formatter)
     logger.addHandler(fileHandler)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.getLevelName(log_level))
     return logger
 
 
