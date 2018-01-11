@@ -1,5 +1,4 @@
 import sys
-
 import common_modules
 from common.daemon import Daemon
 from common.logger import getLogger
@@ -13,6 +12,7 @@ pid_file = config.pid_file
 log_format = config.log_format
 file_size = config.file_max_byte
 backup_cnt = config.backup_count
+log_level = config.logging_level
 product = consts.PRODUCTS['efsl']
 
 
@@ -29,7 +29,7 @@ class LoadDaemon(Daemon):
 
 
 if __name__ == '__main__':
-    logger = getLogger(log_name, log_file, log_format, file_size, backup_cnt)
+    logger = getLogger(log_name, log_file, log_format, file_size, backup_cnt, log_level)
     print(pid_file)
     daemon = LoadDaemon(pid_file)
 

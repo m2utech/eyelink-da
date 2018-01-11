@@ -81,7 +81,7 @@ def getStartEndDateByMinute(timeRange, utcYN, fm):
     endDate = today.strftime(fm)
     return startDate, endDate
 
-# for job_day
+# EFSL
 def getTimeRangeByDay(timeRange, fm):
     today = datetime.now()
     startDate = (today - relativedelta(days=timeRange)).strftime(fm)
