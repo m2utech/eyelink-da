@@ -12,6 +12,22 @@ def sampling(dataset, tInterval, mv_method, output):
     dataset = dataset.interpolate(method=mv_method).bfill().ffill()
     output.put(dataset)
 
+### efsl pm
+def samplingForPM(dataset, tInterval, eDate, DataIndex, mv_method, match_len, output):
+    if isinstance(tInterval, int):
+        tInterval = str(tInterval) + 'T'
+    dataset = dataset.resample(tInterval).mean()
+    dataset = dataset.reset_index()
+    timestamp = eDate.replace('T', ' ').replace('Z', '')
+    timestamp = datetime.strptime(timestamp, consts.PY_DATETIME)
+    date_list = [timestamp - relativedelta(minutes=x) for x in range(0, match_len)]
+    date_list = sorted(date_list)
+    date_list = pd.DataFrame(date_list, columns=[DataIndex])
+    dataset = date_list.set_index(DataIndex).join(dataset.set_index(DataIndex))
+    dataset = dataset.interpolate(method=mv_method).bfill().ffill()
+    dataset = dataset.reset_index(drop=True)
+    output.put(dataset)
+
 
 def targetSampling(dataset, tInterval, eDate, output):
     ind = config.AD_opt['index']

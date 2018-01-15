@@ -40,11 +40,11 @@ def getStatusData(index, docType, body):
 def getCorecodeData(index, docType, body, dataIndex):
     dataset = []
     scroller = scan(es, body, index=index, doc_type=docType, scroll=scroll_time, size=scroll_size)
-
     for doc in scroller:
         dataset.append(doc['_source'])
     dataset = convertToDataFrame(dataset, dataIndex)
     return dataset
+
 
 def convertToDataFrame(dataset, ind):
     if not dataset:
@@ -54,6 +54,7 @@ def convertToDataFrame(dataset, ind):
         dataset[ind] = pd.to_datetime(dataset[ind], format=consts.PY_DATETIME)
         dataset = dataset.set_index(ind)
     return dataset
+
 
 def dataConvert(dataset):
     if not dataset:
@@ -88,7 +89,7 @@ def getDataById(index, docType, body, masterId):
         logger.warn("dataset does not exist")
         return doc
 
-
+###
 def insertDataById(index, docType, sid, body):
     check = es.exists_source(index=index, doc_type=docType, id=sid)
     if check is False:

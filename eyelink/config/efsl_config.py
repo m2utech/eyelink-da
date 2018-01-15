@@ -36,16 +36,20 @@ mv_method = 'linear'    # Option : 'linear', 'time', 'index', 'values', 'nearest
 AD_opt = {
     'node_id': 'B_009',     ###
     'time_interval': 1,     ### 1 minute
-    'range_sec': 30,
     'index': 'event_time',  ###
-    'factors': ['ampere', 'active_power', 'power_factor', 'voltage'],
+    'factors': ['ampere', 'active_power', 'power_factor', 'voltage'],   ###
     'masterID': 'master',   ###
     'n_cluster': 50,        ### 50
     'top_k': 3,
     'slide_len': 2,                             # 1m
     'win_len': 120,                             # 1h
     'match_len': 110,                           # 55m
-    'value_range': [0.0, 1.0],                  # range of occurrence 
+    'value_range': {
+        'ampere': [0.0, 1.0],
+        'active_power': [0.0, 240.0],
+        'power_factor': [0.0, 1.0],
+        'voltage': [0.0, 240.0]
+    },
     'match_rate_threshold': 95.0,               # range of value [min, max]
     'timeUnit': 'minutes',      # seconds, minutes, hours ...
     'sched_cp': {'cycle': 0, 'range': 26},    ### sched opt for create pattern
@@ -68,14 +72,14 @@ CA_opt = {
 # ### ALARM MESSAGE ###
 alarm_info = {
     'host': 'http://m2utech.eastus.cloudapp.azure.com',
-    'port': 5224,
-    'AD': {
+    'port': 5225,
+    'CA': {
         'appType': 'CA',
         'agentId': 'TEST',
         'alarmType': 'CA',
         'alarmTypeName': 'CLUSTER_ANALYSIS'
     },
-    'CA': {
+    'AD': {
         'appType': 'AD',
         'agentId': 'TEST',
         'alarmType': 'AD',

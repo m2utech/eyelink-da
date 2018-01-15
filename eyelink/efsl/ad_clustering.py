@@ -30,26 +30,32 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = util.getToday(True, consts.DATE)
     saveID = saveID.replace('Z', '')
     dataset = getDataset(sDate, eDate, esIndex, docType)
-    dataset = preprocessing(dataset, tInterval)
     # dataset is empty
-    if not bool(dataset):
+    if (dataset is None) or (dataset.empty):
         logger.warn("[AD] There is no dataset... skipping analysis")
     else:
         if masterData is not None:
+            dataset = preprocessing(dataset, tInterval)
             logger.debug("[AD] load pattern info[ID:{}]".format(MASTER_ID))
             query = es_query.getDataById(MASTER_ID)
-            masterInfo = es_api.getDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], query, MASTER_ID)
+            masterInfo = es_api.getDataById(
+                    DA_INDEX[esIndex][docType]['PI']['INDEX'],
+                    DA_INDEX[esIndex][docType]['PI']['TYPE'],
+                    query,
+                    MASTER_ID)
             logger.debug("[AD] ### Start create pattern ...")
             pData, pInfo, npData, npInfo = createPatternData(dataset, masterData, masterInfo, saveID)
             logger.debug("[AD] Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, True, esIndex, docType)
         else:
+            dataset = preprocessing(dataset, tInterval)
             masterInfo = None
             print("masterInfo is None")
             logger.debug("[AD] ### Start create pattern ...")
             pData, pInfo, npData, npInfo = createPatternData(dataset, masterData, masterInfo, saveID)
             logger.debug("[AD] Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, False, esIndex, docType)
+
 
 def getDataset(sDate, eDate, esIndex, docType):
     idxList = util.getIndexDateList(esIndex+'-', sDate, eDate, consts.DATE)
@@ -62,59 +68,6 @@ def getDataset(sDate, eDate, esIndex, docType):
         dataset = dataset.append(data)
     dataset = dataset.sort_index()
     return dataset
-
-# def startAnalysis(dataset, masterData, masterInfo, saveID, tInterval):
-#     logger.debug("[AD] Dataset preprocessing ...")
-#     dataset = preprocessing(dataset, tInterval)
-#     procs = []
-#     c_pdQ, c_piQ, c_npdQ, c_npiQ = {}, {}, {}, {}
-#     pData, pInfo, npData, npInfo = {}, {}, {}, {}
-
-#     for factor_name in factors:
-#         c_pdQ[factor_name], c_piQ[factor_name], c_npdQ[factor_name], c_npiQ[factor_name] = Queue(), Queue(), Queue(), Queue()
-#         if masterData is not None:
-#             procs.append(Process(
-#                 target=createPatternData,
-#                 args=(dataset[factor_name],
-#                       masterData[factor_name],
-#                       masterInfo[factor_name],
-#                       saveID,
-#                       c_pdQ[factor_name],
-#                       c_piQ[factor_name],
-#                       c_npdQ[factor_name],
-#                       c_npiQ[factor_name]
-#                       )
-#                 )
-#             )
-#         else:
-#             procs.append(Process(
-#                 target=createPatternData,
-#                 args=(dataset[factor_name],
-#                       masterData,
-#                       masterInfo,
-#                       saveID,
-#                       c_pdQ[factor_name],
-#                       c_piQ[factor_name],
-#                       c_npdQ[factor_name],
-#                       c_npiQ[factor_name]
-#                       )
-#                 )
-#             )
-#     for p in procs:
-#         p.start()
-#     for factor_name in factors:
-#         pData[factor_name] = c_pdQ[factor_name].get()
-#         pInfo[factor_name] = c_piQ[factor_name].get()
-#         npData[factor_name] = c_npdQ[factor_name].get()
-#         npInfo[factor_name] = c_npiQ[factor_name].get()
-#         c_pdQ[factor_name].close()
-#         c_piQ[factor_name].close()
-#         c_npdQ[factor_name].close()
-#         c_npiQ[factor_name].close()
-#     for proc in procs:
-#         proc.join()
-
-#     return pData, pInfo, npData, npInfo
 
 
 def preprocessing(dataset, tInterval):
@@ -205,13 +158,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, saveID, pdQ, 
     max_df = max_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
     lower_df = lower_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
     upper_df = upper_df.apply(lambda x: x.astype(float) if np.allclose(x, x.astype(float)) else x)
-    # replace Nan to zero
-    clusted_df = clusted_df.fillna(0.0)
-    min_df = min_df.fillna(0.0)
-    max_df = max_df.fillna(0.0)
-    lower_df = lower_df.fillna(0.0)
-    upper_df = upper_df.fillna(0.0)
-
+    
     center_df = clusted_df.T
     fact_pattern = {}
     for col in center_df.columns:
