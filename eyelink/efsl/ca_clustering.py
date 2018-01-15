@@ -14,7 +14,6 @@ import common_modules
 from common import es_api
 from common import es_query
 from common import converter
-from common import learn_utils
 from config import efsl_config as config
 from consts import consts
 from common import util
@@ -33,7 +32,6 @@ def main(esIndex, docType, sDate, eDate, tInterval, nCluster):
     dateRange = getDateRange(sDate, eDate, tInterval)
     logger.debug("[CA] get trainning dataset by multiprocessing")
     dataset = getDataset(sDate, eDate, esIndex, docType)
-    dataset = dataset.sort_index()
 
     if dataset.empty:
         logger.warn("[CA] There is no target dataset... skipping analysis")
@@ -78,6 +76,7 @@ def getDataset(sDate, eDate, esIndex, docType):
         logger.debug("[CA] get dataset about index [{}]".format(idx))
         data = es_api.getCorecodeData(idx, docType, body, DataIndex)
         dataset = dataset.append(data)
+    dataset = dataset.sort_index()
     return dataset
 
 

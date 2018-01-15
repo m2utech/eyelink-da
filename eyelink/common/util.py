@@ -12,7 +12,7 @@ def getTimezone():
         tz_list.append(tz)
     return tz_list
 
-
+# EFSL, EFMM
 def getToday(utcYN, fm):
     today = ""
     if utcYN is True:

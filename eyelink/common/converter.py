@@ -4,10 +4,12 @@ from config import config
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-
-def sampling(dataset, tInterval, output):
+# efsl
+def sampling(dataset, tInterval, mv_method, output):
+    if isinstance(tInterval, int):
+        tInterval = str(tInterval) + 'T'
     dataset = dataset.resample(tInterval).mean()
-    dataset = dataset.interpolate(method=config.mv_method).bfill().ffill()
+    dataset = dataset.interpolate(method=mv_method).bfill().ffill()
     output.put(dataset)
 
 

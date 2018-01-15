@@ -76,7 +76,27 @@ def getCorecodeDataByRange(sDate, eDate):
     }
     return body
 
+def getCorecodeTargetDataByRange(node_id, sDate, eDate):
+    body = {
+        "_source": ["event_time", "active_power", "ampere", "power_factor", "voltage"],
+        "sort": {"event_time": {"order": "asc"}},
+        "query": {
+            "bool": {
+                "must": [
+                    {"term": {"event_type": "1"}},
+                    {"term": {"node_id": node_id}}
+                ],
+                "filter": {
+                    "range": {
+                        "event_time": {"gte": sDate, "lt": eDate}
+                    }
+                }
+            }
+        }
+    }
+    return body
 
+### efsl
 def getDataById(id):
     body = {
         "query": {
