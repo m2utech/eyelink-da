@@ -21,7 +21,7 @@ def getStatusDataByRange(sDate, eDate, cid):
     body = {}
     if cid == "all" or cid == "All" or cid == "ALL":
         body = {
-            "size": 1000,
+            "size": 100000,
             "_source": ["cid", "data"],
             "sort": {"dtTransmitted": "asc"},
             "query": {
@@ -76,6 +76,7 @@ def getCorecodeDataByRange(sDate, eDate):
     }
     return body
 
+# EFSL CA, PM
 def getCorecodeTargetDataByRange(node_id, sDate, eDate):
     body = {
         "_source": ["event_time", "active_power", "ampere", "power_factor", "voltage"],

@@ -7,36 +7,53 @@ import heapq
 import logging
 
 import common_modules
-from common import es_api as efmm_es
-from common import es_query as efmm_query
-from common import converter as efmm_convert
+from common import es_api
+from common import es_query
+from common import converter
 from common import learn_utils
-from config import config
+from config import efsl_config as config
 from consts import consts
 from common import util
 
-DA_INDEX = config.da_index
+logger = logging.getLogger(config.logger_name)
+DA_INDEX = config.es_index
 MASTER_ID = config.AD_opt['masterID']
-logger = logging.getLogger(config.logger_name['efmm'])
+DataIndex = config.AD_opt['index']
+TimeUnit = config.CA_opt['timeUnit']
+MV_method = config.mv_method
+topK = config.AD_opt['top_k']
+match_len = config.AD_opt['match_len']
+valRange = config.AD_opt['value_range']
+node_id = config.AD_opt['node_id']
+factors = config.AD_opt['factors']
+
+### Alarm Info ###
+appType = config.alarm_info['AD']['appType']
+agentId = config.alarm_info['AD']['agentId']
+alarmType = config.alarm_info['AD']['alarmType']
+alarmTypeName = config.alarm_info['AD']['alarmTypeName']
+alarm_host = config.alarm_info['host']
+alarm_port = config.alarm_info['port']
 
 
 def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = eDate
-    efmm_index = config.efmm_index[esIndex][docType]['INDEX']
-    idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
-    body = efmm_query.getOeeDataByRange(sDate, eDate)
-    logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
-    dataset = efmm_es.getOeeData(idxList, docType, body)
+    dataset = getDataset(sDate, eDate, esIndex, docType)
 
-    if dataset is not None or not dataset.empty:
+    if (dataset is not None) and (not dataset.empty):
         if masterData is not None:
             logger.debug("[AD] Dataset preprocessing ...")
             dataset = preprocessing(dataset, eDate, tInterval)
+
             logger.debug("[AD] Load pattern info[ID:{}]".format(MASTER_ID))
-            query = efmm_query.getDataById(MASTER_ID)
-            masterInfo = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], query, MASTER_ID)
+            query = es_query.getDataById(MASTER_ID)
+            masterInfo = es_api.getDataById(
+                                    DA_INDEX[esIndex][docType]['PI']['INDEX'],
+                                    DA_INDEX[esIndex][docType]['PI']['TYPE'],
+                                    query,
+                                    MASTER_ID)
             logger.debug("[AD] ### Start pattern matching ...")
-            assign_result = startAnalysis(dataset, masterData, masterInfo, saveID)
+            assign_result = patternMatching(dataset, masterData, masterInfo, saveID)
             logger.debug("[AD] Save result of pattern matching ...")
             saveMatchingResult(assign_result, saveID, esIndex, docType)
         else:
@@ -45,95 +62,88 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
         logger.warn("[AD] There is no dataset for pattern matching")
 
 
+def getDataset(sDate, eDate, esIndex, docType):
+    idxList = util.getIndexDateList(esIndex+'-', sDate, eDate, consts.DATE)
+    body = es_query.getCorecodeTargetDataByRange(node_id, sDate, eDate)
+    logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
+    dataset = pd.DataFrame()
+    for idx in idxList:
+        logger.debug("[CA] get dataset about index [{}]".format(idx))
+        data = es_api.getCorecodeData(idx, docType, body, DataIndex)
+        dataset = dataset.append(data)
+    dataset = dataset.sort_index()
+    return dataset
+
+
 def preprocessing(dataset, eDate, tInterval):
-    cid_list = set(dataset['cid'])
-    data, output, df = {}, {}, {}
+    output, df = {}, {}
     procs = []
-    for cid in cid_list:
-        data[cid] = dataset[dataset['cid'] == cid]
-        output[cid] = Queue()
-        procs.append(Process(target=efmm_convert.targetSampling,
-            args=(data[cid], tInterval, eDate, output[cid])))
+    for factor_name in factors:
+        output[factor_name] = Queue()
+        procs.append(Process(
+            target=converter.samplingForPM,
+            args=(dataset[factor_name], tInterval, eDate, DataIndex,
+                  MV_method, match_len, output[factor_name])))
     for p in procs:
         p.start()
-    for cid in cid_list:
-        df[cid] = output[cid].get()
-        output[cid].close()
+    for factor_name in factors:
+        df[factor_name] = output[factor_name].get()
+        output[factor_name].close()
     for proc in procs:
         proc.join()
     return df
 
 
-def startAnalysis(dataset, masterData, masterInfo, saveID):
-    procs, cid_list = [], []
-    resultQ, result = {}, {}
-    for cid in dataset.keys():
-        resultQ[cid] = Queue()
-        cid_list.append(cid)
-        procs.append(Process(target=patternMatching,
-            args=(dataset[cid], masterData[cid], masterInfo[cid], saveID, resultQ[cid])))
-    for p in procs:
-        p.start()
-    for cid in cid_list:
-        result[cid] = resultQ[cid].get()
-        resultQ[cid].close()
-    for proc in procs:
-        proc.join()
-    return result
-
-
-def patternMatching(dataset, master_data, master_info, timestamp, resultQ):
-    procs, col_list = [], []
+def patternMatching(dataset, master_data, master_info, saveID):
+    procs = []
     output, assign_result = {}, {}
-    for col_name in dataset.columns:
+    for col_name in factors:
         output[col_name] = Queue()
-        col_list.append(col_name)
-        procs.append(Process(target=compareDistance,
+        procs.append(Process(
+            target=compareDistance,
             args=(dataset[col_name], master_data[col_name],
-                master_info[col_name], col_name, output[col_name])))
+                  master_info[col_name], col_name, topK,
+                  match_len, valRange[col_name], output[col_name])))
     for p in procs:
         p.start()
-    for col_name in col_list:
+    for col_name in factors:
         assign_result[col_name] = output[col_name].get()
         output[col_name].close()
 
         if assign_result[col_name]['status']['status'] == 'anomaly':
             sendData = {}
-            sendData['applicationType'] = config.alarm_info['AD']['appType']
-            sendData['agentId'] = config.alarm_info['AD']['agentId']
-            sendData['alarmType'] = config.alarm_info['AD']['alarmType']
-            sendData['alarmTypeName'] = config.alarm_info['AD']['alarmTypeName']
-            sendData['timestamp'] = timestamp
+            sendData['applicationType'] = appType
+            sendData['agentId'] = agentId
+            sendData['alarmType'] = alarmType
+            sendData['alarmTypeName'] = alarmTypeName
+            sendData['timestamp'] = saveID
             sendData['message'] = 'Anomaly expected in {} factor'.format(col_name)
-            socketIO = SocketIO(config.alarm_info['host'], config.alarm_info['port'])
+            socketIO = SocketIO(alarm_host, alarm_port)
             socketIO.emit('receiveAlarmData', sendData)
             socketIO.wait(seconds=1)
 
     for proc in procs:
         proc.join()
 
-    assign_result['timestamp'] = timestamp
-    resultQ.put(assign_result)
+    assign_result['timestamp'] = saveID
+    return assign_result
 
 
-def compareDistance(test_data, master_data, master_info, col_name, output):
+def compareDistance(test_data, master_data, master_info, col_name, topK, match_len, valRange, output):
+    test_data = pd.Series(test_data[col_name].values)
     master_center = pd.DataFrame()
     for cno in master_data.keys():
         master_center[cno] = pd.Series(master_data[cno]['center']).values
     logger.debug("[AD] compare distance between patterns of {} ...".format(col_name))
     # max_clustNo = int(heapq.nlargest(1,master_center.columns)[0].split('_')[1])
     distance = {}
-    topK = config.AD_opt['top_k']
-    match_len = config.AD_opt['match_len']
 
     for clust_name in master_center.columns:
         match_data = master_center[clust_name]
         cur_dist = learn_utils.DTWDistance(test_data.tail(match_len), match_data.head(match_len), 1)
-
         distance[clust_name] = cur_dist
 
     topK_list = heapq.nsmallest(topK, distance, key=distance.get)
-    valRange = config.AD_opt['value_range']
     percentile = np.sqrt(((valRange[1] - valRange[0])**2)*match_len) / 100.0
 
     result = {}
@@ -172,17 +182,20 @@ def compareDistance(test_data, master_data, master_info, col_name, output):
 
 
 def saveMatchingResult(assign_result, saveID, esIndex, docType):
-    efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PM']['INDEX'], DA_INDEX[esIndex][docType]['PM']['TYPE'], saveID, assign_result)
+    es_api.insertDataById(DA_INDEX[esIndex][docType]['PM']['INDEX'], DA_INDEX[esIndex][docType]['PM']['TYPE'], saveID, assign_result)
     logger.debug("[AD] [ID:{}] was saved successfully".format(saveID))
 
 
 #############################
 if __name__ == '__main__':
     freeze_support()
-    esIndex = 'notching'
-    docType = 'oee'
-    sDate = "2017-12-19T01:41:00Z"
-    eDate = "2017-12-19T02:41:00Z"
-    query = efmm_query.getDataById(config.AD_opt['masterID'])
-    masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
-    main(esIndex, docType, sDate, eDate, masterData, '30S')
+    from common.logger import getStreamLogger
+    logger = getStreamLogger()
+    esIndex = 'corecode'
+    docType = 'corecode'
+    sDate = "2018-01-11T21:00:00Z"
+    eDate = "2018-01-11T23:00:00Z"
+    masterID = config.AD_opt['masterID']
+    query = es_query.getDataById(masterID)
+    masterData = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, masterID)
+    main(esIndex, docType, sDate, eDate, masterData, 1)
