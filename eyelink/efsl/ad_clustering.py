@@ -7,132 +7,159 @@ import heapq
 import logging
 
 import common_modules
-from common import es_api as efmm_es
-from common import es_query as efmm_query
-from common import converter as efmm_convert
+from common import es_api
+from common import es_query
+from common import converter
 from common import learn_utils
-from config import config
+from config import efsl_config as config
 from consts import consts
 from common import util
 
-
-DA_INDEX = config.da_index
+logger = logging.getLogger(config.logger_name)
+DA_INDEX = config.es_index
 MASTER_ID = config.AD_opt['masterID']
-logger = logging.getLogger(config.logger_name['efmm'])
+DataIndex = config.AD_opt['index']
+TimeUnit = config.CA_opt['timeUnit']
+MV_method = config.mv_method
+node_id = config.AD_opt['node_id']
+factors = config.AD_opt['factors']
+
 
 
 def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = util.getToday(True, consts.DATE)
     saveID = saveID.replace('Z', '')
-    efmm_index = config.efmm_index[esIndex][docType]['INDEX']
-    print(efmm_index)
-    idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
-    body = efmm_query.getOeeDataByRange(sDate, eDate)
-    logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
-
-    dataset = efmm_es.getOeeData(idxList, docType, body)
-    dataset = dataset.sort_index()
-
-    if (dataset is None) or (dataset.empty):
+    dataset = getDataset(sDate, eDate, esIndex, docType)
+    dataset = preprocessing(dataset, tInterval)
+    # dataset is empty
+    if not bool(dataset):
         logger.warn("[AD] There is no dataset... skipping analysis")
     else:
         if masterData is not None:
             logger.debug("[AD] load pattern info[ID:{}]".format(MASTER_ID))
-            query = efmm_query.getDataById(MASTER_ID)
-            masterInfo = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], query, MASTER_ID)
+            query = es_query.getDataById(MASTER_ID)
+            masterInfo = es_api.getDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], query, MASTER_ID)
             logger.debug("[AD] ### Start create pattern ...")
-            pData, pInfo, npData, npInfo = startAnalysis(dataset, masterData, masterInfo, saveID, tInterval)
+            pData, pInfo, npData, npInfo = createPatternData(dataset, masterData, masterInfo, saveID)
             logger.debug("[AD] Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, True, esIndex, docType)
         else:
             masterInfo = None
+            print("masterInfo is None")
             logger.debug("[AD] ### Start create pattern ...")
-            pData, pInfo, npData, npInfo = startAnalysis(dataset, masterData, masterInfo, saveID, tInterval)
+            pData, pInfo, npData, npInfo = createPatternData(dataset, masterData, masterInfo, saveID)
             logger.debug("[AD] Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, False, esIndex, docType)
 
+def getDataset(sDate, eDate, esIndex, docType):
+    idxList = util.getIndexDateList(esIndex+'-', sDate, eDate, consts.DATE)
+    body = es_query.getCorecodeTargetDataByRange(node_id, sDate, eDate)
+    logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
+    dataset = pd.DataFrame()
+    for idx in idxList:
+        logger.debug("[CA] get dataset about index [{}]".format(idx))
+        data = es_api.getCorecodeData(idx, docType, body, DataIndex)
+        dataset = dataset.append(data)
+    dataset = dataset.sort_index()
+    return dataset
 
-def startAnalysis(dataset, masterData, masterInfo, saveID, tInterval):
-    logger.debug("[AD] Dataset preprocessing ...")
-    dataset = preprocessing(dataset, tInterval)
-    procs, cid_list = [], []
-    c_pdQ, c_piQ, c_npdQ, c_npiQ = {}, {}, {}, {}
-    pData, pInfo, npData, npInfo = {}, {}, {}, {}
+# def startAnalysis(dataset, masterData, masterInfo, saveID, tInterval):
+#     logger.debug("[AD] Dataset preprocessing ...")
+#     dataset = preprocessing(dataset, tInterval)
+#     procs = []
+#     c_pdQ, c_piQ, c_npdQ, c_npiQ = {}, {}, {}, {}
+#     pData, pInfo, npData, npInfo = {}, {}, {}, {}
 
-    for cid in dataset.keys():
-        c_pdQ[cid], c_piQ[cid], c_npdQ[cid], c_npiQ[cid] = Queue(), Queue(), Queue(), Queue()
-        cid_list.append(cid)
-        if masterData is not None:
-            procs.append(Process(target=createPatternData,
-                args=(dataset[cid], masterData[cid], masterInfo[cid], saveID,
-                    c_pdQ[cid], c_piQ[cid], c_npdQ[cid], c_npiQ[cid])))
-        else:
-            procs.append(Process(target=createPatternData,
-                args=(dataset[cid], masterData, masterInfo, saveID,
-                    c_pdQ[cid], c_piQ[cid], c_npdQ[cid], c_npiQ[cid])))
-    for p in procs:
-        p.start()
-    for cid in cid_list:
-        pData[cid] = c_pdQ[cid].get()
-        pInfo[cid] = c_piQ[cid].get()
-        npData[cid] = c_npdQ[cid].get()
-        npInfo[cid] = c_npiQ[cid].get()
-        c_pdQ[cid].close()
-        c_piQ[cid].close()
-        c_npdQ[cid].close()
-        c_npiQ[cid].close()
-    for proc in procs:
-        proc.join()
+#     for factor_name in factors:
+#         c_pdQ[factor_name], c_piQ[factor_name], c_npdQ[factor_name], c_npiQ[factor_name] = Queue(), Queue(), Queue(), Queue()
+#         if masterData is not None:
+#             procs.append(Process(
+#                 target=createPatternData,
+#                 args=(dataset[factor_name],
+#                       masterData[factor_name],
+#                       masterInfo[factor_name],
+#                       saveID,
+#                       c_pdQ[factor_name],
+#                       c_piQ[factor_name],
+#                       c_npdQ[factor_name],
+#                       c_npiQ[factor_name]
+#                       )
+#                 )
+#             )
+#         else:
+#             procs.append(Process(
+#                 target=createPatternData,
+#                 args=(dataset[factor_name],
+#                       masterData,
+#                       masterInfo,
+#                       saveID,
+#                       c_pdQ[factor_name],
+#                       c_piQ[factor_name],
+#                       c_npdQ[factor_name],
+#                       c_npiQ[factor_name]
+#                       )
+#                 )
+#             )
+#     for p in procs:
+#         p.start()
+#     for factor_name in factors:
+#         pData[factor_name] = c_pdQ[factor_name].get()
+#         pInfo[factor_name] = c_piQ[factor_name].get()
+#         npData[factor_name] = c_npdQ[factor_name].get()
+#         npInfo[factor_name] = c_npiQ[factor_name].get()
+#         c_pdQ[factor_name].close()
+#         c_piQ[factor_name].close()
+#         c_npdQ[factor_name].close()
+#         c_npiQ[factor_name].close()
+#     for proc in procs:
+#         proc.join()
 
-    return pData, pInfo, npData, npInfo
+#     return pData, pInfo, npData, npInfo
 
 
 def preprocessing(dataset, tInterval):
-    cid_list = set(dataset['cid'])
-    data, output, df = {}, {}, {}
+    output, df = {}, {}
     procs = []
-    for cid in cid_list:
-        data[cid] = dataset[dataset['cid'] == cid]
-        output[cid] = Queue()
-        procs.append(Process(target=efmm_convert.sampling,
-            args=(data[cid], tInterval, output[cid])))
+    for factor_name in factors:
+        output[factor_name] = Queue()
+        procs.append(Process(target=converter.sampling,
+            args=(dataset[factor_name], tInterval, MV_method, output[factor_name])))
     for p in procs:
         p.start()
-    for cid in cid_list:
-        df[cid] = output[cid].get()
-        output[cid].close()
+    for factor_name in factors:
+        df[factor_name] = output[factor_name].get()
+        output[factor_name].close()
     for proc in procs:
         proc.join()
 
     return df
 
 
-# cid별 multiprocessing
-def createPatternData(dataset, masterData, masterInfo, saveID, c_pdQ, c_piQ, c_npdQ, c_npiQ):
+# factor별 multiprocessing
+def createPatternData(dataset, masterData, masterInfo, saveID):
     logger.debug("[AD] create pattern for each factors .... ")
-    procs, col_list = [], []
+    procs = []
     pdQ, piQ, npdQ, npiQ = {}, {}, {}, {}
     pData, pInfo, npData, npInfo = {}, {}, {}, {}
 
-    for col_name in dataset.columns:
+    for col_name in factors:
         pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name] = Queue(), Queue(), Queue(), Queue()
-        col_list.append(col_name)
         if masterData is not None:
-            procs.append(Process(target=clusteringSegment,
-                args=(dataset[col_name], masterData[col_name],
-                    masterInfo[col_name], col_name, saveID,
-                    pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name])))
+            procs.append(Process(
+                target=clusteringSegment,
+                args=(dataset[col_name], masterData[col_name], masterInfo[col_name], col_name, saveID,
+                      pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name])))
         else:
-            procs.append(Process(target=clusteringSegment,
-                args=(dataset[col_name], masterData,
-                    masterInfo, col_name, saveID,
-                    pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name])))
+            procs.append(Process(
+                target=clusteringSegment,
+                args=(dataset[col_name], masterData, masterInfo, col_name, saveID,
+                      pdQ[col_name], piQ[col_name], npdQ[col_name], npiQ[col_name])))
 
     for p in procs:
         p.start()
 
     createDatetime = util.getToday(True, consts.DATETIME)
-    for col_name in col_list:
+    for col_name in factors:
         pData[col_name] = pdQ[col_name].get()
         pInfo[col_name] = piQ[col_name].get()
         npData[col_name] = npdQ[col_name].get()
@@ -149,10 +176,7 @@ def createPatternData(dataset, masterData, masterInfo, saveID, c_pdQ, c_piQ, c_n
     for proc in procs:
         proc.join()
 
-    c_pdQ.put(pData)
-    c_piQ.put(pInfo)
-    c_npdQ.put(npData)
-    c_npiQ.put(npInfo)
+    return pData, pInfo, npData, npInfo
 
 
 # ##### 속성별 클러스터링 usint K-Means and DTW algorithm #####
@@ -299,18 +323,15 @@ def computeThreshold(dataset, n_cluster):
 
 
 def savePatternData(pData, pInfo, npData, npInfo, saveID, masterYN, esIndex, docType):
-    print(pData)
-    import pdb; pdb.set_trace()  # breakpoint f4e2229b //
-
-    efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], saveID, pData)
-    efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], saveID, pInfo)
+    es_api.insertDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], saveID, pData)
+    es_api.insertDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], saveID, pInfo)
     if masterYN is False:
-        efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], MASTER_ID, pData)
-        efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], MASTER_ID, pInfo)
+        es_api.insertDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], MASTER_ID, pData)
+        es_api.insertDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], MASTER_ID, pInfo)
     else:
         logger.debug("[AD] insert new pattern clusters to master patterns ....")
-        efmm_es.updateDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], MASTER_ID, npData)
-        efmm_es.updateDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], MASTER_ID, npInfo)
+        es_api.updateDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], MASTER_ID, npData)
+        es_api.updateDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], MASTER_ID, npInfo)
 
 
 #############################
@@ -323,11 +344,11 @@ if __name__ == '__main__':
     sDate = "2018-01-01T00:00:00Z"
     eDate = "2018-01-01T03:00:00Z"
 
-    # query = efmm_query.getDataById(config.AD_opt['masterID'])
-    # masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
+    # query = es_query.getDataById(config.AD_opt['masterID'])
+    # masterData = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
     # main(esIndex, docType, sDate, eDate, masterData, '30S')
 
     esIndex = 'stacking'
-    query = efmm_query.getDataById(config.AD_opt['masterID'])
-    masterData = efmm_es.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
+    query = es_query.getDataById(config.AD_opt['masterID'])
+    masterData = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
     main(esIndex, docType, sDate, eDate, masterData, '30S')

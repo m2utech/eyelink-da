@@ -299,9 +299,6 @@ def computeThreshold(dataset, n_cluster):
 
 
 def savePatternData(pData, pInfo, npData, npInfo, saveID, masterYN, esIndex, docType):
-    print(pData)
-    import pdb; pdb.set_trace()  # breakpoint f4e2229b //
-
     efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], saveID, pData)
     efmm_es.insertDataById(DA_INDEX[esIndex][docType]['PI']['INDEX'], DA_INDEX[esIndex][docType]['PI']['TYPE'], saveID, pInfo)
     if masterYN is False:

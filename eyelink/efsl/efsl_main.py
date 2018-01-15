@@ -10,8 +10,8 @@ from config import efsl_config as config
 from consts import consts
 from common import util
 
-# import ad_clustering
-# import ad_matching
+import ad_clustering
+import ad_matching
 import ca_clustering
 
 
@@ -89,27 +89,14 @@ class SocketThread(object):
                     self.loadMasterPattern(esIndex, docType)
                     self.createPattern(esIndex, docType, sDate, eDate, tInterval)
                     self.loadMasterPattern(esIndex, docType)
-               
                 ##### Pattern Matching #####
                 elif json_dict["type"] == "matching":
-                    if esIndex == 'notching':
-                        if NOTCHING_CODE is 1:
+                    if esIndex == 'corecode':
+                        if CODE is 1:
                             self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                         else:
                             self.loadMasterPattern(esIndex, docType)
-                            if NOTCHING_CODE is 1:
-                                self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
-                            else:
-                                new_sDate, new_eDate = util.getStartEndDateByDay(1, True, consts.DATETIME)
-                                self.createPattern(esIndex, docType, new_sDate, new_eDate, tInterval)
-                                self.loadMasterPattern(esIndex, docType)
-                                self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
-                    elif esIndex == 'stacking':
-                        if STACKING_CODE is 1:
-                            self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
-                        else:
-                            self.loadMasterPattern(esIndex, docType)
-                            if STACKING_CODE is 1:
+                            if CODE is 1:
                                 self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                             else:
                                 new_sDate, new_eDate = util.getStartEndDateByDay(1, True, consts.DATETIME)
@@ -117,8 +104,7 @@ class SocketThread(object):
                                 self.loadMasterPattern(esIndex, docType)
                                 self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                     else:
-                        logger.warn("Sensor type is invalid, please check sensor type ...")
-
+                        logger.warn("index type is invalid, please check index type ...")
                 ##### Clustering Analysis #####
                 elif json_dict["type"] == "clustering":
                     ca_clustering.main(esIndex, docType, sDate, eDate, tInterval, nCluster)
@@ -129,49 +115,37 @@ class SocketThread(object):
         else:
             logger.warn("Message format is incorrect")
 
+
     def loadMasterPattern(self, esIndex, docType):
-        global NOTCHING_MASTER
-        global STACKING_MASTER
-        global NOTCHING_CODE
-        global STACKING_CODE
+        global MASTER
+        global CODE
         query = es_query.getDataById(config.AD_opt['masterID'])
         dataset = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'],
-                                        DA_INDEX[esIndex][docType]['PD']['TYPE'],
-                                        query, config.AD_opt['masterID'])
+                                     DA_INDEX[esIndex][docType]['PD']['TYPE'],
+                                     query, config.AD_opt['masterID'])
         if dataset is not None:
             logger.debug("reload latest master pattern ....")
-            if esIndex == 'notching':
-                NOTCHING_MASTER = dataset
-                NOTCHING_CODE = 1
-            elif esIndex == 'stacking':
-                STACKING_MASTER = dataset
-                STACKING_CODE = 1
+            if esIndex == 'corecode':
+                MASTER = dataset
+                CODE = 1
             else:
-                logger.warn("Sensor type is invalid, please check sensor type ...")
+                logger.warn("index type is invalid, please check index type ...")
         else:
             logger.debug("master pattern is None ....")
-            if esIndex == 'notching':
-                NOTCHING_MASTER = None
-                NOTCHING_CODE = 0
-            elif esIndex == 'stacking':
-                STACKING_MASTER = None
-                STACKING_CODE = 0
+            if esIndex == 'corecode':
+                MASTER = None
+                CODE = 0
             else:
-                logger.warn("Sensor type is invalid, please check sensor type ...")
+                logger.warn("index type is invalid, please check index type ...")
+
 
     def createPattern(self, esIndex, docType, sDate, eDate, tInterval):
         logger.debug("==== Start pattern generation from [{}] to [{}] ====".format(sDate, eDate))
-        # if esIndex == 'notching':
-        #     ad_clustering.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER, tInterval)
-        # elif esIndex == 'stacking':
-        #     ad_clustering.main(esIndex, docType, sDate, eDate, STACKING_MASTER, tInterval)
+        ad_clustering.main(esIndex, docType, sDate, eDate, MASTER, tInterval)
 
     def matchPattern(self, esIndex, docType, sDate, eDate, tInterval):
         logger.debug("==== Start pattern matching from [{}] to [{}] ====".format(sDate, eDate))
-        # if esIndex == 'notching':
-        #     ad_matching.main(esIndex, docType, sDate, eDate, NOTCHING_MASTER, tInterval)
-        # elif esIndex == 'stacking':
-        #     ad_matching.main(esIndex, docType, sDate, eDate, STACKING_MASTER, tInterval)
+        ad_matching.main(esIndex, docType, sDate, eDate, MASTER, tInterval)
 
 
 ######################################
@@ -180,5 +154,5 @@ if __name__ == '__main__':
     logger = getStreamLogger()
     host = consts.LOCAL_HOST
     port = consts.PRODUCTS['efsl']['port']
-    data = b'{"type": "clustering", "esIndex": "corecode", "docType": "corecode", "sDate": "2018-01-09T00:00:00", "eDate": "2018-01-10T00:00:00", "tInterval": 5, "nCluster": 5}'
+    data = b'{"type": "pattern", "esIndex": "corecode", "docType": "corecode", "sDate": "2018-01-12T00:00:00", "eDate": "2018-01-12T08:00:00", "tInterval": 1, "nCluster": 30}'
     SocketThread(host, port).jsonParsing(data)

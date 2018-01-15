@@ -23,19 +23,15 @@ product = consts.PRODUCTS['efsl']
 maxInstances = config.sched_opt['max_instances']
 trigger = config.sched_opt['trigger']
 job_code = config.sched_opt['job_code']
-
+### Cluster Analysis opt
 ca_daily = config.CA_opt['daily']
 ca_weekly = config.CA_opt['weekly']
 ca_n_cluster = config.CA_opt['n_cluster']
-
-cp_opt = config.AD_opt['cpSchedule']
-pm_opt = config.AD_opt['pmSchedule']
+### Anomaly Detection opt
+ad_cp_sched = config.AD_opt['sched_cp']
+ad_pm_sched = config.AD_opt['sched_pm']
 ad_tInterval = config.AD_opt['time_interval']
-ad_cid = config.AD_opt['cid']
 ad_n_cluster = config.AD_opt['n_cluster']
-
-
-ca_cid = config.CA_opt['cid']
 
 
 class Scheduler(object):
@@ -54,10 +50,8 @@ class Scheduler(object):
         self.sched.add_job(self.job_runTest, trigger, max_instances=maxInstances, minute='*/10')
         self.sched.add_job(self.job_CA_daily, trigger, max_instances=maxInstances, hour=ca_daily['cycle'])
         self.sched.add_job(self.job_CA_weekly, trigger, max_instances=maxInstances, day_of_week=ca_weekly['cycle'], hour=ca_daily['cycle'])
-        # self.sched.add_job(self.job_notching_CP, trigger, max_instances=maxInstances, hour=cp_opt['cycle'])
-        # self.sched.add_job(self.job_stacking_CP, trigger, max_instances=maxInstances, hour=cp_opt['cycle'])
-        # self.sched.add_job(self.job_notching_PM, trigger, max_instances=maxInstances, minute=pm_opt['cycle'])
-        # self.sched.add_job(self.job_stacking_PM, trigger, max_instances=maxInstances, minute=pm_opt['cycle'])
+        self.sched.add_job(self.job_CP, trigger, max_instances=maxInstances, hour=ad_cp_sched['cycle'])
+        self.sched.add_job(self.job_PM, trigger, max_instances=maxInstances, minute=ad_pm_sched['cycle'])
 
     def sendData(self, jobcode, esIndex, docType, sDate, eDate, tInterval, nCluster):
         sendData = {
@@ -78,34 +72,26 @@ class Scheduler(object):
         logger.debug("========== scheduler run test ==========")
 
     def job_CA_daily(self):
-        logger.debug("== start Daily CA for {} ...".format(product['productName']))
+        logger.debug("== start Daily Cluster Analysis for {} ...".format(product['productName']))
         sDate, eDate = util.getTimeRangeByDay(ca_daily['range'], consts.DATETIMEZERO)
         self.sendData("2000", "corecode", "corecode", sDate, eDate, ca_daily['interval'], ca_n_cluster)
 
     def job_CA_weekly(self):
-        logger.debug("== start Weekly CA for {} ...".format(product['productName']))
+        logger.debug("== start Weekly Cluster Analysis for {} ...".format(product['productName']))
         sDate, eDate = util.getTimeRangeByDay(ca_weekly['range'], consts.DATETIMEZERO)
         self.sendData("2000", "corecode", "corecode", sDate, eDate, ca_weekly['interval'], ca_n_cluster)
 
-    # def job_notching_CP(self):
-    #     logger.debug("== start CreatePatterns for Notching OEE ==")
-    #     sDate, eDate = util.getStartEndDateByHour(cp_opt['range'], False, consts.DATETIMEZERO)
-    #     self.sendData("0000", "notching", "oee", sDate, eDate, ad_tInterval, ad_cid, ad_n_cluster)
+    def job_CP(self):
+        logger.debug("========== CP test ==========")
+        # logger.debug("== start Create Patterns for {} ...".format(product['productName']))
+        # sDate, eDate = util.getStartEndDateByHour(ad_cp_sched['range'], False, consts.DATETIMEZERO)
+        # self.sendData("0000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 
-    # def job_notching_PM(self):
-    #     logger.debug("== start PatternMatching for Notching OEE ==")
-    #     sDate, eDate = util.getStartEndDateByMinute(pm_opt['range'], False, consts.DATETIMEZERO)
-    #     self.sendData("1000", "notching", "oee", sDate, eDate, ad_tInterval, ad_cid, ad_n_cluster)
-
-    # def job_stacking_CP(self):
-    #     logger.debug("== start CreatePatterns for Stacking OEE ==")
-    #     sDate, eDate = util.getStartEndDateByHour(cp_opt['range'], False, consts.DATETIMEZERO)
-    #     self.sendData("0000", "stacking", "oee", sDate, eDate, ad_tInterval, ad_cid, ad_n_cluster)
-
-    # def job_stacking_PM(self):
-    #     logger.debug("== start PatternMatching for Stacking OEE ==")
-    #     sDate, eDate = util.getStartEndDateByMinute(pm_opt['range'], False, consts.DATETIMEZERO)
-    #     self.sendData("1000", "stacking", "oee", sDate, eDate, ad_tInterval, ad_cid, ad_n_cluster)
+    def job_PM(self):
+        logger.debug("========== PM test ==========")
+        # logger.debug("== start Pattern Matching for {} ...".format(product['productName']))
+        # sDate, eDate = util.getStartEndDateByMinute(ad_pm_sched['range'], False, consts.DATETIMEZERO)
+        # self.sendData("1000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 
 
 class SchedulerDaemon(Daemon):

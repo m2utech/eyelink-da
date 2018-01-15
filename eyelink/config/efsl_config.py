@@ -2,19 +2,11 @@
 log_format = '%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s'
 file_max_byte = 1024 * 1024 * 100
 backup_count = 10
-logger_name = "efsl_log"
-logging_level = "DEBUG"  # CRITCAL, ERROR, WARNING, INFO, DEBUG, NOTSET
+logger_name = "efsl_log"    ###
+logging_level = "DEBUG"     ### CRITCAL, ERROR, WARNING, INFO, DEBUG, NOTSET
 log_file = "/home/Toven/eyelink-da/logs/efsl.log"
 pid_file = "/home/Toven/eyelink-da/pid/efsl.pid"
 sched_pid_file = "/home/Toven/eyelink-da/pid/efslScheduler.pid"
-
-
-### 안쓰임!!!s
-file_path = {
-    "efmm_log": "/home/Toven/eyelink-da/logs/efmm.log",
-    "efmm_pid": "/home/Toven/eyelink-da/pid/efmm.pid",
-    "efmm_sche_pid": "/home/Toven/eyelink-da/pid/efmmScheduler.pid"
-}
 
 # used
 sched_opt = {
@@ -31,34 +23,37 @@ sched_opt = {
     }
 }
 
-# used
+##### Elasticsearch API #####
 es_opt = {
     'url': 'http://m2u-parstream.eastus.cloudapp.azure.com:9200',
     'scroll_time': '3m',
     'scroll_size': 10000
 }
+
 # ### interpolation method for missing value ###
 mv_method = 'linear'    # Option : 'linear', 'time', 'index', 'values', 'nearest', 'zero'
 
 AD_opt = {
-    'time_interval': '30S', # 30 seconds
+    'node_id': 'B_009',     ###
+    'time_interval': 1,     ### 1 minute
     'range_sec': 30,
-    'index': 'dtSensed',
-    'factors': ['cid', 'availability', 'overall_oee', 'performance', 'quality'],
-    'masterID': 'master',
-    'n_cluster': 10,
-    'cid': 'all',
+    'index': 'event_time',  ###
+    'factors': ['ampere', 'active_power', 'power_factor', 'voltage'],
+    'masterID': 'master',   ###
+    'n_cluster': 50,        ### 50
     'top_k': 3,
     'slide_len': 2,                             # 1m
     'win_len': 120,                             # 1h
     'match_len': 110,                           # 55m
     'value_range': [0.0, 1.0],                  # range of occurrence 
     'match_rate_threshold': 95.0,               # range of value [min, max]
-    'cpSchedule': {'cycle': 9, 'range': 24},    # sched opt for create pattern
-    'pmSchedule': {'cycle': '*/2', 'range': 60} # sched opt for pattern matching
+    'timeUnit': 'minutes',      # seconds, minutes, hours ...
+    'sched_cp': {'cycle': 0, 'range': 26},    ### sched opt for create pattern
+    'sched_pm': {'cycle': '*/2', 'range': 120} ### sched opt for pattern matching
 }
 
 ### used
+##### option info for Clustering Analysis
 CA_opt = {
     'id': 'node_id',
     'index': 'event_time',
@@ -93,7 +88,10 @@ es_index = {
     'corecode': {
         'corecode': {
             'master': {'INDEX': 'efsl_clustering_master', 'TYPE': 'master'},
-            'detail': {'INDEX': 'efsl_clustering_detail', 'TYPE': 'detail'}
+            'detail': {'INDEX': 'efsl_clustering_detail', 'TYPE': 'detail'},
+            'PD': {'INDEX': 'efsl_pattern_data', 'TYPE': 'pattern_data'},
+            'PI': {'INDEX': 'efsl_pattern_info', 'TYPE': 'pattern_info'},
+            'PM': {'INDEX': 'efsl_pattern_matching', 'TYPE': 'pattern_matching'}
         }
     }
 }
