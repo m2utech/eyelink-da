@@ -31,4 +31,4 @@ def sendMessage(sendData):
 
 
 if __name__ == '__main__':
-    sendData('clustering', 'corecode', 'corecode', '2018-01-10T00:00:00', '2018-01-11T00:00:00', 1, 10)
+    sendData('pattern', 'corecode', 'corecode', '2018-01-10T00:00:00', '2018-01-17T00:00:00', 1, 30)

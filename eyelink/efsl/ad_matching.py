@@ -39,6 +39,7 @@ alarm_port = config.alarm_info['port']
 def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = eDate
     dataset = getDataset(sDate, eDate, esIndex, docType)
+    print(dataset)
 
     if (dataset is not None) and (not dataset.empty):
         if masterData is not None:
@@ -64,7 +65,9 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
 
 def getDataset(sDate, eDate, esIndex, docType):
     idxList = util.getIndexDateList(esIndex+'-', sDate, eDate, consts.DATE)
+    print(idxList)
     body = es_query.getCorecodeTargetDataByRange(node_id, sDate, eDate)
+    print(body)
     logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
     dataset = pd.DataFrame()
     for idx in idxList:
