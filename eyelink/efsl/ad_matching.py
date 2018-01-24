@@ -37,7 +37,9 @@ alarm_port = config.alarm_info['port']
 
 
 def main(esIndex, docType, sDate, eDate, masterData, tInterval):
-    saveID = eDate
+    saveID = util.getToday(True, consts.DATETIMEZERO)
+    saveID = saveID.replace('Z', '')
+    # saveID = eDate
     dataset = getDataset(sDate, eDate, esIndex, docType)
     print(dataset)
 
