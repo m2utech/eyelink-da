@@ -1,3 +1,4 @@
+import common_modules
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import pytz
@@ -71,6 +72,16 @@ def getStartEndDateByHour(timeRange, utcYN, fm):
     endDate = today.strftime(fm)
     return startDate, endDate
 
+def convertDefaultDate(strDate):
+    d = strDate.split('T')[0]
+    t = strDate.split('T')[1]
+    day = int(d.split('-')[2])
+    day = '{0:02d}'.format(day % 10)
+    if day == '00':
+        day = '10'
+    dt = "2018-01-{}T{}".format(day, t)
+    return dt
+
 
 def getStartEndDateByMinute(timeRange, utcYN, fm):
     if utcYN is True:
@@ -100,5 +111,5 @@ if __name__ == '__main__':
     # s, e = getStartEndDateByMinute(60, False, consts.DATETIMEZERO)
     # s, e = getStartEndDateByHour(24, False, consts.DATETIMEZERO)
     #s, e = getTimeRangeByDay(1, consts.DATETIMEZERO)
-    s, e = getStartEndDateByMinute(config.sched_opt['PM_range'], False, consts.DATETIMEZERO)
-    print(s, e)
+    dt = convertDefaultDate("2018-01-31T12:12:23")
+    print(dt)

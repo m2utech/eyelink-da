@@ -85,12 +85,16 @@ class Scheduler(object):
         # logger.debug("========== CP test ==========")
         logger.debug("== start Create Patterns for {} ...".format(product['productName']))
         sDate, eDate = util.getStartEndDateByHour(ad_cp_sched['range'], False, consts.DATETIMEZERO)
+        sDate = util.convertDefaultDate(sDate)
+        eDate = util.convertDefaultDate(eDate)
         self.sendData("0000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 
     def job_PM(self):
         # logger.debug("========== PM test ==========")
         logger.debug("== start Pattern Matching for {} ...".format(product['productName']))
         sDate, eDate = util.getStartEndDateByMinute(ad_pm_sched['range'], False, consts.DATETIMEZERO)
+        sDate = util.convertDefaultDate(sDate)
+        eDate = util.convertDefaultDate(eDate)
         self.sendData("1000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 
 

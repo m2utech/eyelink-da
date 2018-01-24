@@ -34,7 +34,7 @@ es_opt = {
 mv_method = 'linear'    # Option : 'linear', 'time', 'index', 'values', 'nearest', 'zero'
 
 AD_opt = {
-    'node_id': 'B_009',     ###
+    'node_id': 'B009',     ###
     'time_interval': 1,     ### 1 minute
     'index': 'event_time',  ###
     'factors': ['ampere', 'active_power', 'power_factor', 'voltage'],   ###
