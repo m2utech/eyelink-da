@@ -1,5 +1,6 @@
 from __future__ import print_function
 import time
+import traceback
 
 class AlgoUPGrowth(object):
     #  variable for statistics
@@ -34,40 +35,42 @@ class AlgoUPGrowth(object):
 
         mapItemToTWU = {}
 
-        with open(inputFile, 'r') as input:
-            for line in input:
-                split = line.rstrip().split(":")
-                items = split[0].split(" ")
-                transactionUtility = int(split[1])
+        try:
+            with open(inputFile, 'r') as input:
+                for line in input:
+                    split = line.rstrip().split(":")
+                    items = split[0].split(" ")
+                    transactionUtility = int(split[1])
 
-                for i in range(len(items)):
-                    item = int(items[i])
-                    twu = mapItemToTWU.get(item)
-                    twu = transactionUtility if (twu == None) else twu + transactionUtility
-                    # mapItemToTWU.update({item : twu})
-                    mapItemToTWU[item] = twu
-                    print("split ====", split)
-                    print("items ====", items)
-                    print("twu ====", twu)
-                    print("utility ====", transactionUtility)
-                    print("map ====", mapItemToTWU)
+                    for i in range(len(items)):
+                        item = int(items[i])
+                        twu = mapItemToTWU.get(item)
+                        twu = transactionUtility if (twu == None) else twu + transactionUtility
+                        # mapItemToTWU.update({item : twu})
+                        mapItemToTWU[item] = twu
+        except:
+            traceback.print_exc()
 
         mapMinimumItemUtility = {}
 
-        
+        try:
+            tree = UPTree()
+            with open(inputFile, 'r') as input:
+                for line in input:
+                    split = line.rstrip().split(":")
+                    items = split[0].split(" ")
+                    utilityValues = split[2].split(" ")
+
+                    for i in range(len(items)):
+                        item = int(items[i])
+                        twu = mapItemToTWU.get(item)
+                        twu = transactionUtility if (twu == None) else twu + transactionUtility
+                        # mapItemToTWU.update({item : twu})
+                        mapItemToTWU[item] = twu
+        except:
+            pass
 
 
-    #                 item = Integer.parseInt(items[i])
-    #                 twu = mapItemToTWU.get(item)
-    #                 twu = transactionUtility if (twu == None) else twu + transactionUtility
-    #                 mapItemToTWU.put(item, twu)
-    #                 i += 1
-    #     except Exception as e:
-    #         e.printStackTrace()
-    #     finally:
-    #         if myInput != None:
-    #             myInput.close()
-    #     self.mapMinimumItemUtility = HashMap()
     #     try:
     #         tree = UPTree()
     #         myInput = BufferedReader(InputStreamReader(FileInputStream(File(input))))
