@@ -9,7 +9,7 @@ class Item(object):
             pass
         else:
             self.utility = utility
-        print(self.name, self.utility)
+        # print(self.name, self.utility)
 
     # ## method to get node utility
     def getUtility(self):
