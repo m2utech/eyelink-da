@@ -8,7 +8,7 @@ from common import es_api
 from common import es_query
 from config import efsl_config as config
 from consts import consts
-from common import util
+from common import utils
 
 import ad_clustering
 import ad_matching
@@ -80,8 +80,8 @@ class SocketThread(object):
                 tInterval = json_dict['tInterval']
                 nCluster = json_dict['nCluster']
                 # check dateformat and convert UTC datetime
-                sDate = util.checkDatetime(sDate, consts.DATETIME)
-                eDate = util.checkDatetime(eDate, consts.DATETIME)
+                sDate = utils.checkDatetime(sDate, consts.DATETIME)
+                eDate = utils.checkDatetime(eDate, consts.DATETIME)
 
                 print(sDate, eDate)
                 ##### Create Patterns #####
@@ -99,7 +99,7 @@ class SocketThread(object):
                             if CODE is 1:
                                 self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                             else:
-                                new_sDate, new_eDate = util.getStartEndDateByDay(1, True, consts.DATETIME)
+                                new_sDate, new_eDate = utils.getStartEndDateByDay(1, True, consts.DATETIME)
                                 self.createPattern(esIndex, docType, new_sDate, new_eDate, tInterval)
                                 self.loadMasterPattern(esIndex, docType)
                                 self.matchPattern(esIndex, docType, sDate, eDate, tInterval)

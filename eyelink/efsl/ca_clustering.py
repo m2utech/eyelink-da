@@ -16,7 +16,7 @@ from common import es_query
 from common import converter
 from config import efsl_config as config
 from consts import consts
-from common import util
+from common import utils
 
 logger = logging.getLogger(config.logger_name)
 DA_INDEX = config.es_index
@@ -27,7 +27,7 @@ MV_method = config.mv_method
 
 
 def main(esIndex, docType, sDate, eDate, tInterval, nCluster):
-    daTime = util.getToday(True, consts.DATETIME)
+    daTime = utils.getToday(True, consts.DATETIME)
     logger.debug("[CA] create time range by time interval ...")
     dateRange = getDateRange(sDate, eDate, tInterval)
     logger.debug("[CA] get trainning dataset by multiprocessing")
@@ -47,7 +47,7 @@ def main(esIndex, docType, sDate, eDate, tInterval, nCluster):
 def sendAlarm(daTime):
     logger.debug("[CA] send Alarm message for analysis completion")
     sendData = {}
-    sendData['timestamp'] = util.getToday(True, consts.DATETIME)
+    sendData['timestamp'] = utils.getToday(True, consts.DATETIME)
     sendData['applicationType'] = config.alarm_info['CA']['appType']
     sendData['agentId'] = config.alarm_info['CA']['agentId']
     sendData['alarmType'] = config.alarm_info['CA']['alarmType']
@@ -62,14 +62,14 @@ def getDateRange(sDate, eDate, tInterval):
     s_dt = datetime.strptime(sDate.replace('T', ' ').replace('Z', ''), consts.PY_DATETIME)
     e_dt = datetime.strptime(eDate.replace('T', ' ').replace('Z', ''), consts.PY_DATETIME)
     dateRange = []
-    for dt in util.datetime_range(s_dt, e_dt, {TimeUnit: tInterval}):
+    for dt in utils.datetime_range(s_dt, e_dt, {TimeUnit: tInterval}):
         dateRange.append(dt)
     dateRange = pd.DataFrame(dateRange, columns=[DataIndex])
     return dateRange
 
 
 def getDataset(sDate, eDate, esIndex, docType):
-    idxList = util.getIndexDateList(esIndex+'-', sDate, eDate, consts.DATE)
+    idxList = utils.getIndexDateList(esIndex + '-', sDate, eDate, consts.DATE)
     body = es_query.getCorecodeDataByRange(sDate, eDate)
     dataset = pd.DataFrame()
     for idx in idxList:

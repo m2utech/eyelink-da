@@ -5,7 +5,7 @@ from common.daemon import Daemon
 from common.logger import getLogger
 from config import efsl_config as config
 from consts import consts
-from common import util
+from common import utils
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -73,28 +73,28 @@ class Scheduler(object):
 
     def job_CA_daily(self):
         logger.debug("== start Daily Cluster Analysis for {} ...".format(product['productName']))
-        sDate, eDate = util.getTimeRangeByDay(ca_daily['range'], consts.DATETIMEZERO)
+        sDate, eDate = utils.getTimeRangeByDay(ca_daily['range'], consts.DATETIMEZERO)
         self.sendData("2000", "corecode", "corecode", sDate, eDate, ca_daily['interval'], ca_n_cluster)
 
     def job_CA_weekly(self):
         logger.debug("== start Weekly Cluster Analysis for {} ...".format(product['productName']))
-        sDate, eDate = util.getTimeRangeByDay(ca_weekly['range'], consts.DATETIMEZERO)
+        sDate, eDate = utils.getTimeRangeByDay(ca_weekly['range'], consts.DATETIMEZERO)
         self.sendData("2000", "corecode", "corecode", sDate, eDate, ca_weekly['interval'], ca_n_cluster)
 
     def job_CP(self):
         # logger.debug("========== CP test ==========")
         logger.debug("== start Create Patterns for {} ...".format(product['productName']))
-        sDate, eDate = util.getStartEndDateByHour(ad_cp_sched['range'], False, consts.DATETIMEZERO)
-        sDate = util.convertDefaultDate(sDate)
-        eDate = util.convertDefaultDate(eDate)
+        sDate, eDate = utils.getStartEndDateByHour(ad_cp_sched['range'], False, consts.DATETIMEZERO)
+        sDate = utils.convertDefaultDate(sDate)
+        eDate = utils.convertDefaultDate(eDate)
         self.sendData("0000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 
     def job_PM(self):
         # logger.debug("========== PM test ==========")
         logger.debug("== start Pattern Matching for {} ...".format(product['productName']))
-        sDate, eDate = util.getStartEndDateByMinute(ad_pm_sched['range'], False, consts.DATETIMEZERO)
-        sDate = util.convertDefaultDate(sDate)
-        eDate = util.convertDefaultDate(eDate)
+        sDate, eDate = utils.getStartEndDateByMinute(ad_pm_sched['range'], False, consts.DATETIMEZERO)
+        sDate = utils.convertDefaultDate(sDate)
+        eDate = utils.convertDefaultDate(eDate)
         self.sendData("1000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 
 
