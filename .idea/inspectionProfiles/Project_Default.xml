@@ -18,5 +18,15 @@
         </value>
       </option>
     </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="list.hashCode" />
+          <option value="common_modules" />
+          <option value="setDirPath" />
+          <option value="predictor.CPTplus.testCPTPlus.SetPackagePath" />
+        </list>
+      </option>
+    </inspection_tool>
   </profile>
 </component>

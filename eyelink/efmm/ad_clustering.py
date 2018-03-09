@@ -13,7 +13,7 @@ from common import converter as efmm_convert
 from common import learn_utils
 from config import config
 from consts import consts
-from common import util
+from common import utils
 
 
 DA_INDEX = config.da_index
@@ -22,11 +22,11 @@ logger = logging.getLogger(config.logger_name['efmm'])
 
 
 def main(esIndex, docType, sDate, eDate, masterData, tInterval):
-    saveID = util.getToday(True, consts.DATE)
+    saveID = utils.getToday(True, consts.DATE)
     saveID = saveID.replace('Z', '')
     efmm_index = config.efmm_index[esIndex][docType]['INDEX']
     print(efmm_index)
-    idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
+    idxList = utils.getIndexDateList(efmm_index + '-', sDate, eDate, consts.DATE)
     body = efmm_query.getOeeDataByRange(sDate, eDate)
     logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
 
@@ -131,7 +131,7 @@ def createPatternData(dataset, masterData, masterInfo, saveID, c_pdQ, c_piQ, c_n
     for p in procs:
         p.start()
 
-    createDatetime = util.getToday(True, consts.DATETIME)
+    createDatetime = utils.getToday(True, consts.DATETIME)
     for col_name in col_list:
         pData[col_name] = pdQ[col_name].get()
         pInfo[col_name] = piQ[col_name].get()

@@ -8,7 +8,7 @@ from common import es_api as efmm_es
 from common import es_query as efmm_query
 from config import config
 from consts import consts
-from common import util
+from common import utils
 
 import ad_clustering
 import ad_matching
@@ -85,8 +85,8 @@ class EfmmSocketThread(object):
                 cid = json_dict['cid']
                 nCluster = json_dict['nCluster']
                 # check dateformat and convert UTC datetime
-                sDate = util.checkDatetime(sDate, consts.DATETIME)
-                eDate = util.checkDatetime(eDate, consts.DATETIME)
+                sDate = utils.checkDatetime(sDate, consts.DATETIME)
+                eDate = utils.checkDatetime(eDate, consts.DATETIME)
 
 
                 ##### Create Patterns #####
@@ -105,7 +105,7 @@ class EfmmSocketThread(object):
                             if NOTCHING_CODE is 1:
                                 self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                             else:
-                                new_sDate, new_eDate = util.getStartEndDateByDay(1, True, consts.DATETIME)
+                                new_sDate, new_eDate = utils.getStartEndDateByDay(1, True, consts.DATETIME)
                                 self.createPattern(esIndex, docType, new_sDate, new_eDate, tInterval)
                                 self.loadMasterPattern(esIndex, docType)
                                 self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
@@ -117,7 +117,7 @@ class EfmmSocketThread(object):
                             if STACKING_CODE is 1:
                                 self.matchPattern(esIndex, docType, sDate, eDate, tInterval)
                             else:
-                                new_sDate, new_eDate = util.getStartEndDateByDay(1, True, consts.DATETIME)
+                                new_sDate, new_eDate = utils.getStartEndDateByDay(1, True, consts.DATETIME)
                                 self.createPattern(esIndex, docType, new_sDate, new_eDate, tInterval)
                                 self.loadMasterPattern(esIndex, docType)
                                 self.matchPattern(esIndex, docType, sDate, eDate, tInterval)

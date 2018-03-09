@@ -5,7 +5,7 @@ from common.daemon import Daemon
 from common.logger import getEfmmLogger
 from config import config
 from consts import consts
-from common import util
+from common import utils
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -43,32 +43,32 @@ class Scheduler(object):
 
     def job_notching_CP(self):
         logger.debug("== start CreatePatterns for Notching OEE ==")
-        sDate, eDate = util.getStartEndDateByHour(cp_opt['range'], False, consts.DATETIMEZERO)
+        sDate, eDate = utils.getStartEndDateByHour(cp_opt['range'], False, consts.DATETIMEZERO)
         self.sendData("0000", "notching", "oee", sDate, eDate, ad_tInterval, ad_cid, ad_n_cluster)
 
     def job_notching_PM(self):
         logger.debug("== start PatternMatching for Notching OEE ==")
-        sDate, eDate = util.getStartEndDateByMinute(pm_opt['range'], False, consts.DATETIMEZERO)
+        sDate, eDate = utils.getStartEndDateByMinute(pm_opt['range'], False, consts.DATETIMEZERO)
         self.sendData("1000", "notching", "oee", sDate, eDate, ad_tInterval, ad_cid, ad_n_cluster)
 
     def job_stacking_CP(self):
         logger.debug("== start CreatePatterns for Stacking OEE ==")
-        sDate, eDate = util.getStartEndDateByHour(cp_opt['range'], False, consts.DATETIMEZERO)
+        sDate, eDate = utils.getStartEndDateByHour(cp_opt['range'], False, consts.DATETIMEZERO)
         self.sendData("0000", "stacking", "oee", sDate, eDate, ad_tInterval, ad_cid, ad_n_cluster)
 
     def job_stacking_PM(self):
         logger.debug("== start PatternMatching for Stacking OEE ==")
-        sDate, eDate = util.getStartEndDateByMinute(pm_opt['range'], False, consts.DATETIMEZERO)
+        sDate, eDate = utils.getStartEndDateByMinute(pm_opt['range'], False, consts.DATETIMEZERO)
         self.sendData("1000", "stacking", "oee", sDate, eDate, ad_tInterval, ad_cid, ad_n_cluster)
 
     def job_stacking_CA_day(self):
         logger.debug("== start Daily CA for Stacking STATUS ==")
-        sDate, eDate = util.getTimeRangeByDay(ca_daily['range'], consts.DATETIMEZERO)
+        sDate, eDate = utils.getTimeRangeByDay(ca_daily['range'], consts.DATETIMEZERO)
         self.sendData("2000", "stacking", "status", sDate, eDate, ca_daily['interval'], ca_cid, ca_n_cluster)
 
     def job_stacking_CA_week(self):
         logger.debug("== start Weekly CA for Stacking STATUS ==")
-        sDate, eDate = util.getTimeRangeByDay(ca_weekly['range'], consts.DATETIMEZERO)
+        sDate, eDate = utils.getTimeRangeByDay(ca_weekly['range'], consts.DATETIMEZERO)
         self.sendData("2000", "stacking", "status", sDate, eDate, ca_weekly['interval'], ca_cid, ca_n_cluster)
 
     def sendData(self, jobcode, esIndex, docType, sDate, eDate, tInterval, cid, nCluster):

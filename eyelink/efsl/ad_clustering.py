@@ -13,7 +13,7 @@ from common import converter
 from common import learn_utils
 from config import efsl_config as config
 from consts import consts
-from common import util
+from common import utils
 
 logger = logging.getLogger(config.logger_name)
 DA_INDEX = config.es_index
@@ -27,7 +27,7 @@ factors = config.AD_opt['factors']
 
 
 def main(esIndex, docType, sDate, eDate, masterData, tInterval):
-    saveID = util.getToday(True, consts.DATE)
+    saveID = utils.getToday(True, consts.DATE)
     saveID = saveID.replace('Z', '')
     dataset = getDataset(sDate, eDate, esIndex, docType)
     # dataset is empty
@@ -58,7 +58,7 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
 
 
 def getDataset(sDate, eDate, esIndex, docType):
-    idxList = util.getIndexDateList(esIndex+'-', sDate, eDate, consts.DATE)
+    idxList = utils.getIndexDateList(esIndex + '-', sDate, eDate, consts.DATE)
     body = es_query.getCorecodeTargetDataByRange(node_id, sDate, eDate)
     logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
     dataset = pd.DataFrame()
@@ -111,7 +111,7 @@ def createPatternData(dataset, masterData, masterInfo, saveID):
     for p in procs:
         p.start()
 
-    createDatetime = util.getToday(True, consts.DATETIME)
+    createDatetime = utils.getToday(True, consts.DATETIME)
     for col_name in factors:
         pData[col_name] = pdQ[col_name].get()
         pInfo[col_name] = piQ[col_name].get()

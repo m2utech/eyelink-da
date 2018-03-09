@@ -1,0 +1,3 @@
+
+class Predictor(object):
+    pass

@@ -8,7 +8,7 @@ def main(dirPath):
         #  the path for saving the patterns found
         output = "./output.txt"
         #  the minimum utility threshold
-        minutil = 35
+        minutil = 30
 
         algo = AlgoUSpan()
         #  set the maximum pattern length (optional)
@@ -16,7 +16,7 @@ def main(dirPath):
         #  run the algorithm
         algo.runAlgorithm(input, output, minutil)
         #  print statistics
-        # algo.printStatistics()
+        algo.printStatistics()
 
 
 def fileToPath(dirPath, filename):

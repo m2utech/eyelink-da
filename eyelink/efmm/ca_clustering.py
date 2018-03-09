@@ -17,14 +17,14 @@ from common import converter as efmm_convert
 from common import learn_utils
 from config import config
 from consts import consts
-from common import util
+from common import utils
 
 DA_INDEX = config.da_index
 logger = logging.getLogger(config.logger_name['efmm'])
 
 
 def main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
-    daTime = util.getToday(True, consts.DATETIME)
+    daTime = utils.getToday(True, consts.DATETIME)
     timeUnit = config.CA_opt['timeUnit']
 
     logger.debug("[CA] create time range by time interval ...")
@@ -47,7 +47,7 @@ def main(esIndex, docType, sDate, eDate, tInterval, cid, nCluster):
 def sendAlarm(daTime):
     logger.debug("[CA] send Alarm message for analysis completion")
     sendData = {}
-    sendData['timestamp'] = util.getToday(True, consts.DATETIME)
+    sendData['timestamp'] = utils.getToday(True, consts.DATETIME)
     sendData['applicationType'] = config.alarm_info['CA']['appType']
     sendData['agentId'] = config.alarm_info['CA']['agentId']
     sendData['alarmType'] = config.alarm_info['CA']['alarmType']
@@ -62,7 +62,7 @@ def getDateRange(sDate, eDate, timeUnit, tInterval):
     s_dt = datetime.strptime(sDate.replace('T', ' ').replace('Z', ''), consts.PY_DATETIME)
     e_dt = datetime.strptime(eDate.replace('T', ' ').replace('Z', ''), consts.PY_DATETIME)
     dateRange = []
-    for dt in util.datetime_range(s_dt, e_dt, {timeUnit: tInterval}):
+    for dt in utils.datetime_range(s_dt, e_dt, {timeUnit: tInterval}):
         dateRange.append(dt)
     dateRange = pd.DataFrame(dateRange, columns=[config.CA_opt['index']])
     return dateRange
@@ -70,7 +70,7 @@ def getDateRange(sDate, eDate, timeUnit, tInterval):
 
 def getDataset(sDate, eDate, esIndex, docType, cid):
     efmm_index = config.efmm_index[esIndex][docType]['INDEX']
-    idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
+    idxList = utils.getIndexDateList(efmm_index + '-', sDate, eDate, consts.DATE)
     body = efmm_query.getStatusDataByRange(sDate, eDate, cid)
 
     dataset = pd.DataFrame()

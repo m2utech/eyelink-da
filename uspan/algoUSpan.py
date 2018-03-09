@@ -18,7 +18,7 @@ class AlgoUSpan(object):
 
         self.patternCount = 0
         self.writer = None
-        # self.BUFFERS_SIZE = 2000
+        self.BUFFERS_SIZE = 2000
         self.patternBuffer = None
 
         #  if true, debugging information will be shown in the console
@@ -35,12 +35,12 @@ class AlgoUSpan(object):
 
     def runAlgorithm(self, inputFile, output, minUtility):
         self.input = inputFile
-        # //self.patternBuffer = [None] * self.BUFFERS_SIZE
-        self.patternBuffer = []
+        self.patternBuffer = [0] * self.BUFFERS_SIZE
+        # self.patternBuffer = []
         self.maxMemory = 0
         self.startTimestamp = time.time()*1000
         print("startTimestamp : ", self.startTimestamp)
-        # self.writer = BufferedWriter(FileWriter(output))
+        self.writer = open(output, 'w')
         self.minUtility = minUtility
 
         mapItemToSWU = {}
@@ -82,6 +82,7 @@ class AlgoUSpan(object):
                 consideredItems.clear()
                 sequenceCount += 1
         except:
+            self.writer.close()
             traceback.print_exc()
         finally:
             myInput.close()
@@ -245,6 +246,7 @@ class AlgoUSpan(object):
                     print("\n")
 
         except:
+            self.writer.close()
             traceback.print_exc()
         finally:
             myInput.close()
@@ -255,6 +257,7 @@ class AlgoUSpan(object):
 
         self.checkMemory()
 
+        self.writer.close()
 
         self.startTimestamp = time.time() * 1000
 
@@ -301,10 +304,7 @@ class AlgoUSpan(object):
                 #  For each sequence
                 for qmatrix in database:
                     #  if the item appear in that sequence (in that qmatrix)
-                    # row = self.binary_search(qmatrix.itemNames, 5, 0, len(qmatrix.itemNames))
-                    pos = np.searchsorted(qmatrix.itemNames, item)
-                    row = pos if pos != len(qmatrix.itemNames) and qmatrix.itemNames[pos] == item else -1
-                    # Arrays.binarySearch(qmatrix.itemNames, item)
+                    row = self.binarySearch(qmatrix.itemNames, item)
                     if row >= 0:
                         #  create a list to store the positions (itemsets) where this item
                         #  appear in that sequence
@@ -336,311 +336,366 @@ class AlgoUSpan(object):
 
                 prefix[0] = item
                 if totalUtility >= self.minUtility:
-                    writeOut(prefix, 1, totalUtility)
+                    self.writeOut(prefix, 1, totalUtility)
                     ################# 2018. 02. 20 ##################
 
                 if totalUtility + totalRemainingUtility >= self.minUtility:
                     if 1 < self.maxPatternLength:
-                        uspan(prefix, 1, matrixProjections, 1)
-        MemoryLogger.getInstance().checkMemory()
-
-    # class Pair(object):
-    #     """ generated source for class Pair """
-    #     swu = int()
-    #     lastSID = None
-
-    # def uspan(self, prefix, prefixLength, projectedDatabase, itemCount):
-    #     """ generated source for method uspan """
-    #     if self.DEBUG:
-    #         i = 0
-    #         while i < prefixLength:
-    #             print(prefix[i] + " ", end="")
-    #             i += 1
-    #         print()
-    #         print()
-    #     mapItemSWU = HashMap()
-    #     for qmatrix in projectedDatabase:
-    #         for position in qmatrix.positions:
-    #             row = position.row + 1
-    #             column = position.column
-    #             localSequenceUtility = qmatrix.getLocalSequenceUtility(position)
-    #             while len(length):
-    #                 item = qmatrix.getItemNames()[row]
-    #                 if qmatrix.getItemUtility(row, column) > 0:
-    #                     currentSWU = mapItemSWU.get(item)
-    #                     if currentSWU == None:
-    #                         pair = self.Pair()
-    #                         pair.lastSID = qmatrix
-    #                         pair.swu = position.utility + localSequenceUtility
-    #                         mapItemSWU.put(item, pair)
-    #                     elif currentSWU.lastSID != qmatrix:
-    #                         currentSWU.lastSID = qmatrix
-    #                         currentSWU.swu += position.utility + localSequenceUtility
-    #                     else:
-    #                         tempSWU = position.utility + localSequenceUtility
-    #                         if tempSWU > currentSWU.swu:
-    #                             currentSWU.swu = tempSWU
-    #                 row += 1
-    #     for entry in mapItemSWU.entrySet():
-    #         itemSWU = entry.getValue()
-    #         if itemSWU.swu >= self.minUtility:
-    #             item = entry.getKey()
-    #             totalUtility = 0
-    #             totalRemainingUtility = 0
-    #             matrixProjections = ArrayList()
-    #             for qmatrix in projectedDatabase:
-    #                 rowItem = Arrays.binarySearch(qmatrix.getItemNames(), item)
-    #                 if rowItem >= 0:
-    #                     maxUtility = 0
-    #                     maxRemainingUtility = 0
-    #                     positions = ArrayList()
-    #                     for position in qmatrix.positions:
-    #                         column = position.column
-    #                         newItemUtility = qmatrix.getItemUtility(rowItem, column)
-    #                         if newItemUtility > 0:
-    #                             newPrefixUtility = position.utility + newItemUtility
-    #                             positions.add(MatrixPosition(rowItem, column, newPrefixUtility))
-    #                             if newPrefixUtility > maxUtility:
-    #                                 maxUtility = newPrefixUtility
-    #                                 remaining = qmatrix.getRemainingUtility(rowItem, column)
-    #                                 if remaining > 0 and maxRemainingUtility == 0:
-    #                                     maxRemainingUtility = remaining
-    #                     totalUtility += maxUtility
-    #                     totalRemainingUtility += maxRemainingUtility
-    #                     projection = QMatrixProjection(qmatrix, positions)
-    #                     matrixProjections.add(projection)
-    #             prefix[prefixLength] = item
-    #             if totalUtility >= self.minUtility:
-    #                 writeOut(prefix, prefixLength + 1, totalUtility)
-    #             if totalUtility + totalRemainingUtility >= self.minUtility:
-    #                 if itemCount + 1 < self.maxPatternLength:
-    #                     self.uspan(prefix, prefixLength + 1, matrixProjections, itemCount + 1)
-    #     mapItemSWU.clear()
-    #     for qmatrix in projectedDatabase:
-    #         for position in qmatrix.positions:
-    #             localSequenceUtility = qmatrix.getLocalSequenceUtility(position)
-    #             row = 0
-    #             while len(length):
-    #                 item = qmatrix.getItemNames()[row]
-    #                 column = position.column + 1
-    #                 while len(length):
-    #                     if qmatrix.getItemUtility(row, column) > 0:
-    #                         currentSWU = mapItemSWU.get(item)
-    #                         if currentSWU == None:
-    #                             pair = self.Pair()
-    #                             pair.lastSID = qmatrix
-    #                             pair.swu = position.utility + localSequenceUtility
-    #                             mapItemSWU.put(item, pair)
-    #                         elif currentSWU.lastSID != qmatrix:
-    #                             currentSWU.lastSID = qmatrix
-    #                             currentSWU.swu += position.utility + localSequenceUtility
-    #                         else:
-    #                             tempSWU = position.utility + localSequenceUtility
-    #                             if tempSWU > currentSWU.swu:
-    #                                 currentSWU.swu = tempSWU
-    #                         break
-    #                     column += 1
-    #                 row += 1
-    #     for entry in mapItemSWU.entrySet():
-    #         itemSWU = entry.getValue()
-    #         if itemSWU.swu >= self.minUtility:
-    #             item = entry.getKey()
-    #             totalUtility = 0
-    #             totalRemainingUtility = 0
-    #             matrixProjections = ArrayList()
-    #             for qmatrix in projectedDatabase:
-    #                 rowItem = Arrays.binarySearch(qmatrix.getItemNames(), item)
-    #                 if rowItem >= 0:
-    #                     maxUtility = 0
-    #                     maxRemainingUtility = 0
-    #                     positions = ArrayList()
-    #                     for position in qmatrix.positions:
-    #                         column = position.column + 1
-    #                         while len(length):
-    #                             newItemUtility = qmatrix.getItemUtility(rowItem, column)
-    #                             if newItemUtility > 0:
-    #                                 newPrefixUtility = position.utility + newItemUtility
-    #                                 positions.add(MatrixPosition(rowItem, column, newPrefixUtility))
-    #                                 if newPrefixUtility > maxUtility:
-    #                                     maxUtility = newPrefixUtility
-    #                                     remaining = qmatrix.getRemainingUtility(rowItem, column)
-    #                                     if remaining > 0 and maxRemainingUtility == 0:
-    #                                         maxRemainingUtility = remaining
-    #                             column += 1
-    #                     totalUtility += maxUtility
-    #                     totalRemainingUtility += maxRemainingUtility
-    #                     projection = QMatrixProjection(qmatrix, positions)
-    #                     matrixProjections.add(projection)
-    #             prefix[prefixLength] = -1
-    #             prefix[prefixLength + 1] = item
-    #             if totalUtility >= self.minUtility:
-    #                 writeOut(prefix, prefixLength + 2, totalUtility)
-    #             if totalUtility + totalRemainingUtility >= self.minUtility:
-    #                 if itemCount + 1 < self.maxPatternLength:
-    #                     self.uspan(prefix, prefixLength + 2, matrixProjections, itemCount + 1)
-    #     MemoryLogger.getInstance().checkMemory()
+                        self.uspan(prefix, 1, matrixProjections, 1)
+        self.checkMemory()
 
 
 
+    def checkIfUtilityOfPatternIsCorrect(self, prefix, prefixLength, utility):
+        calculatedUtility = 0
+        myInput = open(self.input, 'r')
+
+        try:
+            for thisLine in myInput.readlines():
+                #  if the line is a comment, is  empty or is a kind of metadata, skip it
+                if (not thisLine) or (thisLine[:1] == '#') or (thisLine[:1] == '%') or (thisLine[:1] == '@'):
+                    continue
+
+                tokens = thisLine.split(" ")
+                tokensLength = len(tokens) - 3
+
+                sequence = [None] * tokensLength
+                sequenceUtility = [None] * tokensLength
+
+                for i in range(tokensLength):
+                    currentToken = tokens[i]
+
+                    if(len(currentToken) == 0):
+                        continue
+
+                    item = None
+                    itemUtility = None
+
+                    if currentToken == "-1":
+                        item = -1
+                        itemUtility = 0
+                    else:
+                        positionLeftBracketString = currentToken.index('[')
+                        positionRightBracketString = currentToken.index(']')
+                        itemString = currentToken[:positionLeftBracketString]
+                        item = int(itemString)
+
+                        utilityString = currentToken[positionLeftBracketString+1:positionRightBracketString]
+                        itemUtility = int(utilityString)
+
+                    sequence[i] = item
+                    sequenceUtility[i] = itemUtility
+
+                util = self.tryToMatch(sequence, sequenceUtility, prefix, prefixLength, 0, 0, 0)
+                calculatedUtility += util
+        except:
+            self.writer.close()
+            traceback.print_exc()
+        finally:
+            myInput.close()
+
+        if calculatedUtility != utility:
+            print(" ERROR, WRONG UTILITY FOR PATTERN : ", end="")
+            for i in range(prefixLength):
+                print(prefix[i], end="")
+            print(" utility is: {} but should be: ".format(utility,calculatedUtility))
+            input() # like java's system.in.read()
 
 
-    # def writeOut(self, prefix, prefixLength, utility):
-    #     """ generated source for method writeOut """
-    #     self.patternCount += 1
-    #     buffer_ = StringBuilder()
-    #     if self.SAVE_RESULT_EASIER_TO_READ_FORMAT == False:
-    #         i = 0
-    #         while i < prefixLength:
-    #             buffer_.append(prefix[i])
-    #             buffer_.append(' ')
-    #             i += 1
-    #         buffer_.append("-1 #UTIL: ")
-    #         buffer_.append(utility)
-    #     else:
-    #         buffer_.append('<')
-    #         buffer_.append('(')
-    #         i = 0
-    #         while i < prefixLength:
-    #             if prefix[i] == -1:
-    #                 buffer_.append(")(")
-    #             else:
-    #                 buffer_.append(prefix[i])
-    #             i += 1
-    #         buffer_.append(")>:")
-    #         buffer_.append(utility)
-    #     self.writer.write(buffer_.__str__())
-    #     self.writer.newLine()
-    #     if self.DEBUG:
-    #         print(" SAVING : " + buffer_.__str__())
-    #         print()
-    #         checkIfUtilityOfPatternIsCorrect(prefix, prefixLength, utility)
+    def tryToMatch(self, sequence, sequenceUtility, prefix, prefixLength, prefixPos, seqPos, utility):
+        otherUtilityValues = []
+        posP = prefixPos
+        posS = seqPos
+        previousPrefixPos = prefixPos
+        itemsetUtility = 0
+        while (posP < prefixLength) & (posS < len(sequence)):
+            if prefix[posP] == -1 and sequence[posS] == -1:
+                posS += 1
+                otherUtility = self.tryToMatch(sequence, sequenceUtility, prefix, prefixLength, previousPrefixPos, posS, utility)
+                otherUtilityValues.append(otherUtility)
 
-    # def checkIfUtilityOfPatternIsCorrect(self, prefix, prefixLength, utility):
-    #     """ generated source for method checkIfUtilityOfPatternIsCorrect """
-    #     calculatedUtility = 0
-    #     myInput = BufferedReader(InputStreamReader(FileInputStream(File(self.input))))
-    #     try:
-    #         thisLine = None
-    #         while (thisLine = myInput.readLine()) != None:
-    #             if thisLine.isEmpty() == True or thisLine.charAt(0) == '#' or thisLine.charAt(0) == '%' or thisLine.charAt(0) == '@':
-    #                 continue 
-    #             tokens = thisLine.split(" ")
-    #             tokensLength = len(tokens)
-    #             sequence = [None] * tokensLength
-    #             sequenceUtility = [None] * tokensLength
-    #             i = 0
-    #             while i < tokensLength:
-    #                 currentToken = tokens[i]
-    #                 if 0 == len(currentToken):
-    #                     i += 1
-    #                     continue 
-    #                 item = int()
-    #                 itemUtility = int()
-    #                 if currentToken == "-1":
-    #                     item = -1
-    #                     itemUtility = 0
-    #                 else:
-    #                     positionLeftBracketString = currentToken.indexOf('[')
-    #                     positionRightBracketString = currentToken.indexOf(']')
-    #                     itemString = currentToken.substring(0, positionLeftBracketString)
-    #                     item = Integer.parseInt(itemString)
-    #                     utilityString = currentToken.substring(positionLeftBracketString + 1, positionRightBracketString)
-    #                     itemUtility = Integer.parseInt(utilityString)
-    #                 sequence[i] = item
-    #                 sequenceUtility[i] = itemUtility
-    #                 i += 1
-    #             util = tryToMatch(sequence, sequenceUtility, prefix, prefixLength, 0, 0, 0)
-    #             calculatedUtility += util
-    #     except Exception as e:
-    #         e.printStackTrace()
-    #     finally:
-    #         if myInput != None:
-    #             myInput.close()
-    #     if calculatedUtility != utility:
-    #         print(" ERROR, WRONG UTILITY FOR PATTERN : ", end="")
-    #         i = 0
-    #         while i < prefixLength:
-    #             print(prefix[i], end="")
-    #             i += 1
-    #         print(" utility is: " + utility + " but should be: " + calculatedUtility)
-    #         System.in_.read()
+                posP += 1
+                utility += itemsetUtility
+                itemsetUtility = 0
+                previousPrefixPos = posP
 
-    # def tryToMatch(self, sequence, sequenceUtility, prefix, prefixLength, prefixPos, seqPos, utility):
-    #     """ generated source for method tryToMatch """
-    #     otherUtilityValues = ArrayList()
-    #     posP = prefixPos
-    #     posS = seqPos
-    #     previousPrefixPos = prefixPos
-    #     itemsetUtility = 0
-    #     while posP < prefixLength & len(sequence):
-    #         if prefix[posP] == -1 and sequence[posS] == -1:
-    #             posS += 1
-    #             otherUtility = self.tryToMatch(sequence, sequenceUtility, prefix, prefixLength, previousPrefixPos, posS, utility)
-    #             otherUtilityValues.add(otherUtility)
-    #             posP += 1
-    #             utility += itemsetUtility
-    #             itemsetUtility = 0
-    #             previousPrefixPos = posP
-    #         elif prefix[posP] == -1:
-    #             while sequence[posS] != -1 and len(sequence):
-    #                 posS += 1
-    #             otherUtility = self.tryToMatch(sequence, sequenceUtility, prefix, prefixLength, previousPrefixPos, posS, utility)
-    #             otherUtilityValues.add(otherUtility)
-    #             utility += itemsetUtility
-    #             itemsetUtility = 0
-    #             previousPrefixPos = posP
-    #         elif sequence[posS] == -1:
-    #             posP = previousPrefixPos
-    #             itemsetUtility = 0
-    #             posS += 1
-    #         elif prefix[posP] == sequence[posS]:
-    #             posP += 1
-    #             itemsetUtility += sequenceUtility[posS]
-    #             posS += 1
-    #             if posP == prefixLength:
-    #                 while sequence[posS] != -1 and len(sequence):
-    #                     posS += 1
-    #                 otherUtility = self.tryToMatch(sequence, sequenceUtility, prefix, prefixLength, previousPrefixPos, posS, utility)
-    #                 otherUtilityValues.add(otherUtility)
-    #                 utility += itemsetUtility
-    #         elif prefix[posP] != sequence[posS]:
-    #             posS += 1
-    #     max = 0
-    #     if posP == prefixLength:
-    #         max = utility
-    #     for utilValue in otherUtilityValues:
-    #         if utilValue > utility:
-    #             max = utilValue
-    #     return max
+            elif prefix[posP] == -1:
+                while (posS < len(sequence)) and (sequence[posS] != -1):
+                    posS += 1
+                otherUtility = self.tryToMatch(sequence, sequenceUtility, prefix, prefixLength, previousPrefixPos, posS, utility)
+                otherUtilityValues.append(otherUtility)
+                utility += itemsetUtility
+                itemsetUtility = 0
+                previousPrefixPos = posP
 
-    # def printStatistics(self):
-    #     """ generated source for method printStatistics """
-    #     print("=============  USPAN ALGORITHM v2.14 - STATS ==========")
-    #     print(" Total time ~ " + (self.endTimestamp - self.startTimestamp) + " ms")
-    #     print(" Max Memory ~ " + MemoryLogger.getInstance().getMaxMemory() + " MB")
-    #     print(" High-utility sequential pattern count : " + self.patternCount)
-    #     print("========================================================")
+            elif sequence[posS] == -1:
+                posP = previousPrefixPos
+                itemsetUtility = 0
+                posS += 1
+
+            elif prefix[posP] == sequence[posS]:
+                posP += 1
+                itemsetUtility += sequenceUtility[posS]
+                posS += 1
+                if posP == prefixLength:
+                    while (posS < len(sequence)) and (sequence[posS] != -1):
+                        posS += 1
+                    otherUtility = self.tryToMatch(sequence, sequenceUtility, prefix, prefixLength, previousPrefixPos, posS, utility)
+                    otherUtilityValues.append(otherUtility)
+                    utility += itemsetUtility
+
+            elif prefix[posP] != sequence[posS]:
+                posS += 1
+
+        max = 0
+        if posP == prefixLength:
+            max = utility
+        for utilValue in otherUtilityValues:
+            if utilValue > utility:
+                max = utilValue
+
+        return max
+        ### // end of tryToMatch()
+
+    def printStatistics(self):
+        print("=================  USPAN ALGORITHM STATS ===============")
+        print(" Total time ~ {} ms".format(int(round(self.endTimestamp - self.startTimestamp))))
+        print(" Max Memory ~ {} MB".format(self.maxMemory))
+        print(" High-utility sequential pattern count : {}".format(self.patternCount))
+        print("========================================================")
 
     def checkMemory(self):
         # unit : MB
         currentMemory = psutil.virtual_memory().used / 1024 / 1024 / 1024
-        print("currentMemory : ", currentMemory)
+        # print("currentMemory : ", currentMemory)
         if currentMemory > self.maxMemory:
             self.maxMemory = currentMemory
 
     def setMaxPatternLength(self, maxPatternLength):
         self.maxPatternLength = maxPatternLength
 
-    def binarySearch(self, A, B):
-        idx = np.searchsorted(A,B)
+    def binarySearch(self, a, x):
+        pos = np.searchsorted(a, x)
+        return (pos if pos != len(a) and a[pos] == x else -1)
 
-        idx2 = np.minimum(len(A) - 1, np.searchsorted(A,B))
-        idx1 = np.maximum(0, idx2 - 1)
-        idx2_is_better = np.abs(A[idx1] - B) > np.abs(A[idx2] - B)
-        np.putmask(idx1, idx2_is_better, idx2)
-        return  A[idx1]
 
-    def binary_search(self, a, x, lo=0, hi=None):
-        hi = hi if hi is not None else len(a)  # hi defaults to len(a)
-        pos = bisect_left(a, x, lo, hi)  # find insertion position
-        return (pos if pos != hi and a[pos] == x else -1)  # don't walk off the end
+    def writeOut(self, prefix, prefixLength, utility):
+        self.patternCount += 1
+        buffer = []
+        if(self.SAVE_RESULT_EASIER_TO_READ_FORMAT == False):
+            # append each item of the pattern
+            for i in range(prefixLength):
+                buffer.append(prefix[i])
+                buffer.append(" ")
+
+            buffer.append("-1 #UTIL: ")
+            buffer.append(utility)
+        else:
+            buffer.append("<")
+            buffer.append("(")
+            for i in range(prefixLength):
+                if prefix[i] == -1:
+                    buffer.append(")(")
+                else:
+                    buffer.append(prefix[i])
+            buffer.append(")>:")
+            buffer.append(utility)
+        buffer = ''.join(map(str, buffer))
+
+        self.writer.writelines(buffer + '\n')
+
+        if self.DEBUG:
+            print("SAVING : {} \n".format(buffer))
+            #  check if the calculated utility is correct by reading the file for debugging purpose
+            self.checkIfUtilityOfPatternIsCorrect(prefix, prefixLength, utility)
+
+
+
+
+
+
+    def uspan(self, prefix, prefixLength, projectedDatabase, itemCount):
+        if self.DEBUG:
+            for i in range(prefixLength):
+                print("{} ".format(prefix[i]), end="")
+            print("\n")
+
+        #  =======================  I-CONCATENATIONS  ===========================/
+        #  We first try to perform I-Concatenations to grow the pattern larger.
+        #  we scan the projected database to calculated the SWU of each item that could
+        #  ne concatenated to the prefix
+        #  The following map will store for each item, their SWU (key: item value: swu)
+        mapItemSWU = {}
+
+        for qmatrix in projectedDatabase:
+
+            for position in qmatrix.positions:
+                row = position.row + 1
+                column = position.column
+                localSequenceUtility = qmatrix.getLocalSequenceUtility(position)
+
+                for row in range(row, len(qmatrix.getItemNames())):
+                    item = qmatrix.getItemNames()[row]
+                    if qmatrix.getItemUtility(row, column) > 0:
+                        currentSWU = mapItemSWU.get(item)
+                        if currentSWU == None:
+                            ######### TODO: inner class 처리 ###########
+                            pair = self.Pair()
+                            pair.lastSID = qmatrix
+                            pair.swu = position.utility + localSequenceUtility
+                            mapItemSWU[item] = pair
+
+                        elif currentSWU.lastSID != qmatrix:
+                            currentSWU.lastSID = qmatrix
+                            currentSWU.swu += position.utility + localSequenceUtility
+
+                        else:
+                            tempSWU = position.utility + localSequenceUtility
+                            if tempSWU > currentSWU.swu:
+                                currentSWU.swu = tempSWU
+
+
+        for key, value in mapItemSWU.items():
+            itemSWU = value
+            if itemSWU.swu >= self.minUtility:
+                item = key
+                totalUtility = 0
+                totalRemainingUtility = 0
+                matrixProjections = []
+                for qmatrix in projectedDatabase:
+                    rowItem = self.binarySearch(qmatrix.getItemNames(), item)
+
+                    if rowItem >= 0:
+                        positions = []
+                        maxUtility = 0
+                        maxRemainingUtility = 0
+
+                        #  for each position of the prefix
+                        for position in qmatrix.positions:
+                            column = position.column
+                            newItemUtility = qmatrix.getItemUtility(int(rowItem), int(column))
+                            if newItemUtility > 0:
+                                newPrefixUtility = position.utility + newItemUtility
+                                positions.append(MatrixPosition(rowItem, column, newPrefixUtility))
+                                if newPrefixUtility > maxUtility:
+                                    maxUtility = newPrefixUtility
+                                    remaining = qmatrix.getRemainingUtility(rowItem, column)
+                                    if remaining > 0 and maxRemainingUtility == 0:
+                                        maxRemainingUtility = remaining
+
+                        totalUtility += maxUtility
+                        totalRemainingUtility += maxRemainingUtility
+                        projection = QMatrixProjection()
+                        projection.qProjectionMatrix(qmatrix, positions)
+
+                        matrixProjections.append(projection)
+
+
+                prefix[prefixLength] = item
+                if totalUtility >= self.minUtility:
+                    self.writeOut(prefix, prefixLength + 1, totalUtility)
+
+                if totalUtility + totalRemainingUtility >= self.minUtility:
+                    if itemCount + 1 < self.maxPatternLength:
+                        self.uspan(prefix, prefixLength + 1, matrixProjections, itemCount + 1)
+
+        #  =======================  S-CONCATENATIONS  ===========================/
+        #  We will next look for S-Concatenations
+        #  We first clear the map for calculating the SWU of items to reuse it instead of creating a new one
+        mapItemSWU.clear()
+        #  Now, we will loop over sequences of the projected database to calculate the local SWU of each item
+        #  For each sequence in the projected database
+
+        for qmatrix in projectedDatabase:
+
+            for position in qmatrix.positions:
+                localSequenceUtility = qmatrix.getLocalSequenceUtility(position)
+
+                for row in range(len(qmatrix.getItemNames())):
+                    item = qmatrix.getItemNames()[row]
+
+                    for column in range(position.column+1,
+                                        len(qmatrix.originalMatrix.matrixItemUtility[row])):
+
+                        if qmatrix.getItemUtility(row, column) > 0:
+                            currentSWU = mapItemSWU.get(item)
+                            if currentSWU == None:
+                                ######### TODO: inner class 처리 ###########
+                                pair = self.Pair()
+                                pair.lastSID = qmatrix
+                                pair.swu = position.utility + localSequenceUtility
+                                mapItemSWU[item] = pair
+
+                            elif currentSWU.lastSID != qmatrix:
+                                currentSWU.lastSID = qmatrix
+                                currentSWU.swu += position.utility + localSequenceUtility
+
+                            else:
+                                tempSWU = position.utility + localSequenceUtility
+                                if tempSWU > currentSWU.swu:
+                                    currentSWU.swu = tempSWU
+                            #  we don't need to check the other column if we found one column where this item
+                            #  appears after the previous item
+                            break
+
+
+        for key, value in mapItemSWU.items():
+            itemSWU = value
+
+            if itemSWU.swu >= self.minUtility:
+                item = key
+                totalUtility = 0
+                totalRemainingUtility = 0
+                matrixProjections = []
+
+                for qmatrix in projectedDatabase:
+                    rowItem = self.binarySearch(qmatrix.getItemNames(), item)
+
+                    if rowItem >= 0:
+                        maxUtility = 0
+                        maxRemainingUtility = 0
+                        positions = []
+
+                        #  for each position of the prefix
+                        for position in qmatrix.positions:
+
+                            for column in range(position.column + 1,
+                                                len(qmatrix.originalMatrix.matrixItemUtility[rowItem])):
+                                newItemUtility = qmatrix.getItemUtility(int(rowItem), int(column))
+                                if newItemUtility > 0:
+                                    newPrefixUtility = position.utility + newItemUtility
+                                    positions.append(MatrixPosition(rowItem, column, newPrefixUtility))
+                                    if newPrefixUtility > maxUtility:
+                                        maxUtility = newPrefixUtility
+                                        remaining = qmatrix.getRemainingUtility(rowItem, column)
+                                        if remaining > 0 and maxRemainingUtility == 0:
+                                            maxRemainingUtility = remaining
+
+                        totalUtility += maxUtility
+                        totalRemainingUtility += maxRemainingUtility
+
+                        projection = QMatrixProjection()
+                        projection.qProjectionMatrix(qmatrix, positions)
+                        matrixProjections.append(projection)
+
+                prefix[prefixLength] = -1
+                prefix[prefixLength + 1] = item
+
+                if totalUtility >= self.minUtility:
+                    self.writeOut(prefix, prefixLength + 2, totalUtility)
+
+                if totalUtility + totalRemainingUtility >= self.minUtility:
+                    if itemCount + 1 < self.maxPatternLength:
+                        self.uspan(prefix, prefixLength + 2, matrixProjections, itemCount + 1)
+
+
+        self.checkMemory()
+
+
+
+
+    class Pair(object):
+        def __init__(self):
+            self.swu = 0
+            self.lastSID = None
+

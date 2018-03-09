@@ -13,7 +13,7 @@ from common import converter as efmm_convert
 from common import learn_utils
 from config import config
 from consts import consts
-from common import util
+from common import utils
 
 DA_INDEX = config.da_index
 MASTER_ID = config.AD_opt['masterID']
@@ -23,7 +23,7 @@ logger = logging.getLogger(config.logger_name['efmm'])
 def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = eDate
     efmm_index = config.efmm_index[esIndex][docType]['INDEX']
-    idxList = util.getIndexDateList(efmm_index+'-', sDate, eDate, consts.DATE)
+    idxList = utils.getIndexDateList(efmm_index + '-', sDate, eDate, consts.DATE)
     body = efmm_query.getOeeDataByRange(sDate, eDate)
     logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
     dataset = efmm_es.getOeeData(idxList, docType, body)
