@@ -1,4 +1,3 @@
-import common_modules
 import logging
 import logging.handlers
 from config import config

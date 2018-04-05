@@ -10,13 +10,13 @@ import numpy as np
 import logging
 from datetime import datetime
 
-import common_modules
-from eyelink.common import es_api
-from eyelink.common import es_query
-from eyelink.common import converter
-from eyelink.config import efsl_config as config
-from eyelink.consts import consts
-from eyelink.common import util
+# import common_modules
+from common import es_api
+from common import es_query
+from common import converter
+from config import efsl_config as config
+from consts import consts
+from common import util
 
 logger = logging.getLogger(config.logger_name)
 DA_INDEX = config.es_index

@@ -2,7 +2,6 @@ import elasticsearch
 from elasticsearch.helpers import scan
 import pandas as pd
 import logging
-import common_modules
 from config import config
 from consts import consts
 

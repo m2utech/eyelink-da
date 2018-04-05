@@ -17,12 +17,12 @@ LOCAL_HOST = 'localhost'
 PRODUCTS = {
     'efsl': {
         'productName': 'EFSL',
-        'host': 'DataAnalyzer',
-        'port': 5225
+        'host': 'localhost',
+        'port': 52251
     },
     'efmm': {
         'productName': 'EFMM',
-        'host': 'DataAnalyzer',
-        'port': 5224
+        'host': 'localhost',
+        'port': 52241
     }
 }
