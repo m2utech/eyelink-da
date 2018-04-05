@@ -4,6 +4,9 @@ import sys
 from database.SequenceDatabase import SequenceDatabase
 from database.SequenceStatsGenerator import SequenceStatsGenerator
 from predictor.CPTplus.CPTPlusPredictor import CPTPlusPredictor
+from database.Sequence import Sequence
+from database.Item import Item
+
 
 # from algoCPTplus import AlgoCPTplus
 # from sequencePrediction.database.Item import Item
@@ -41,21 +44,24 @@ def main(dirPath):
         predictionModel = CPTPlusPredictor("CPT+", optionalParameters)
         predictionModel.Train(trainingSet.getSequences())
 
-        print("testing")
-        #  the path for saving the patterns found
 
-        # output = "./output.txt"
-        #  the minimum utility threshold
+        """ Now we will make a prediction We want to predict what would occur after
+        the sequence <1, 2> We first create the sequence """
+        sequence = Sequence(0)
+        sequence.addItem(Item(1))
+        sequence.addItem(Item(2))
 
-        # minutil = 30
-        #
-        # algo = AlgoUSpan()
-        # #  set the maximum pattern length (optional)
-        # algo.setMaxPatternLength(4)
-        # #  run the algorithm
-        # algo.runAlgorithm(input, output, minutil)
-        # #  print statistics
-        # algo.printStatistics()
+        """ Then we perform the prediction """
+        thePrediction = predictionModel.Predict(sequence)
+        print("For the sequence <(1), (2)>, the prediction for the next symbol is: +{}".format(thePrediction))
+
+        """ If we want to see why that prediction was made, we can also ask to see the count table of 
+        the prediction algorithm. The count table is a structure that stores the score for each symbols
+        for the last prediction that was made. The symbol with the highest score was the prediction."""
+        print("To make the prediction, the scores were calculated as follows:")
+        counTable = predictionModel.getCountTable()
+        for key, value in counTable.items():
+            print("symbol {0} \t score: {1}".format(key, value))
 
 
 def fileToPath(dirPath, filename):

@@ -2,7 +2,7 @@ from multipledispatch import dispatch
 from database.Item import Item
 
 class Sequence(object):
-    items = []
+    items = None
     id = int()
 
     @dispatch(int)
@@ -80,17 +80,18 @@ class Sequence(object):
             copy.items.append(item.clone())
         return copy
 
-    def __eq__(self, other):
-        if other == None:
+    def __eq__(self, obj):
+        if obj == None:
             return None
         else:
+            other = obj
             return self.equals(other)
 
     def equals(self, other):
         if (self.id != other.id) or (len(self.items) != len(other.items)):
             return False
         for i in range(len(self.items)):
-            if (self.items[i].equals(other.items[i])) == False:
+            if (self.items[i].__eq__(other.items[i])) == False:
                 return False
         return True
 
@@ -102,11 +103,18 @@ class Sequence(object):
         result = prime * result + self.hashCode(self.items)
         return result
 
-    def hashCode(self, item):
+    def hashCode(self, items):
         h = 0
-        for c in item:
-            h = (31 * h + ord(str(c.val))) & 0xFFFFFFFF
-        return (((h + 0x80000000) & 0xFFFFFFFF) - 0x80000000)
+        for c in items:
+            h += c.__hash__()
+        return h
+
+
+    # def hashCode(self, item):
+    #     h = 0
+    #     for c in item:
+    #         h = (31 * h + ord(str(c.val))) & 0xFFFFFFFF
+    #     return (((h + 0x80000000) & 0xFFFFFFFF) - 0x80000000)
 
 
 
@@ -139,7 +147,7 @@ if __name__ == '__main__':
         print("Seen b (obviously)")
     if c in seen:
         print("Seen c")
-    if b.equals(a):
+    if b.__eq__(a):
         print("a == b")
     if b.equals(c):
         print("b == c")

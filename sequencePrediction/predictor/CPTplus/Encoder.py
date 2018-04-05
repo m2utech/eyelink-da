@@ -2,11 +2,9 @@ from database.Item import Item
 from database.Sequence import Sequence
 
 from collections import deque
-from common.LinkedList import LinkedList
+from common.HashMap import HashMap
 
-class hashabledict(dict):
-    def __hash__(self):
-        return hash(tuple(sorted(self.items())))
+from common.LinkedList import LinkedList
 
 class Encoder(object):
     Dict = None
@@ -14,28 +12,34 @@ class Encoder(object):
 
     def __init__(self):
         self.Dict = list()
-        # self.InvDict = hashabledict()
+        # self.InvDict = dict()
         self.InvDict = dict()
 
     def addEntry(self, entry):
-        key = deque()
-        for i in entry:
-            if type(i) == int:
-                key.append(i)
-            else:
-                key.append(i.val)
-        id = self.getId(tuple(key))
+        # key = deque()
+        # for i in entry:
+        #     if type(i) == int:
+        #         key.append(i)
+        #     else:
+        #         key.append(i.val)
+        # id = self.getId(tuple(key))
+        # if id == None:
+        #     self.Dict.append(tuple(key))
+        #     id = len(self.Dict) - 1
+        #     self.InvDict[tuple(key)] = id
+        # return id
+        id = self.getId(entry)
         if id == None:
-            self.Dict.append(tuple(key))
+            self.Dict.append(list(entry))
             id = len(self.Dict) - 1
-            self.InvDict[tuple(key)] = id
+            self.InvDict[tuple(entry)] = id
         return id
 
     def getEntry(self, id):
         return self.Dict[id]
 
     def getId(self, entry):
-        id = self.InvDict.get(entry)
+        id = self.InvDict.get(tuple(entry))
         return id
 
     def getIdorAdd(self, entry):
@@ -54,9 +58,9 @@ class Encoder(object):
             # candidate = seq.getItems()[i : seqSize]
             idFound = None
             while ((idFound == None) and (len(candidate) > 0)):
-                key = deque()
+                key = list()
                 for element in candidate:
-                    key.append(element.val)
+                    key.append(element)
                 idFound = self.getId(tuple(key))
                 if idFound != None:
                     encoded.addItem(Item(idFound))
@@ -96,9 +100,6 @@ if __name__ == '__main__':
     p3.append(Item(42))
     p3.append(Item(43))
     p3.append(Item(44))
-    print(p1)
-    print(p2)
-    print(p3)
 
     seq1 = Sequence(-1)
     seq1.addItem(Item(42))

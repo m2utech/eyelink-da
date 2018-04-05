@@ -4,11 +4,11 @@ import logging
 import logging.handlers
 
 import common_modules
-from common import es_api
-from common import es_query
-from config import efsl_config as config
-from consts import consts
-from common import utils
+from eyelink.common import es_api
+from eyelink.common import es_query
+from eyelink.config import efsl_config as config
+from eyelink.consts import consts
+from eyelink.common import util
 
 import ad_clustering
 import ad_matching
@@ -80,8 +80,8 @@ class SocketThread(object):
                 tInterval = json_dict['tInterval']
                 nCluster = json_dict['nCluster']
                 # check dateformat and convert UTC datetime
-                sDate = utils.checkDatetime(sDate, consts.DATETIME)
-                eDate = utils.checkDatetime(eDate, consts.DATETIME)
+                sDate = util.checkDatetime(sDate, consts.DATETIME)
+                eDate = util.checkDatetime(eDate, consts.DATETIME)
 
                 print(sDate, eDate)
                 ##### Create Patterns #####
@@ -150,7 +150,7 @@ class SocketThread(object):
 
 ######################################
 if __name__ == '__main__':
-    from common.logger import getStreamLogger
+    from eyelink.common.logger import getStreamLogger
     logger = getStreamLogger()
     host = consts.LOCAL_HOST
     port = consts.PRODUCTS['efsl']['port']

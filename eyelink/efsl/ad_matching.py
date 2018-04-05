@@ -7,13 +7,13 @@ import heapq
 import logging
 
 import common_modules
-from common import es_api
-from common import es_query
-from common import converter
-from common import learn_utils
-from config import efsl_config as config
-from consts import consts
-from common import utils
+from eyelink.common import es_api
+from eyelink.common import es_query
+from eyelink.common import converter
+from eyelink.common import learn_utils
+from eyelink.config import efsl_config as config
+from eyelink.consts import consts
+from eyelink.common import util
 
 logger = logging.getLogger(config.logger_name)
 DA_INDEX = config.es_index
@@ -37,7 +37,7 @@ alarm_port = config.alarm_info['port']
 
 
 def main(esIndex, docType, sDate, eDate, masterData, tInterval):
-    saveID = utils.getToday(True, consts.DATETIMEZERO)
+    saveID = util.getToday(True, consts.DATETIMEZERO)
     saveID = saveID.replace('Z', '')
     # saveID = eDate
     dataset = getDataset(sDate, eDate, esIndex, docType)
@@ -66,7 +66,7 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
 
 
 def getDataset(sDate, eDate, esIndex, docType):
-    idxList = utils.getIndexDateList(esIndex + '-', sDate, eDate, consts.DATE)
+    idxList = util.getIndexDateList(esIndex + '-', sDate, eDate, consts.DATE)
     print(idxList)
     body = es_query.getCorecodeTargetDataByRange(node_id, sDate, eDate)
     print(body)
@@ -194,7 +194,7 @@ def saveMatchingResult(assign_result, saveID, esIndex, docType):
 #############################
 if __name__ == '__main__':
     freeze_support()
-    from common.logger import getStreamLogger
+    from eyelink.common.logger import getStreamLogger
     logger = getStreamLogger()
     esIndex = 'corecode'
     docType = 'corecode'

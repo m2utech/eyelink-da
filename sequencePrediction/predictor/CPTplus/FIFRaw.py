@@ -30,19 +30,20 @@ class FIFRaw(FIF):
                         itemset.append(seq.get(offset))
 
                         if len(itemset) >= minLength:
-                            tupleItemset = util.objToTuple(itemset)
-                            support = frequencies.get(tupleItemset)
+                            # tupleItemset = util.objToTuple(itemset)
+                            # print(tupleItemset)
+                            support = frequencies.get(tuple(itemset))
                             if support == None:
                                 support = 0
-                            frequencies[tupleItemset] = support + 1
+                            frequencies[tuple(itemset)] = support + 1
                         offset += 1
 
-                    intSeq = util.objToInt(seq.get(i))
-                    support = self.itemFrequencies.get(intSeq)
+                    # intSeq = util.objToInt(seq.get(i))
+                    support = self.itemFrequencies.get(seq.get(i))
                     if support == None:
                         support = 0
                     support +=1
-                    self.itemFrequencies[intSeq] = support
+                    self.itemFrequencies[seq.get(i)] = support
 
         for key, value in frequencies.items():
             if value >= minSup:
