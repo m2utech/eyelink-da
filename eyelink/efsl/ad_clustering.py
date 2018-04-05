@@ -8,9 +8,9 @@ import logging
 
 # import common_modules
 from eyelink.common import es_api
-from eyelink.common import es_query
-from eyelink.common import converter
-from eyelink.common import learn_utils
+from common import es_query
+from common import converter
+from common import learn_utils
 from eyelink.config import efsl_config as config
 from eyelink.consts import consts
 from eyelink.common import util
