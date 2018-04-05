@@ -27,5 +27,6 @@ def objToTuple(item):
     else:
         element = list()
         for i in item:
-            element.append(i.val)
+            element.append(i)
+            # element.append(i.val)
         return tuple(element)

@@ -16,16 +16,16 @@ from predictor.CPTplus.CountTable import CountTable
 
 
 class CPTPlusPredictor(Predictor):
-    Root = None
-    LT = None
-    II = None
-    helper = None
-    nodeNumber = None
+    # Root = None
+    # LT = None
+    # II = None
+    # helper = None
+    # nodeNumber = None
     CCF = False
     CBS = True
-    encoder = None
-    seqEncoding = None
-    parameters = None
+    # encoder = None
+    # seqEncoding = None
+    # parameters = None
     TAG = "CPT+"
     lastCountTable = None
 
@@ -68,6 +68,7 @@ class CPTPlusPredictor(Predictor):
             itemsets = finder.findFrequentItemsets(trainingSequences, self.parameters.paramInt("CCFmin"), self.parameters.paramInt("CCFmax"), self.parameters.paramInt("CCFsup"))
 
             for itemset in itemsets:
+                print(list(itemset))
                 self.encoder.addEntry(itemset)
 
         for seq in trainingSequences:
@@ -83,14 +84,14 @@ class CPTPlusPredictor(Predictor):
                 itemset = self.encoder.getEntry(itemCompressed.val)
 
                 for item in itemset:
-                    if (item.val in self.II.keys() ==False):
+                    if (item.val in self.II) ==False:
                         tmpBitset = Bitvector()
                         self.II[item.val] = tmpBitset
 
                     self.II.get(item.val).setBit(seqId)
 
                 if curNode.hasChild(itemCompressed) == False:
-                    curNode.addChild(itemCompressed)
+                    curNode.addChildItem(itemCompressed)
                     self.nodeNumber += 1
                     curNode = curNode.getChild(itemCompressed)
                 else:
@@ -201,7 +202,7 @@ class CPTPlusPredictor(Predictor):
                             leaf.Parent = cur
 
                             cur.removeChild(last.Item)
-                            cur.addChild(leaf)
+                            cur.addChildLeaf(leaf)
                             nodeSaved += pathLength - 1
                         singlePath = False
                     else:

@@ -2,9 +2,9 @@ from multipledispatch import dispatch
 from database.Item import Item
 
 class PredictionTree(object):
-    Item = None
-    Parent = None
-    Children = None
+    # Item = None
+    # Parent = None
+    # Children = None
 
     @dispatch()
     def __init__(self):
@@ -18,13 +18,12 @@ class PredictionTree(object):
         self.Children = []
         self.Parent = None
 
-    @dispatch(list) # 문제있음!!
-    def addChild(self, child):
+    def addChildItem(self, child):
         newChild = PredictionTree(child)
+        newChild.Parent = self
         self.Children.append(newChild)
 
-    @dispatch(object)
-    def addChild(self, child):
+    def addChildLeaf(self, child):
         child.Parent = self
         self.Children.append(child)
 
@@ -37,7 +36,7 @@ class PredictionTree(object):
 
     def hasChild(self, target):
         found = self.getChild(target)
-        return False if found == None else True
+        return False if (found == None) else True
 
     def getChild(self, target):
         for child in self.Children:
@@ -48,5 +47,12 @@ class PredictionTree(object):
     def getChildren(self):
         return self.Children
 
+
+# test
+if __name__=="__main__":
+    test1 = PredictionTree(3)
+    test2 = PredictionTree(4)
+
+    test2.addChildLeaf(test1)
 
 

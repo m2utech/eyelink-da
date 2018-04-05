@@ -1,10 +1,12 @@
 import sys
 import common_modules
-from common.daemon import Daemon
-from common.logger import getLogger
-from config import efsl_config as config
-from consts import consts
-import efsl_main
+from eyelink.common.daemon import Daemon
+from eyelink.common.logger import getLogger
+
+from eyelink.config import efsl_config as config
+from eyelink.consts import consts
+
+from eyelink.efsl import efsl_main
 
 log_name = config.logger_name
 log_file = config.log_file
@@ -30,7 +32,8 @@ class LoadDaemon(Daemon):
 
 if __name__ == '__main__':
     logger = getLogger(log_name, log_file, log_format, file_size, backup_cnt, log_level)
-    print(pid_file)
+    # import os
+    # print(os.path.abspath(pid_file))
     daemon = LoadDaemon(pid_file)
 
     if len(sys.argv) == 2:
