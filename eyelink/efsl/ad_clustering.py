@@ -6,7 +6,7 @@ import numpy as np
 import heapq
 import logging
 
-# import common_modules
+import common_modules
 from eyelink.common import es_api
 from common import es_query
 from common import converter
