@@ -1,9 +1,9 @@
 import sys, os, time, atexit, signal
 
-
 class Daemon:
     def __init__(self, pidfile):
         self.pidfile = pidfile
+        # print("pidfile ={}".format(self.pidfile))
 
     def daemonize(self):
         try:
@@ -12,6 +12,7 @@ class Daemon:
                 sys.exit(0)
         except OSError as err:
             sys.stderr.write('fork #1 failed: {0}\n'.format(err))
+            print('fork #1 failed: {0}\n'.format(err))
             sys.exit(1)
         # decouple from parent environment
         os.chdir('/')
@@ -25,6 +26,7 @@ class Daemon:
                 sys.exit(0)
         except OSError as err:
             sys.stderr.write('fork #2 failed: {0}\n'.format(err))
+            print('fork #2 failed: {0}\n'.format(err))
             sys.exit(1)
 
         # redirect standard file descriptors
@@ -53,7 +55,7 @@ class Daemon:
         try:
             with open(self.pidfile, 'r') as pf:
                 pid = int(pf.read().strip())
-        except IOError:
+        except IOError as err:
             pid = None
 
         if pid:

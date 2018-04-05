@@ -3,12 +3,13 @@ from threading import Thread
 import logging
 import logging.handlers
 
-import common_modules
-from eyelink.common import es_api
-from eyelink.common import es_query
-from eyelink.config import efsl_config as config
-from eyelink.consts import consts
-from eyelink.common import util
+import insertPkgPath
+
+from common import es_api
+from common import es_query
+from config import efsl_config as config
+from consts import consts
+from common import util
 
 import ad_clustering
 import ad_matching
@@ -150,9 +151,9 @@ class SocketThread(object):
 
 ######################################
 if __name__ == '__main__':
-    from eyelink.common.logger import getStreamLogger
+    from common.logger import getStreamLogger
     logger = getStreamLogger()
-    host = consts.LOCAL_HOST
-    port = consts.PRODUCTS['efsl']['port']
+    host = 'localhost'
+    port = 52251
     data = b'{"type": "matching", "esIndex": "corecode", "docType": "corecode", "sDate": "2018-01-18T06:00:00", "eDate": "2018-01-18T08:00:00", "tInterval": 1, "nCluster": 30}'
     SocketThread(host, port).jsonParsing(data)
