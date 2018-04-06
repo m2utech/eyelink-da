@@ -1,4 +1,5 @@
 # coding: utf-8
+
 from multiprocessing import Process, Queue, freeze_support
 from sklearn.cluster import KMeans
 import pandas as pd
@@ -6,14 +7,13 @@ import numpy as np
 import heapq
 import logging
 
-import common_modules
-from eyelink.common import es_api
+from common import es_api
 from common import es_query
 from common import converter
 from common import learn_utils
-from eyelink.config import efsl_config as config
-from eyelink.consts import consts
-from eyelink.common import util
+from common import util
+from config import efsl_config as config
+from consts import consts
 
 logger = logging.getLogger(config.logger_name)
 DA_INDEX = config.es_index
@@ -283,6 +283,8 @@ def savePatternData(pData, pInfo, npData, npInfo, saveID, masterYN, esIndex, doc
 
 #############################
 if __name__ == '__main__':
+    print("start")
+    import insertPkgPath
     freeze_support()
     from common.logger import getStreamLogger
     logger = getStreamLogger()

@@ -4,10 +4,10 @@ file_max_byte = 1024 * 1024 * 100
 backup_count = 10
 logger_name = "efsl_log"    ###
 logging_level = "DEBUG"     ### CRITCAL, ERROR, WARNING, INFO, DEBUG, NOTSET
-log_file = "../../logs/efsl.log"
-pid_file = "../../pid/efsl.pid"
-# log_file = "/home/Toven/eyelink-da/logs/efsl.log"
-# pid_file = "/home/Toven/eyelink-da/pid/efsl.pid"
+#log_file = "../../logs/efsl.log"
+#pid_file = "../../pid/efsl.pid"
+log_file = "/home/m2utech/da/eyelink-da/logs/efsl.log"
+pid_file = "/home/m2utech/da/eyelink-da/pid/efsl.pid"
 sched_pid_file = "/home/Toven/eyelink-da/pid/efslScheduler.pid"
 
 # used
