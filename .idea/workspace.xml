@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="03761f8f-bd7d-493f-ab90-979042626d41" name="Default" comment="180406_efsl 수정">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tools/GUI_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tools/GUI_test2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eyelink/efmm/ad_matching.py" beforeDir="false" afterPath="$PROJECT_DIR$/eyelink/efmm/ad_matching.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tools/wxPython_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/wxPython_test.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -21,8 +21,8 @@
       <file leaf-file-name="wxPython_test.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tools/wxPython_test.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="356">
-              <caret line="181" column="22" lean-forward="true" selection-start-line="181" selection-start-column="22" selection-end-line="181" selection-end-column="22" />
+            <state relative-caret-position="413">
+              <caret line="196" column="34" lean-forward="true" selection-start-line="196" selection-start-column="34" selection-end-line="196" selection-end-column="34" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -57,7 +57,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/sequencePrediction/database/SequenceStatsGenerator.py" />
         <option value="$PROJECT_DIR$/sequencePrediction/predictor/CPTplus/setPackagePath.py" />
         <option value="$PROJECT_DIR$/sequencePrediction/predictor/CPTplus/SetPackagePath.py" />
         <option value="$PROJECT_DIR$/sequencePrediction/predictor/Evaluator.py" />
@@ -92,7 +91,6 @@
         <option value="$PROJECT_DIR$/eyelink/common/util.py" />
         <option value="$PROJECT_DIR$/eyelink/common/__init__.py" />
         <option value="$PROJECT_DIR$/eyelink/efmm/common_modules.py" />
-        <option value="$PROJECT_DIR$/eyelink/efsl/ad_clustering.py" />
         <option value="$PROJECT_DIR$/eyelink/efsl/ad_matching.py" />
         <option value="$PROJECT_DIR$/eyelink/efsl/ca_clustering.py" />
         <option value="$PROJECT_DIR$/eyelink/config/efsl_config.py" />
@@ -107,6 +105,8 @@
         <option value="$PROJECT_DIR$/tools/dataGrid.py" />
         <option value="$PROJECT_DIR$/tools/pandas_wxpython_test.py" />
         <option value="$PROJECT_DIR$/eyelink/config/config.py" />
+        <option value="$PROJECT_DIR$/eyelink/efmm/ad_clustering.py" />
+        <option value="$PROJECT_DIR$/eyelink/efsl/ad_clustering.py" />
         <option value="$PROJECT_DIR$/tools/wxPython_test.py" />
       </list>
     </option>
@@ -126,42 +126,12 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
               <item name="00_eyelink_python" type="b2602c69:ProjectViewProjectNode" />
               <item name="00_eyelink_python" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="00_eyelink_python" type="b2602c69:ProjectViewProjectNode" />
-              <item name="00_eyelink_python" type="462c0819:PsiDirectoryNode" />
-              <item name="eyelink" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="00_eyelink_python" type="b2602c69:ProjectViewProjectNode" />
-              <item name="00_eyelink_python" type="462c0819:PsiDirectoryNode" />
-              <item name="eyelink" type="462c0819:PsiDirectoryNode" />
-              <item name="common" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="00_eyelink_python" type="b2602c69:ProjectViewProjectNode" />
-              <item name="00_eyelink_python" type="462c0819:PsiDirectoryNode" />
-              <item name="eyelink" type="462c0819:PsiDirectoryNode" />
-              <item name="config" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="00_eyelink_python" type="b2602c69:ProjectViewProjectNode" />
-              <item name="00_eyelink_python" type="462c0819:PsiDirectoryNode" />
-              <item name="eyelink" type="462c0819:PsiDirectoryNode" />
-              <item name="consts" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="00_eyelink_python" type="b2602c69:ProjectViewProjectNode" />
-              <item name="00_eyelink_python" type="462c0819:PsiDirectoryNode" />
-              <item name="eyelink" type="462c0819:PsiDirectoryNode" />
-              <item name="efsl" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="00_eyelink_python" type="b2602c69:ProjectViewProjectNode" />
@@ -187,6 +157,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -225,7 +196,7 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.wxPython_test">
-    <configuration name="GUI_test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="ad_clustering (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="00_eyelink_python" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -233,17 +204,17 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tools" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/eyelink/efmm" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/GUI_test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/eyelink/efmm/ad_clustering.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
     </configuration>
-    <configuration name="GUI_test2" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="ad_clustering" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="00_eyelink_python" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -251,11 +222,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tools" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/eyelink/efsl" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tools/GUI_test2.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/eyelink/efsl/ad_clustering.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -316,19 +287,19 @@
       <option name="MODULE_MODE" value="false" />
     </configuration>
     <list>
-      <item itemvalue="Python.GUI_test" />
-      <item itemvalue="Python.GUI_test2" />
       <item itemvalue="Python.wxPython_test" />
       <item itemvalue="Python.pandas_wxpython_test" />
       <item itemvalue="Python.dataGrid" />
+      <item itemvalue="Python.ad_clustering" />
+      <item itemvalue="Python.ad_clustering (1)" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.wxPython_test" />
+        <item itemvalue="Python.ad_clustering (1)" />
+        <item itemvalue="Python.ad_clustering" />
         <item itemvalue="Python.pandas_wxpython_test" />
         <item itemvalue="Python.dataGrid" />
-        <item itemvalue="Python.GUI_test2" />
-        <item itemvalue="Python.GUI_test" />
       </list>
     </recent_temporary>
   </component>
@@ -380,7 +351,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" x="832" y="26" width="255" height="1028" id="Project" order="0" sideWeight="0.08980044" side_tool="true" visible="true" weight="0.1716418" />
+      <window_info active="true" content_ui="combo" x="832" y="26" width="255" height="1028" id="Project" order="0" sideWeight="0.08980044" side_tool="true" visible="true" weight="0.1748401" />
       <window_info anchor="right" id="TODO" order="6" side_tool="true" weight="0.32889125" />
       <window_info anchor="bottom" id="Event Log" order="5" side_tool="true" weight="0.32934782" />
       <window_info anchor="right" id="Version Control" order="5" side_tool="true" weight="0.24322917" />
@@ -389,7 +360,7 @@
       <window_info id="Structure" order="1" sideWeight="0.902439" side_tool="true" weight="0.2497309" />
       <window_info anchor="right" id="Terminal" order="4" side_tool="true" weight="0.32942432" />
       <window_info id="Favorites" order="2" sideWeight="0.09756097" side_tool="true" weight="0.2497309" />
-      <window_info anchor="right" x="0" y="336" width="1920" height="368" id="Debug" order="3" sideWeight="0.5121951" side_tool="true" visible="true" weight="0.2196162" />
+      <window_info anchor="right" x="0" y="336" width="1920" height="368" id="Debug" order="3" sideWeight="0.5121951" side_tool="true" weight="0.2196162" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -429,7 +400,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="191" />
+      <option name="time" value="197" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -447,10 +418,40 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/sequencePrediction/predictor/CPTplus/FIF.py">
+    <entry file="file://$PROJECT_DIR$/eyelink/efsl/ca_clustering.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="10" column="19" lean-forward="true" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
+        <state relative-caret-position="3360">
+          <caret line="154" column="73" selection-start-line="154" selection-start-column="73" selection-end-line="154" selection-end-column="73" />
+          <folding>
+            <element signature="e#102#138#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/wxPython_test.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4056">
+          <caret line="181" column="22" lean-forward="true" selection-start-line="181" selection-start-column="22" selection-end-line="181" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/eyelink/common/es_api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="552">
+          <caret line="28" column="24" lean-forward="true" selection-start-line="28" selection-start-column="24" selection-end-line="28" selection-end-column="24" />
+          <folding>
+            <element signature="e#0#20#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/eyelink/config/config.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="696">
+          <caret line="29" column="43" lean-forward="true" selection-start-line="29" selection-start-column="43" selection-end-line="29" selection-end-column="43" />
         </state>
       </provider>
     </entry>
@@ -567,26 +568,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3408">
           <caret line="157" column="16" selection-start-line="157" selection-start-column="16" selection-end-line="157" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#13#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/eyelink/efsl/ca_clustering.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="33" column="36" selection-start-line="33" selection-start-column="36" selection-end-line="33" selection-end-column="36" />
-          <folding>
-            <element signature="e#102#138#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Python35/Lib/site-packages/wx/core.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="489">
-          <caret line="2095" selection-start-line="2095" selection-end-line="2095" />
         </state>
       </provider>
     </entry>
@@ -625,46 +606,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tools/busan_tb_node_test_1.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/sample_data.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/pandas_wxpython_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="567">
-          <caret line="327" selection-start-line="327" selection-end-line="327" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/GUI_test2.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/GUI_test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="293">
-          <caret line="38" column="71" selection-start-line="38" selection-start-column="71" selection-end-line="38" selection-end-column="71" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/tools/dataGrid.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="365">
-          <caret line="74" column="31" selection-start-line="74" selection-start-column="31" selection-end-line="74" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/tools/pandas_wxpython_test.py" />
+    <entry file="file://$PROJECT_DIR$/tools/GUI_test.py" />
+    <entry file="file://$PROJECT_DIR$/tools/dataGrid.py" />
     <entry file="file://$PROJECT_DIR$/eyelink/common/util.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="456">
           <caret line="19" column="8" selection-start-line="19" selection-start-column="8" selection-end-line="19" selection-end-column="40" />
-          <folding>
-            <element signature="e#0#40#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -672,16 +620,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="48">
           <caret line="2" column="30" lean-forward="true" selection-start-line="2" selection-start-column="11" selection-end-line="2" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/eyelink/efsl/ad_clustering.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="165" column="61" lean-forward="true" selection-start-line="165" selection-start-column="61" selection-end-line="165" selection-end-column="61" />
-          <folding>
-            <element signature="e#17#75#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -699,16 +637,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/hup/testUPGrowth.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/hup/algoUPGrowth.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="591">
           <caret line="352" column="96" lean-forward="true" selection-start-line="352" selection-end-line="352" selection-end-column="96" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -723,33 +655,58 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="346">
           <caret line="189" column="22" selection-start-line="189" selection-start-column="22" selection-end-line="189" selection-end-column="22" />
-          <folding>
-            <element signature="e#16#52#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/eyelink/common/es_api.py">
+    <entry file="file://$PROJECT_DIR$/eyelink/efmm/ad_clustering.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="8" column="45" lean-forward="true" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
+        <state relative-caret-position="384">
+          <caret line="300" column="86" lean-forward="true" selection-start-line="300" selection-start-column="86" selection-end-line="300" selection-end-column="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/eyelink/efsl/ad_clustering.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="796">
+          <caret line="271" column="86" lean-forward="true" selection-start-line="271" selection-start-column="86" selection-end-line="271" selection-end-column="86" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/eyelink/efsl/ca_clustering.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="412">
+          <caret line="150" lean-forward="true" selection-start-line="150" selection-end-line="150" />
           <folding>
-            <element signature="e#0#20#0" expanded="true" />
+            <element signature="e#102#138#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/eyelink/config/config.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="24" column="28" lean-forward="true" selection-start-line="24" selection-start-column="28" selection-end-line="24" selection-end-column="28" />
+        <state relative-caret-position="504">
+          <caret line="39" column="24" selection-start-line="39" selection-start-column="24" selection-end-line="39" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Python35/Lib/site-packages/wx/core.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="489">
+          <caret line="3077" selection-start-line="3077" selection-end-line="3077" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/eyelink/common/es_api.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="24">
+          <caret line="1" column="38" lean-forward="true" selection-start-line="1" selection-start-column="38" selection-end-line="1" selection-end-column="38" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/tools/wxPython_test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="356">
-          <caret line="181" column="22" lean-forward="true" selection-start-line="181" selection-start-column="22" selection-end-line="181" selection-end-column="22" />
+        <state relative-caret-position="413">
+          <caret line="196" column="34" lean-forward="true" selection-start-line="196" selection-start-column="34" selection-end-line="196" selection-end-column="34" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
