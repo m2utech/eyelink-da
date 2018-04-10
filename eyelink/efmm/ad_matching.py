@@ -13,7 +13,7 @@ from common import converter as efmm_convert
 from common import learn_utils
 from config import config
 from consts import consts
-from common import utils
+from common import util as utils
 
 DA_INDEX = config.da_index
 MASTER_ID = config.AD_opt['masterID']

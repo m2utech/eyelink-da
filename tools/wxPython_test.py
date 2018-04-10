@@ -9,8 +9,11 @@ import gettext
 import pandas as pd
 from datetime import datetime
 import time
+import json
+import csv
 
 import elasticsearch
+from elasticsearch import helpers
 
 cwd = os.path.abspath(os.curdir)
 dataSet = None
@@ -69,7 +72,7 @@ class MyFrame(wx.Frame):  # this is the parent frame
             try:
                 dataSet = pd.read_csv(dataPath, sep=',', encoding='utf-8', skiprows=0)
                 testSet = dataSet.to_dict('records')
-                # print(testSet)
+
                 rowLen = len(dataSet.index)
                 colLen = len(dataSet.columns)
                 MyDialog1(self).Show()
@@ -170,6 +173,7 @@ class MyDialog1(wx.Dialog):  # this is the PhoneBook dialog box...
         if result == wx.ID_OK:
             saveID = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
             startTimestamp = time.time() * 1000
+
             self.insertDataById(INDEX, TYPE, saveID, testSet)
 
             endTimestamp = time.time() * 1000
@@ -182,12 +186,21 @@ class MyDialog1(wx.Dialog):  # this is the PhoneBook dialog box...
         # event.Skip()
 
     def insertDataById(self, index, docType, sid, body):
-        check = es.exists_source(index=index, doc_type=docType, id=sid)
-        if check is False:
-            es.index(index=index, doc_type=docType, id=sid, body=body)
-        else:
-            self.txt_result.AppendText("The same ID already exists.")
-
+        # check = es.exists_source(index=index, doc_type=docType, id=sid)
+        # if check is False:
+        #     es.index(index=index, doc_type=docType, id=sid, body=body)
+        # else:
+        #     self.txt_result.AppendText("The same ID already exists.")
+        actions = [
+            {
+                "_index" : index,
+                "_type" : docType,
+                "_id" : sid,
+                "_source" : body
+            }
+            for node in body
+        ]
+        helpers.bulk(es, actions)
 
 if __name__ == "__main__":
     app = wx.App(False)
