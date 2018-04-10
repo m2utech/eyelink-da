@@ -1,29 +1,19 @@
 import wx
 import wx.grid
-import os
-import sqlite3
-import re
-import string
-import gettext
-
 import pandas as pd
 from datetime import datetime
 import time
-import json
 import csv
-
 import elasticsearch
-from elasticsearch import helpers
 
-cwd = os.path.abspath(os.curdir)
 dataSet = None
 dataPath = None
 colLen = None
 rowLen = None
-testSet = None
+bulkData = None
 INDEX = 'efsl_throughput_test'
 TYPE = 'throughput'
-host = 'localhost:5601'
+host = 'http://localhost:9200'
 es = elasticsearch.Elasticsearch(host)
 
 
@@ -58,7 +48,7 @@ class MyFrame(wx.Frame):  # this is the parent frame
 
     ############
     def open_fileDialog(self, event):
-        global dataSet, dataPath, colLen, rowLen, testSet
+        global dataSet, dataPath, colLen, rowLen, bulkData
         wildcard = "CSV (쉼표로 분리) (*.csv)|*.csv| All files (*.*)|*.*"
 
         with wx.FileDialog(self, "Open Testdata file", wildcard=wildcard,
@@ -71,11 +61,17 @@ class MyFrame(wx.Frame):  # this is the parent frame
             dataPath = fileDialog.GetPath()
             try:
                 dataSet = pd.read_csv(dataPath, sep=',', encoding='utf-8', skiprows=0)
-                testSet = dataSet.to_dict('records')
-
                 rowLen = len(dataSet.index)
                 colLen = len(dataSet.columns)
                 MyDialog1(self).Show()
+
+                # testSet = csv.DictReader(open(dataPath))
+
+                bulkData = []
+                for row in csv.DictReader(open(dataPath)):
+                    bulkData.append({"index":{"_index": INDEX, "_type": TYPE}})
+                    bulkData.append(row)
+
             except IOError:
                 wx.LogError("Cannot open file '%s'." % newfile)
 
@@ -109,7 +105,7 @@ class MyDialog1(wx.Dialog):  # this is the PhoneBook dialog box...
 
     def __set_properties(self):
         self.SetTitle("Throughput Test")
-        self.SetSize((1000, 700))
+        self.SetSize((1020, 750))
         # self.txtID.SetMinSize((150, 27))
 
         i = 0
@@ -140,12 +136,13 @@ class MyDialog1(wx.Dialog):  # this is the PhoneBook dialog box...
         vbox.Add((-1, 7))  # 구분 공간 추가
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         hbox2.Add(self.lbl_rows, flag=wx.RIGHT, border=8)
-        hbox2.Add(self.txt_rows, flag=wx.RIGHT, border=108, proportion=0.5)
-        hbox2.Add(self.btn_save)
+        hbox2.Add(self.txt_rows, flag=wx.RIGHT, border=200, proportion=1)
+
+        hbox2.Add(self.btn_save, flag=wx.RIGHT, border=400)
         vbox.Add(hbox2, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP, border=10)
         vbox.Add((-1, 7))  # 구분 공간 추가
         hbox3 = wx.BoxSizer(wx.VERTICAL)
-        hbox3.Add(self.lbl_dataGrid)
+        hbox3.Add(self.lbl_dataGrid, flag=wx.BOTTOM, border=8)
         hbox3.Add(-1, 7)
         hbox3.Add(self.dataGrid, flag=wx.EXPAND)
         vbox.Add(hbox3, flag=wx.LEFT | wx.TOP, border=10)
@@ -157,13 +154,6 @@ class MyDialog1(wx.Dialog):  # this is the PhoneBook dialog box...
         self.SetSizer(vbox)
 
 
-
-    def clear_grid(self):
-        self.txtID.Value = ""
-        self.txtNAME.Value = ""
-        self.txtSURNAME.Value = ""
-        self.txtNUMBER.Value = ""
-
     def clk_save(self, event):
         dlg = wx.MessageDialog(self, "{:,} 건의 데이터를 Elasticsearch에 저장하시겠습니까?".format(rowLen),
                                "Confirm Save", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
@@ -174,33 +164,16 @@ class MyDialog1(wx.Dialog):  # this is the PhoneBook dialog box...
             saveID = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
             startTimestamp = time.time() * 1000
 
-            self.insertDataById(INDEX, TYPE, saveID, testSet)
+            es.bulk(bulkData)
 
             endTimestamp = time.time() * 1000
-            self.txt_result.AppendText("Start timestamp : {} \n  - Processing time ~ {} ms".format(saveID, int(round(self.endTimestamp - self.startTimestamp))))
-            print(" Processing time ~ {} ms".format(int(round(self.endTimestamp - self.startTimestamp))))
+            self.txt_result.AppendText("Start timestamp : {} \n  - Processing time ~ {} ms \n".format(saveID, int(round(endTimestamp - startTimestamp))))
+            print(" Processing time ~ {} ms".format(int(round(endTimestamp - startTimestamp))))
 
         elif result == wx.ID_CANCEL:
             print("cancel")
 
-        # event.Skip()
-
-    def insertDataById(self, index, docType, sid, body):
-        # check = es.exists_source(index=index, doc_type=docType, id=sid)
-        # if check is False:
-        #     es.index(index=index, doc_type=docType, id=sid, body=body)
-        # else:
-        #     self.txt_result.AppendText("The same ID already exists.")
-        actions = [
-            {
-                "_index" : index,
-                "_type" : docType,
-                "_id" : sid,
-                "_source" : body
-            }
-            for node in body
-        ]
-        helpers.bulk(es, actions)
+        event.Skip()
 
 if __name__ == "__main__":
     app = wx.App(False)
