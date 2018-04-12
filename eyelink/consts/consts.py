@@ -8,7 +8,7 @@ LOCAL_TIMEZONE = 'Asia/Seoul'
 # #### SOCKET INFO ####
 BUFFER_SIZE = 256
 CONN_TIMEOUT = 60
-HOST = 'DataAnalyzer'
+HOST = 'localhost'
 PORT = 5224
 LOCAL_HOST = 'localhost'
 

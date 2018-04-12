@@ -155,5 +155,5 @@ if __name__ == '__main__':
     logger = getStreamLogger()
     host = 'localhost'
     port = 52251
-    data = b'{"type": "matching", "esIndex": "corecode", "docType": "corecode", "sDate": "2018-01-18T06:00:00", "eDate": "2018-01-18T08:00:00", "tInterval": 1, "nCluster": 30}'
+    data = b'{"type": "pattern", "esIndex": "corecode", "docType": "corecode", "sDate": "2018-04-10T06:00:00", "eDate": "2018-04-11T08:00:00", "tInterval": 1, "nCluster": 30}'
     SocketThread(host, port).jsonParsing(data)

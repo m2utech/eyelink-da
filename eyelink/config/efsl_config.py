@@ -4,11 +4,12 @@ file_max_byte = 1024 * 1024 * 100
 backup_count = 10
 logger_name = "efsl_log"    ###
 logging_level = "DEBUG"     ### CRITCAL, ERROR, WARNING, INFO, DEBUG, NOTSET
-#log_file = "../../logs/efsl.log"
-#pid_file = "../../pid/efsl.pid"
-log_file = "/home/m2utech/da/eyelink-da/logs/efsl.log"
-pid_file = "/home/m2utech/da/eyelink-da/pid/efsl.pid"
-sched_pid_file = "/home/Toven/eyelink-da/pid/efslScheduler.pid"
+log_file = "../../logs/efsl.log"
+pid_file = "../../pid/efsl.pid"
+sched_pid_file = "../../pid/efslScheduler.pid"
+# log_file = "/home/m2utech/da/eyelink-da/logs/efsl.log"
+# pid_file = "/home/m2utech/da/eyelink-da/pid/efsl.pid"
+# sched_pid_file = "/home/Toven/eyelink-da/pid/efslScheduler.pid"
 
 # used
 sched_opt = {
@@ -27,7 +28,8 @@ sched_opt = {
 
 ##### Elasticsearch API #####
 es_opt = {
-    'url': 'http://m2u-parstream.eastus.cloudapp.azure.com:9200',
+    # 'url': 'http://m2u-parstream.eastus.cloudapp.azure.com:9200',
+    'url': 'http://localhost:9200',
     'scroll_time': '3m',
     'scroll_size': 10000
 }
@@ -73,7 +75,7 @@ CA_opt = {
 
 # ### ALARM MESSAGE ###
 alarm_info = {
-    'host': 'http://m2utech.eastus.cloudapp.azure.com',
+    'host': 'http://localhost',
     'port': 5225,
     'CA': {
         'appType': 'CA',

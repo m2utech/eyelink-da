@@ -7,11 +7,12 @@ import numpy as np
 import heapq
 import logging
 
+import insertPkgPath
 from common import es_api
 from common import es_query
 from common import converter
 from common import learn_utils
-from common import util
+from common import util as utils
 from config import efsl_config as config
 from consts import consts
 
@@ -286,8 +287,15 @@ if __name__ == '__main__':
     print("start")
     import insertPkgPath
     freeze_support()
-    from common.logger import getStreamLogger
-    logger = getStreamLogger()
+    from common.logger import getLogger
+    logger_name = config.logger_name
+    log_file = config.log_file
+    log_format = config.log_format
+    file_size = config.file_max_byte
+    backup_cnt = config.backup_count
+    log_level = config.logging_level
+
+    logger = getLogger(logger_name, log_file, log_format, file_size, backup_cnt, log_level)
     esIndex = 'notching'
     docType = 'oee'
     sDate = "2018-01-01T00:00:00Z"
