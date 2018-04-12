@@ -8,6 +8,7 @@ import elasticsearch
 
 dataSet = None
 dataPath = None
+fileName = None
 colLen = None
 rowLen = None
 bulkData = None
@@ -30,7 +31,7 @@ class MyFrame(wx.Frame):
         self.btn_save = wx.Button(self, -1, "SAVE")
         self.dataGrid = wx.grid.Grid(self, -1, size=(1000, 400))
         self.lbl_result = wx.StaticText(self, -1, "Result :")
-        self.txt_result = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE, size=(-1, 120))
+        self.txt_result = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE, size=(-1, 170))
 
         self.dataGrid.SetFocus()
 
@@ -50,7 +51,7 @@ class MyFrame(wx.Frame):
 
     def __set_properties(self):
         self.SetTitle("Throughput Test")
-        self.SetSize((1020, 750))
+        self.SetSize((1020, 800))
         self.SetBackgroundColour(wx.Colour(255, 255, 255))
         self.dataGrid.CreateGrid(5, 10) #init
 
@@ -111,7 +112,7 @@ class MyFrame(wx.Frame):
 
 
     def openFileDialog(self, event):
-        global dataSet, dataPath, colLen, rowLen, bulkData
+        global dataSet, dataPath, colLen, rowLen, bulkData, fileName
         wildcard = "CSV (쉼표로 분리) (*.csv)|*.csv| All files (*.*)|*.*"
 
         with wx.FileDialog(self, "Open Testdata file", wildcard=wildcard,
@@ -122,6 +123,7 @@ class MyFrame(wx.Frame):
 
             # Proceed loading the file chosen by the user
             dataPath = fileDialog.GetPath()
+            fileName = fileDialog.GetFilename()
             try:
                 dataSet = pd.read_csv(dataPath, sep=',', encoding='utf-8', skiprows=0)
                 rowLen = len(dataSet.index)
@@ -132,7 +134,7 @@ class MyFrame(wx.Frame):
                 self.__set_dataGridTable(rowLen, colLen)
 
                 bulkData = []
-                for row in dataSet.to_dict('records'):
+                for row in csv.DictReader(open(dataPath)):
                     bulkData.append({"index":{"_index": INDEX, "_type": TYPE}})
                     bulkData.append(row)
 
@@ -151,7 +153,7 @@ class MyFrame(wx.Frame):
         if bulkData == None:
             wx.MessageBox("No data loaded, Please select the .csv file from fileDialog")
         else:
-            dlg = wx.MessageDialog(self, "{:,} 건의 데이터를 Elasticsearch에 저장하시겠습니까?".format(rowLen),
+            dlg = wx.MessageDialog(self, "{} 파일의 {:,}건 데이터를 Elasticsearch에 저장하시겠습니까?".format(fileName,rowLen),
                                    "Confirm Save", wx.OK | wx.CANCEL | wx.ICON_QUESTION)
             result = dlg.ShowModal()
             dlg.Destroy()
@@ -163,8 +165,11 @@ class MyFrame(wx.Frame):
                 es.bulk(bulkData)
 
                 endTimestamp = time.time() * 1000
-                self.txt_result.AppendText("Start timestamp : {} \n  - Processing time ~ {} ms \n".format(saveID, int(round(endTimestamp - startTimestamp))))
-                print(" Processing time ~ {} ms".format(int(round(endTimestamp - startTimestamp))))
+                self.txt_result.AppendText("======== Result of Throughput test ========\n")
+                self.txt_result.AppendText("   - File name : {}\n".format(fileName))
+                self.txt_result.AppendText("   - Start timestamp : {}\n".format(saveID))
+                self.txt_result.AppendText("   - Processing time : {} ms\n".format(int(round(endTimestamp - startTimestamp))))
+                self.txt_result.AppendText("=================================\n\n")
 
             elif result == wx.ID_CANCEL:
                 print("cancel")

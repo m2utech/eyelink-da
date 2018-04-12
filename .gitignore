@@ -6,3 +6,4 @@ eyelink/example/
 eyelink/logs/*.log
 eyelink/PID/*.pid
 *.pyc
+.idea/
