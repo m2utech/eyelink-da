@@ -32,4 +32,4 @@ def sendMessage(sendData):
 
 
 if __name__ == '__main__':
-    sendData('pattern', 'stacking', 'oee', '2018-01-03T09:00:00', '2018-01-04T09:00:00', '30S', 'all',10)
+    sendData('pattern', 'stacking', 'oee', '2018-04-10T09:00:00', '2018-04-11T09:00:00', '30S', 'all',10)
