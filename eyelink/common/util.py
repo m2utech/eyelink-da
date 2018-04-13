@@ -107,10 +107,10 @@ def datetime_range(start, end, delta):
         current += delta
 
 if __name__ == '__main__':
-    # s, e = getStartEndDateByMinute(60, False, consts.DATETIMEZERO)
+    s, e = getStartEndDateByMinute(60, False, consts.DATETIMEZERO)
     # s, e = getStartEndDateByHour(24, False, consts.DATETIMEZERO)
     #s, e = getTimeRangeByDay(1, consts.DATETIMEZERO)
     # dt = convertDefaultDate("2018-01-31T12:12:23")
     # print(dt)
-    dt = getToday(True, consts.DATETIMEZERO)
-    print(dt)
+    # dt = getToday(True, consts.DATETIMEZERO)
+    print(s, e)

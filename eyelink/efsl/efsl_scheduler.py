@@ -95,6 +95,7 @@ class Scheduler(object):
         sDate, eDate = utils.getStartEndDateByMinute(ad_pm_sched['range'], False, consts.DATETIMEZERO)
         sDate = utils.convertDefaultDate(sDate)
         eDate = utils.convertDefaultDate(eDate)
+        print(sDate, eDate)
         self.sendData("1000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 
 
