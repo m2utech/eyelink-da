@@ -10,13 +10,13 @@ import numpy as np
 import logging
 from datetime import datetime
 
-# import common_modules
+import insertPkgPath
 from common import es_api
 from common import es_query
 from common import converter
 from config import efsl_config as config
 from consts import consts
-from common import util
+from common import util as utils
 
 logger = logging.getLogger(config.logger_name)
 DA_INDEX = config.es_index
@@ -41,7 +41,7 @@ def main(esIndex, docType, sDate, eDate, tInterval, nCluster):
 
         logger.debug("[CA] save cluster analysis result ....")
         saveResult(masterDict, detailDict, daTime, dateRange, sDate, eDate, tInterval, esIndex, docType)
-        sendAlarm(daTime)
+        # sendAlarm(daTime)
 
 
 def sendAlarm(daTime):
@@ -161,4 +161,4 @@ if __name__ == '__main__':
     freeze_support()
     from common.logger import getStreamLogger
     logger = getStreamLogger()
-    main('corecode', 'corecode', '2018-01-09T00:00:00Z', '2018-01-10T00:00:00Z', 5, 10)
+    main('corecode', 'corecode', '2018-04-12T00:00:00Z', '2018-04-12T23:00:00Z', 5, 10)

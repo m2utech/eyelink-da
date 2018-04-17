@@ -17,7 +17,7 @@ def getEfmmLogger():
 
 # stream logger for local test
 def getStreamLogger():
-    logger = logging.getLogger(config.logger_name['efmm'])
+    logger = logging.getLogger('stream_log')
     formatter = logging.Formatter(config.log_format)
     streamHandler = logging.StreamHandler()
     streamHandler.setFormatter(formatter)

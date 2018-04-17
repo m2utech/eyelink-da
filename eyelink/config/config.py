@@ -3,7 +3,8 @@ log_format = '%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s'
 file_max_byte = 1024 * 1024 * 100
 backup_count = 10
 logger_name = {
-    "efmm": "efmm_log"
+    "efmm": "efmm_log",
+    "efsl": "efsl_log"
 }
 
 file_path = {

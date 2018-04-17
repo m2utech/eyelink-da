@@ -2,10 +2,10 @@ import elasticsearch
 from elasticsearch.helpers import scan
 import pandas as pd
 import logging
-from config import config
+from config import efsl_config as config
 from consts import consts
 
-logger = logging.getLogger(config.logger_name['efmm'])
+logger = logging.getLogger(config.logger_name)
 es = elasticsearch.Elasticsearch(config.es_opt['url'])
 scroll_time = config.es_opt['scroll_time']
 scroll_size = config.es_opt['scroll_size']

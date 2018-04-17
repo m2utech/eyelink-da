@@ -6,7 +6,7 @@ import numpy as np
 import heapq
 import logging
 
-# import common_modules
+import insertPkgPath
 from common import es_api
 from common import es_query
 from common import converter
@@ -194,12 +194,14 @@ def saveMatchingResult(assign_result, saveID, esIndex, docType):
 #############################
 if __name__ == '__main__':
     freeze_support()
-    from eyelink.common.logger import getStreamLogger
+    from common.logger import getStreamLogger
     logger = getStreamLogger()
+
     esIndex = 'corecode'
     docType = 'corecode'
-    sDate = "2018-01-11T21:00:00Z"
-    eDate = "2018-01-11T23:00:00Z"
+    sDate = "2018-04-12T00:00:00Z"
+    eDate = "2018-04-12T02:00:00Z"
+
     masterID = config.AD_opt['masterID']
     query = es_query.getDataById(masterID)
     masterData = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, masterID)

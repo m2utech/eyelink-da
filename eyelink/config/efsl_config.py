@@ -5,11 +5,18 @@ backup_count = 10
 logger_name = "efsl_log"    ###
 logging_level = "DEBUG"     ### CRITCAL, ERROR, WARNING, INFO, DEBUG, NOTSET
 log_file = "../../logs/efsl.log"
-pid_file = "../../pid/efsl.pid"
-sched_pid_file = "../../pid/efslScheduler.pid"
 # log_file = "/home/m2utech/da/eyelink-da/logs/efsl.log"
 # pid_file = "/home/m2utech/da/eyelink-da/pid/efsl.pid"
 # sched_pid_file = "/home/Toven/eyelink-da/pid/efslScheduler.pid"
+
+log_opt = {
+    "format": "%(asctime)s [%(levelname)s] (%(filename)s:%(lineno)s) %(message)s",
+    "fileSize": 1024 * 1024 * 100,
+    "backupCnt": 10,
+    "name": "efsl_log",
+    "level": "DEBUG",     ### CRITCAL, ERROR, WARNING, INFO, DEBUG, NOTSET
+    "file": "../../logs/efsl.log"
+}
 
 # used
 sched_opt = {
@@ -18,7 +25,7 @@ sched_opt = {
     "CP_cycle": 9,              # 09:00 every day
     "CP_range": 24,             # 24 hours
     "PM_cycle": '*/2',          # every 2 minutes
-    "PM_range": 60,             # 60 minutes
+    "PM_range": 120,             # 120 minutes
     "job_code": {
         '0000': 'pattern',
         '1000': 'matching',

@@ -33,7 +33,7 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     dataset = getDataset(sDate, eDate, esIndex, docType)
     # dataset is empty
     if (dataset is None) or (dataset.empty):
-        logger.warn("[AD] There is no dataset... skipping analysis")
+        logger.warning("[AD] There is no dataset... skipping analysis")
     else:
         if masterData is not None:
             dataset = preprocessing(dataset, tInterval)
@@ -45,6 +45,7 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
                     query,
                     MASTER_ID)
             logger.debug("[AD] ### Start create pattern ...")
+
             pData, pInfo, npData, npInfo = createPatternData(dataset, masterData, masterInfo, saveID)
             logger.debug("[AD] Save result of create pattern ...")
             savePatternData(pData, pInfo, npData, npInfo, saveID, True, esIndex, docType)
@@ -76,8 +77,7 @@ def preprocessing(dataset, tInterval):
     procs = []
     for factor_name in factors:
         output[factor_name] = Queue()
-        procs.append(Process(target=converter.sampling,
-            args=(dataset[factor_name], tInterval, MV_method, output[factor_name])))
+        procs.append(Process(target=converter.sampling, args=(dataset[factor_name], tInterval, MV_method, output[factor_name])))
     for p in procs:
         p.start()
     for factor_name in factors:
@@ -189,7 +189,7 @@ def clusteringSegment(dataset, master_data, master_info, col_name, saveID, pdQ, 
             min_dist = heapq.nsmallest(1, distance, key=distance.get)
 
             match_len = config.AD_opt['match_len']
-            valRange = config.AD_opt['value_range']
+            valRange = config.AD_opt['value_range'][col_name]
             percentile = np.sqrt(((valRange[1] - valRange[0])**2)*match_len) / 100.0
             match_rate = 100.0 - (float(distance[min_dist[0]]) / percentile)
 
@@ -284,28 +284,22 @@ def savePatternData(pData, pInfo, npData, npInfo, saveID, masterYN, esIndex, doc
 
 #############################
 if __name__ == '__main__':
-    print("start")
-    import insertPkgPath
+    # print("start")
     freeze_support()
-    from common.logger import getLogger
-    logger_name = config.logger_name
-    log_file = config.log_file
-    log_format = config.log_format
-    file_size = config.file_max_byte
-    backup_cnt = config.backup_count
-    log_level = config.logging_level
-
-    logger = getLogger(logger_name, log_file, log_format, file_size, backup_cnt, log_level)
-    esIndex = 'notching'
-    docType = 'oee'
-    sDate = "2018-01-01T00:00:00Z"
-    eDate = "2018-01-01T03:00:00Z"
+    from common.logger import getStreamLogger
+    logger = getStreamLogger()
+    esIndex = 'corecode'
+    docType = 'corecode'
+    sDate = "2018-04-12T00:00:00Z"
+    eDate = "2018-04-12T23:00:00Z"
 
     # query = es_query.getDataById(config.AD_opt['masterID'])
     # masterData = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
     # main(esIndex, docType, sDate, eDate, masterData, '30S')
 
-    esIndex = 'stacking'
+    # esIndex = 'stacking'
     query = es_query.getDataById(config.AD_opt['masterID'])
+    # print(query)
     masterData = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])
-    main(esIndex, docType, sDate, eDate, masterData, '30S')
+    # print(masterData)
+    main(esIndex, docType, sDate, eDate, masterData, 1)

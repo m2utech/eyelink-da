@@ -1,10 +1,10 @@
 import socket
 from threading import Thread
-import logging
-import logging.handlers
+import daemon
 
 import insertPkgPath
-
+import logging
+import logging.handlers
 from common import es_api
 from common import es_query
 from config import efsl_config as config
@@ -20,59 +20,56 @@ MASTER = None
 CODE = 0
 DA_INDEX = config.es_index
 
-logger = logging.getLogger(config.logger_name)
-threads = []
-
 
 # Multithreaded Python server : TCP Server Socket Thread Pool
-class SocketThread(object):
+class server_forever(object):
     def __init__(self, host, port):
-        Thread.__init__(self)
         self.host = host
         self.port = port
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sock.bind((self.host, self.port))
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server.bind((self.host, self.port))
 
     def listen(self):
-        self.sock.listen()
+        logger.info("Started main socket server for efsl ...")
+        self.server.listen(1)
         while True:
-            client, address = self.sock.accept()
+            client, address = self.server.accept()
             logger.debug("New ad-socket thread started for {}:{}".format(address[0], address[1]))
-            client.settimeout(consts.CONN_TIMEOUT)
-            newthread = Thread(target=self.listen2Client, args=(client, address))
-            newthread.start()
-            threads.append(newthread)
-        for t in threads:
-            t.join()
 
-    def listen2Client(self, client, address):
-        while True:
-            try:
-                data = client.recv(consts.BUFFER_SIZE)
-                if data:
-                    logger.debug("received data from socket: {}".format(data))
-                    self.jsonParsing(data)
-                    response = data
-                    client.send(response)
-                else:
-                    raise socket.error
-            except socket.error:
+            newthread = Thread(target=self.listen2Client, args=[client])
+            newthread.daemon = True
+            newthread.start()
+
+
+    def listen2Client(self, client):
+        # while True:
+        try:
+            data = client.recv(consts.BUFFER_SIZE)
+            if data:
+                response = data
+                client.send(response)
                 client.close()
-                return False
+                logger.debug("received data from socket: {}".format(data))
+                self.jsonParsing(data)
+            else:
+                raise socket.error
+        except socket.error:
+            client.close()
+            return False
 
     # 소켓 메시지 파싱
     def jsonParsing(self, data):
-        global MASTER
-        global CODE
+        global MASTER, CODE
 
         logger.debug("received message parsing ....")
         dataDecode = data.decode("utf-8")
         json_dict = eval(dataDecode) # dictionary type
-        print(json_dict)
+        logger.debug("Received message =>  {}".format(json_dict))
 
         # message set check
-        if set(('type', 'esIndex', 'docType', 'sDate', 'eDate', 'tInterval', 'nCluster')) <= set(json_dict):
+        if {'type', 'esIndex', 'docType', 'sDate', 'eDate', 'tInterval', 'nCluster'} <= set(json_dict):
+
             if 'None' not in json_dict.values():
                 esIndex = json_dict['esIndex']
                 docType = json_dict['docType']
@@ -84,7 +81,8 @@ class SocketThread(object):
                 sDate = util.checkDatetime(sDate, consts.DATETIME)
                 eDate = util.checkDatetime(eDate, consts.DATETIME)
 
-                print(sDate, eDate)
+                logger.debug("Check dateformat and convert UTC time => [sDate: {}, eDate: {}]".format(sDate, eDate))
+
                 ##### Create Patterns #####
                 if json_dict["type"] == "pattern":
                     self.loadMasterPattern(esIndex, docType)
@@ -118,8 +116,7 @@ class SocketThread(object):
 
 
     def loadMasterPattern(self, esIndex, docType):
-        global MASTER
-        global CODE
+        global MASTER, CODE
         query = es_query.getDataById(config.AD_opt['masterID'])
         dataset = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'],
                                      DA_INDEX[esIndex][docType]['PD']['TYPE'],
@@ -151,9 +148,19 @@ class SocketThread(object):
 
 ######################################
 if __name__ == '__main__':
-    from common.logger import getStreamLogger
-    logger = getStreamLogger()
-    host = 'localhost'
-    port = 52251
-    data = b'{"type": "pattern", "esIndex": "corecode", "docType": "corecode", "sDate": "2018-04-10T06:00:00", "eDate": "2018-04-11T08:00:00", "tInterval": 1, "nCluster": 30}'
-    SocketThread(host, port).jsonParsing(data)
+    product = consts.PRODUCTS['efsl']
+    ### logging info ###
+    LOG = config.log_opt
+    logger = logging.getLogger(LOG["name"])
+    formatter = logging.Formatter(LOG["format"])
+    fileHandler = logging.handlers.RotatingFileHandler(LOG["file"], maxBytes=LOG["fileSize"],
+                                                       backupCount=LOG["backupCnt"])
+    fileHandler.setFormatter(formatter)
+    logger.addHandler(fileHandler)
+    logger.setLevel(logging.getLevelName(LOG["level"]))
+
+    context = daemon.DaemonContext()
+    log_fileno = fileHandler.stream.fileno()
+    context.files_preserve = [log_fileno]
+    with context:
+        server_forever(product['host'], product['port']).listen()
