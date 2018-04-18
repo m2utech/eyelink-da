@@ -1,9 +1,11 @@
 .ipynb_checkpoints/
+.idea/*
 *.ipynb
 eyelink/__pycache__/
 eyelink/jupyter_notebook/
 eyelink/example/
-eyelink/logs/*.log
-eyelink/PID/*.pid
+*.log
+*.pid
 *.pyc
-.idea/
+
+

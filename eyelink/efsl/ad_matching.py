@@ -41,7 +41,6 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = saveID.replace('Z', '')
     # saveID = eDate
     dataset = getDataset(sDate, eDate, esIndex, docType)
-    print(dataset)
 
     if (dataset is not None) and (not dataset.empty):
         if masterData is not None:
@@ -60,24 +59,25 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
             logger.debug("[AD] Save result of pattern matching ...")
             saveMatchingResult(assign_result, saveID, esIndex, docType)
         else:
-            logger.warn("[AD] master data is None ...")
+            logger.warning("[AD] master data is None ...")
     else:
-        logger.warn("[AD] There is no dataset for pattern matching")
+        logger.warning("[AD] There is no dataset for pattern matching")
 
 
 def getDataset(sDate, eDate, esIndex, docType):
-    idxList = util.getIndexDateList(esIndex + '-', sDate, eDate, consts.DATE)
-    print(idxList)
-    body = es_query.getCorecodeTargetDataByRange(node_id, sDate, eDate)
-    print(body)
-    logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
-    dataset = pd.DataFrame()
-    for idx in idxList:
-        logger.debug("[CA] get dataset about index [{}]".format(idx))
-        data = es_api.getCorecodeData(idx, docType, body, DataIndex)
-        dataset = dataset.append(data)
-    dataset = dataset.sort_index()
-    return dataset
+    try:
+        idxList = util.getIndexDateList(esIndex + '-', sDate, eDate, consts.DATE)
+        body = es_query.getCorecodeTargetDataByRange(node_id, sDate, eDate)
+        logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
+        dataset = pd.DataFrame()
+        for idx in idxList:
+            logger.debug("[CA] get dataset about index [{}]".format(idx))
+            data = es_api.getCorecodeData(idx, docType, body, DataIndex)
+            dataset = dataset.append(data)
+        dataset = dataset.sort_index()
+        return dataset
+    except Exception as e:
+        logger.exception(e)
 
 
 def preprocessing(dataset, eDate, tInterval):
@@ -187,9 +187,11 @@ def compareDistance(test_data, master_data, master_info, col_name, topK, match_l
 
 
 def saveMatchingResult(assign_result, saveID, esIndex, docType):
-    es_api.insertDataById(DA_INDEX[esIndex][docType]['PM']['INDEX'], DA_INDEX[esIndex][docType]['PM']['TYPE'], saveID, assign_result)
-    logger.debug("[AD] [ID:{}] was saved successfully".format(saveID))
-
+    try:
+        es_api.insertDataById(DA_INDEX[esIndex][docType]['PM']['INDEX'], DA_INDEX[esIndex][docType]['PM']['TYPE'], saveID, assign_result)
+        logger.debug("[AD] [ID:{}] was saved successfully".format(saveID))
+    except Exception as e:
+        logger.exception(e)
 
 #############################
 if __name__ == '__main__':
@@ -199,8 +201,8 @@ if __name__ == '__main__':
 
     esIndex = 'corecode'
     docType = 'corecode'
-    sDate = "2018-04-12T00:00:00Z"
-    eDate = "2018-04-12T02:00:00Z"
+    sDate = "2018-04-17T00:14:00Z"
+    eDate = "2018-04-17T02:14:00Z"
 
     masterID = config.AD_opt['masterID']
     query = es_query.getDataById(masterID)

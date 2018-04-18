@@ -84,15 +84,11 @@ def job_CA_weekly():
 def job_CP():
     logger.debug("== start Create Patterns for {} ...".format(product['productName']))
     sDate, eDate = utils.getStartEndDateByHour(ad_cp_sched['range'], False, consts.DATETIMEZERO)
-    sDate = utils.convertDefaultDate(sDate)
-    eDate = utils.convertDefaultDate(eDate)
     sendData("0000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 
 def job_PM():
     logger.debug("== start Pattern Matching for {} ...".format(product['productName']))
     sDate, eDate = utils.getStartEndDateByMinute(ad_pm_sched['range'], False, consts.DATETIMEZERO)
-    sDate = utils.convertDefaultDate(sDate)
-    eDate = utils.convertDefaultDate(eDate)
     print(sDate, eDate)
     sendData("1000", "corecode", "corecode", sDate, eDate, ad_tInterval, ad_n_cluster)
 

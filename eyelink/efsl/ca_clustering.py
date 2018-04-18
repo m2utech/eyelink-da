@@ -161,4 +161,4 @@ if __name__ == '__main__':
     freeze_support()
     from common.logger import getStreamLogger
     logger = getStreamLogger()
-    main('corecode', 'corecode', '2018-04-12T00:00:00Z', '2018-04-12T23:00:00Z', 5, 10)
+    main('corecode', 'corecode', '2018-04-16T00:00:00Z', '2018-04-17T02:00:00Z', 5, 10)
