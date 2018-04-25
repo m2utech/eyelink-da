@@ -31,4 +31,4 @@ def sendMessage(sendData):
 
 
 if __name__ == '__main__':
-    sendData('pattern', 'corecode', 'corecode', '2018-04-12T15:00:00', '2018-04-13T14:00:00', 1, 5)
+    sendData('pattern', 'corecode', 'corecode', '2018-04-18T00:00:00', '2018-04-20T14:00:00', 1, 30)

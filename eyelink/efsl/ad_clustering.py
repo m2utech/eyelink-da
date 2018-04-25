@@ -290,8 +290,8 @@ if __name__ == '__main__':
     logger = getStreamLogger()
     esIndex = 'corecode'
     docType = 'corecode'
-    sDate = "2018-04-16T00:00:00Z"
-    eDate = "2018-04-18T13:00:00Z"
+    sDate = "2018-04-17T00:00:00"
+    eDate = "2018-04-19T00:00:00"
 
     # query = es_query.getDataById(config.AD_opt['masterID'])
     # masterData = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])

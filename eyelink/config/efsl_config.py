@@ -50,7 +50,7 @@ AD_opt = {
     'index': 'event_time',  ###
     'factors': ['ampere', 'active_power', 'power_factor', 'voltage'],   ###
     'masterID': 'master',   ###
-    'n_cluster': 50,        ### 50
+    'n_cluster': 30,        ### 30
     'top_k': 3,
     'slide_len': 2,                             # 1m
     'win_len': 120,                             # 1h
