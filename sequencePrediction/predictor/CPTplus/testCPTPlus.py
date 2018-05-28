@@ -7,6 +7,10 @@ from predictor.CPTplus.CPTPlusPredictor import CPTPlusPredictor
 from database.Sequence import Sequence
 from database.Item import Item
 
+#### Logging ####
+from common.logger import getStreamLogger
+logger = getStreamLogger()
+#################
 
 # from algoCPTplus import AlgoCPTplus
 # from sequencePrediction.database.Item import Item
@@ -48,8 +52,14 @@ def main(dirPath):
         """ Now we will make a prediction We want to predict what would occur after
         the sequence <1, 2> We first create the sequence """
         sequence = Sequence(0)
-        sequence.addItem(Item(1))
-        sequence.addItem(Item(2))
+        sequence.addItem(Item(11))
+        sequence.addItem(Item(17))
+        sequence.addItem(Item(8))
+        sequence.addItem(Item(5))
+        sequence.addItem(Item(10))
+
+        logger.debug(sequence)
+
 
         """ Then we perform the prediction """
         thePrediction = predictionModel.Predict(sequence)
