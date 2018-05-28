@@ -1,10 +1,11 @@
-data/
-drivers/
-build/
-dist/
-ELDA/__pycache__
-tests/
+.ipynb_checkpoints/
+.idea/*
+*.ipynb
+eyelink/__pycache__/
+eyelink/jupyter_notebook/
+eyelink/example/
 *.log
+*.pid
 *.pyc
-*.csv
+
 
