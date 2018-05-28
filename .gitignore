@@ -7,5 +7,7 @@ eyelink/example/
 *.log
 *.pid
 *.pyc
+*.csv
+*.dat
 
 
