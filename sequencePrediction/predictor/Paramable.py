@@ -1,6 +1,11 @@
 from multipledispatch import dispatch
 from predictor.profile.Profile import Profile
 
+###########################
+import logging
+logger = logging.getLogger('stream_log')
+###########################
+
 class Paramable(object):
     parameters = None
 
@@ -11,10 +16,10 @@ class Paramable(object):
         if ((params != None) and (len(params) > 0) and (":" in params)):
             paramsStr = params.split(" ")
             for param in paramsStr:
-                print(param)
+                # logger.debug(param)
                 keyValue = param.split(":")
                 self.parameters[keyValue[0]] = keyValue[1]
-            print(self.parameters)
+            logger.debug(self.parameters)
 
     def paramDouble(self, name):
         value = self.parameters.get(name)
@@ -22,7 +27,7 @@ class Paramable(object):
         if value != None:
             return float(self.parameters.get(name))
         else:
-            return Profile.paramDouble(name)
+            return self.Profile.paramDouble(name)
 
 
     def paramDoubleOrDefault(self, paramName, defaultValue):
@@ -35,7 +40,7 @@ class Paramable(object):
         if value != None:
             return int(self.parameters.get(name))
         else:
-            return Profile.paramInt(name)
+            return self.Profile.paramInt(name)
 
     def paramIntOrDefault(self, paramName, defaultValue):
         param = self.paramInt(paramName)
@@ -47,7 +52,7 @@ class Paramable(object):
         if value != None:
             return float(self.parameters.get(name))
         else:
-            return Profile.paramFloat(name)
+            return self.Profile.paramFloat(name)
 
     def paramFloatOrDefault(self, paramName, defaultValue):
         param = self.paramFloat(paramName)
@@ -59,7 +64,7 @@ class Paramable(object):
         if value != None:
             return True if (self.parameters.get(name)).lower() in "true" else False
         else:
-            return Profile.paramBool(name)
+            return self.Profile.paramBool(name)
 
     def paramBoolOrDefault(self, paramName, defaultValue):
         param = self.paramBool(paramName)
