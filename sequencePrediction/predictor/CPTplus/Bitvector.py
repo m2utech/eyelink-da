@@ -1,5 +1,6 @@
 # from bitsets import bitset
 from multipledispatch import dispatch
+import traceback
 #
 # class BitSet:
 #     def __init__(self):
@@ -21,8 +22,15 @@ class Bitvector(object):
         self.cardinality = cardinality
 
     def AND(self, bitvector2):
-        self.bitset = self.bitset & bitvector2
+        self.bitset = self.bitset & bitvector2.bitset
         self.cardinality = -1
+
+    def clone(self):
+        try:
+            return Bitvector(self.bitset.copy(), self.cardinality)
+        except:
+            traceback.print_exc()
+        return None
 
     def __copy__(self):
         return Bitvector(self.bitset, self.cardinality)
@@ -31,16 +39,24 @@ class Bitvector(object):
         return len(self.bitset)
 
     def nextSetBit(self, i):
-        return self.getValue(self.bitset, i)
+        try:
+            next = [x for x in list(self.bitset) if x >= i]
+            if not next:
+                return -1
+            else:
+                return min(next)
+        except:
+            traceback.print_exc()
 
-    def getValue(self, bitset, i):
-        listSet = bitset
-        sorted(listSet)
-        return listSet[i]
+    # def cardinality(self):
+    #     if self.cardinality == -1:
+    #         self.cardinality = self.bitset.cardinality()
+    #     return self.cardinality
 
-    def cardinality(self):
+    # cardinality(self) has error about 'int' object is not callable
+    def getCardinality(self):
         if self.cardinality == -1:
-            self.cardinality = self.bitset.cardinality()
+            self.cardinality = len(self.bitset)
         return self.cardinality
 
     def setBit(self, i):
