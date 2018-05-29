@@ -35,8 +35,8 @@ sched_opt = {
 
 ##### Elasticsearch API #####
 es_opt = {
-    # 'url': 'http://m2u-parstream.eastus.cloudapp.azure.com:9200',
-    'url': 'http://localhost:9200',
+    'url': 'http://m2u-parstream.eastus.cloudapp.azure.com:9200',
+    # 'url': 'http://localhost:9200',
     'scroll_time': '3m',
     'scroll_size': 10000
 }
@@ -53,8 +53,8 @@ AD_opt = {
     'n_cluster': 30,        ### 30
     'top_k': 3,
     'slide_len': 2,                             # 1m
-    'win_len': 120,                             # 2h
-    'match_len': 110,                           # 110m
+    'win_len': 120,                             # 1h
+    'match_len': 110,                           # 55m
     'value_range': {
         'ampere': [0.0, 1.0],
         'active_power': [0.0, 240.0],
@@ -76,7 +76,7 @@ CA_opt = {
     'timeUnit': 'minutes',      # seconds, minutes, hours ...
     'n_cluster': 5,
     # CA scheduler
-    'daily': {'cycle': 0, 'range': 1, 'interval': 5},   # 09:00, 1 day, 1 minute
+    'daily': {'cycle': 0, 'range': 1, 'interval': 1},   # 09:00, 1 day, 1 minute
     'weekly': {'cycle': 'mon', 'range': 7, 'interval': 15}  # monday, 7 days, 10 minutes
 }
 

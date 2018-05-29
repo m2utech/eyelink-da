@@ -35,10 +35,11 @@ class SequenceStatsGenerator(object):
 
         print("Number of distinct items: \t{}".format(len(items)))
         print("Largest item id: \t{}".format(maxItem))
-        print("Itemsets per sequence: t{}".format(self.calculateMean(sizes)))
+        print("Itemsets per sequence: \t{}".format(self.calculateMean(sizes)))
         print("Distinct item per sequence: \t{}".format(self.calculateMean(differentitems)))
         print("Occurences for each item: \t{}".format(self.calculateMean(appearXtimesbySequence)))
-        datasetSize = ((database.size() * 4) + (database.size() * self.calculateMean(sizes) * 4) / (1000 * 1000))
+        # datasetSize = ((database.size() * 4) + (database.size() * self.calculateMean(sizes) * 4) / (1000 * 1000))
+        datasetSize = ((database.size()) + (database.size() * self.calculateMean(sizes)) / (1000 * 1000))
         print("Size of the dataset in MB: \t{}".format(datasetSize))
 
 
