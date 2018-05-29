@@ -2,7 +2,7 @@ import elasticsearch
 from elasticsearch.helpers import scan
 import pandas as pd
 import logging
-from config import config
+from config import efsl_config as config
 from consts import consts
 
 logger = logging.getLogger(config.logger_name)
