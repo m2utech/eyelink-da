@@ -21,10 +21,10 @@ TYPE = 'corecode'
 es = elasticsearch.Elasticsearch(HOST)
 class DataSimulator(object):
     def __init__(self):
-        self.datafilepath = sys.argv[2]
-        self.nodeId = sys.argv[3]
-        self.initialDataInDays = int(0 if sys.argv[4] == None else sys.argv[4])
-        self.startDatetimeToSkip = (datetime.now() if sys.argv[5] == None else datetime.strptime(sys.argv[5], DATETIME))
+        self.datafilepath = sys.argv[1]
+        self.nodeId = sys.argv[2]
+        self.initialDataInDays = int(0 if sys.argv[3] == None else sys.argv[3])
+        self.startDatetimeToSkip = (datetime.now() if sys.argv[4] == None else datetime.strptime(sys.argv[4], DATETIME))
 
         self.printInfo()
 
@@ -44,12 +44,12 @@ class DataSimulator(object):
         self.readFile()
 
     def printInfo(self):
-        print('=========================================================')
-        print('== Data File Path        : {}'.format(self.datafilepath))
-        print('== Node ID               : {}'.format(self.nodeId))
-        print('== Initial Data In Days  : {}'.format(self.initialDataInDays))
-        print('== Start Datetime        : {}'.format(self.startDatetimeToSkip))
-        print('=========================================================')
+        logger.info('=========================================================')
+        logger.info('== Data File Path        : {}'.format(self.datafilepath))
+        logger.info('== Node ID               : {}'.format(self.nodeId))
+        logger.info('== Initial Data In Days  : {}'.format(self.initialDataInDays))
+        logger.info('== Start Datetime        : {}'.format(self.startDatetimeToSkip))
+        logger.info('=========================================================')
 
     def readFile(self):
 
@@ -64,13 +64,12 @@ class DataSimulator(object):
                     data_arr = line.strip("\n").split(',')
                     event_date = data_arr[3].split(' ')[0]
 
-                    print("####################")
-                    print("orginal event_date_time: {}".format(data_arr[3]))
+                    # print("orginal event_date_time: {}".format(data_arr[3]))
 
                     if self.curDate == None:
                         self.curDate = event_date
                     if self.curDate != event_date:
-                        print("Changing date. curDate: {}, event_date: {}".format(self.curDate, event_date))
+                        logger.info("Changing date. curDate: {}, event_date: {}".format(self.curDate, event_date))
                         self.processedDays += 1
                         self.prev_month_datetime = self.prev_month_datetime + timedelta(days=1)
                         self.curDate = event_date
@@ -78,7 +77,7 @@ class DataSimulator(object):
                         if self.processedDays >= self.initialDataInDays:
                             self.initialDateProcessed = True
 
-                        print('=========== {} days passed ============'.format(self.processedDays))
+                            logger.info('=========== {} days passed ============'.format(self.processedDays))
 
                         self.needNewMapping = True
 
@@ -90,12 +89,12 @@ class DataSimulator(object):
                     nextEventDateTime = datetime.strptime(data_arr[3].replace('T', ' '), DATETIME)
                     data_arr[3] = data_arr[3].split('T')[0] + 'T' + nextEventDateTime.strftime(TIME)
 
-                    print("cur_datetime: {}".format(curDateTime.strftime(DATETIME)))
-                    print("nextEventDateTime: {}".format(nextEventDateTime.strftime(DATETIME)))
-                    print("data_arr[3]: {}".format(data_arr[3]))
+                    logger.info("cur_datetime: {}".format(curDateTime.strftime(DATETIME)))
+                    logger.info("nextEventDateTime: {}".format(nextEventDateTime.strftime(DATETIME)))
+                    # logger.info("data_arr[3]: {}".format(data_arr[3]))
 
                     diffSeconds = (nextEventDateTime - cur_datetime).total_seconds()
-                    print("diffSeconds: {}".format(round(diffSeconds)))
+                    logger.info("diffSeconds: {:.2f}".format(diffSeconds))
 
                     # if (self.processedDays >= self.initialDataInDays) and ((nextEventDateTime - self.startDatetimeToSkip).total_seconds() > 0):
                     #     print("-------------------------")
@@ -108,7 +107,7 @@ class DataSimulator(object):
 
                     if (self.startDatetimeToSkip == None) or (((nextEventDateTime - self.startDatetimeToSkip).total_seconds()) > 0):
                         index = 'corecode-' + cur_kor_datetime.split(' ')[0].replace('-', '.')
-                        print("index: {}".format(index))
+                        # print("index: {}".format(index))
                         test = self.makeData(index, TYPE, data_arr)
 
                         if self.needNewMapping:
@@ -116,16 +115,17 @@ class DataSimulator(object):
                                 indexSettings = self.indexSetting()
                                 es.indices.create(index=index, body=indexSettings)
                             else:
-                                print("exist!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                                continue
+                                # print("exist!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
                             self.needNewMapping = False
 
                         if diffSeconds <= 0:
-                            sleep(0)
+                            sleep(0.001)
                             self.insertData(index, TYPE, data_arr)
 
                         elif diffSeconds > 0:
-                            print("waiting {} seconds .....".format(diffSeconds))
+                            logger.info("waiting {:.2f} seconds .....".format(diffSeconds))
                             sleep(diffSeconds)
                             self.insertData(index, TYPE, data_arr)
                     else:
@@ -135,7 +135,7 @@ class DataSimulator(object):
             traceback.print_exc()
 
     def insertData(self, index, doc_type, linedata):
-        print("Inserting data - index: {}, data : {}".format(index, linedata))
+        logger.info("Inserting data - index: {}, data : {}".format(index, linedata))
         insertdata = self.makeData(index, doc_type, linedata)
         es.index(index=index, doc_type=doc_type, body=insertdata)
 
@@ -176,7 +176,8 @@ class DataSimulator(object):
             "status_active_mode": int(data[32]) if data[32] is not '' else 0,
             "status_led_on_off_type": int(data[33]) if data[33] is not '' else 0,
             "reboot_time": data[34] if data[34] is not '' else 'NULL',
-            "event_remain": int(data[35]) if data[35] is not '' else 0
+            "event_remain": int(data[35]) if data[35] is not '' else 0,
+            "failfirmwareupdate": 0
         }
         return insertData
 
@@ -186,7 +187,7 @@ class DataSimulator(object):
         local_tz = pytz.timezone('Asia/Seoul')
         utc_dt = local_tz.localize(strDate).astimezone(pytz.UTC)
         utc_dt = utc_dt.strftime(fm) + 'Z'
-        print("utc_dt : {}".format(utc_dt))
+        # print("utc_dt : {}".format(utc_dt))
         return utc_dt
 
     def indexSetting(self):
@@ -198,9 +199,9 @@ class DataSimulator(object):
             "mappings": {
                 "corecode": {
                     "properties": {
-                        "node_id": {"type": "text", "index": "true"},
-                        "event_type": {"type": "text", "index": "true"},
-                        "measure_time": {"type": "text"},
+                        "node_id": {"type": "string", "index": "not_analyzed"},
+                        "event_type": {"type": "string", "index": "not_analyzed"},
+                        "measure_time": {"type": "string"},
                         "event_time": {"type": "date"},
                         "voltage": {"type": "double"},
                         "ampere": {"type": "double"},
@@ -233,7 +234,7 @@ class DataSimulator(object):
                         "status_self_diagnostics_led_active": {"type": "integer"},
                         "status_active_mode": {"type": "integer"},
                         "status_led_on_off_type": {"type": "integer"},
-                        "reboot_time": {"type": "text"},
+                        "reboot_time": {"type": "string"},
                         "event_remain": {"type": "integer"},
                         "failfirmwareupdate": {"type": "integer"}
                     }
@@ -264,15 +265,17 @@ def getLogger():
 
 if __name__ == '__main__':
     logger = getLogger()
-    sys.argv = [None] * 6
-    sys.argv[0] = 'python3.5'
-    sys.argv[1] = 'DataSimulator.py'
-    sys.argv[2] = './busan_tb_node_raw_180516_TTA.csv'
-    sys.argv[3] = '0'
-    sys.argv[4] = '0'
-    sys.argv[5] = '2018-05-28 00:00:00'
-    # sys.argv[5] = None
-    if (sys.argv[2] == None) or (sys.argv[3] == None):
+
+    if len(sys.argv) < 2:
+        sys.argv = [None] * 6
+        sys.argv[0] = 'DataSimulator.py'
+        sys.argv[1] = './busan_tb_node_raw_180516_TTA.csv'
+        sys.argv[2] = '0'
+        sys.argv[3] = '0'
+        sys.argv[4] = '2018-05-28 00:00:00' #현재날짜와 동일하도록...
+
+    if (len(sys.argv) > 1) and (len(sys.argv) < 5):
+        print("sys.argv length : {}".format(len(sys.argv)))
         printUsage()
         sys.exit()
 
