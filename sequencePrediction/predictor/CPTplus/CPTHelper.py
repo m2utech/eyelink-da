@@ -19,16 +19,17 @@ class CPTHelper(object):
 
         items = []
         curNode = self.predictor.LT.get(id)
-        items.append(curNode)
+        items.append(curNode.Item)
         while (curNode.Parent != None) and (curNode.Parent != self.predictor.Root):
             curNode = curNode.Parent
             items.append(curNode.Item)
 
-        items.sort(reverse=True)
+        # print(items)
+        items.sort(key=lambda x: x.val)
 
         sequence = self.encoder.decode(Sequence(id, items))
 
-        return np.asarray(sequence.getItems())
+        return np.array(sequence.getItems())
 
     def getCommonPrefix(self, A, B):
         if (len(A) < 1) or (len(B) < 1):
@@ -57,7 +58,7 @@ class CPTHelper(object):
         threshold = 0
         selectedItems = list()
         for item in target.getItems():
-            if (self.predictor.II.get(item.val) != None) and (self.predictor.II.get(item.val).cardinality() >= threshold):
+            if (self.predictor.II.get(item.val) != None) and (self.predictor.II.get(item.val).getCardinality() >= threshold):
                 selectedItems.append(item)
 
         target.getItems().clear()
@@ -65,7 +66,7 @@ class CPTHelper(object):
         return target
 
     def getSimilarSequencesIds(self, sequence):
-        if len(sequence == 0):
+        if len(sequence) == 0:
             return Bitvector()
         intersection = None
         for i in range(len(sequence)):
@@ -74,7 +75,7 @@ class CPTHelper(object):
             else:
                 other = self.predictor.II.get(sequence[i].val)
                 if other != None:
-                    intersection.And(self.predictor.II.get(sequence[i].val))
+                    intersection.AND(self.predictor.II.get(sequence[i].val))
 
         return intersection
 

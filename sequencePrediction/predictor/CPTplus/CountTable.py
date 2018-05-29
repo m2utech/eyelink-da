@@ -34,6 +34,7 @@ class CountTable(object):
         id = ids.nextSetBit(0)
         while id >= 0:
             if id in self.branchVisited:
+                id = ids.nextSetBit(id + 1)
                 continue
 
             self.branchVisited.add(id)
@@ -58,7 +59,7 @@ class CountTable(object):
                 # it means that all the items of toAvoid have been seen
                 if (len(toAvoid) == 0) and (count < max):
                     # calculating the score for this item
-                    self.push(item.val, len(sequence), initialSequenceSize, ids.cardinality(), count)
+                    self.push(item.val, len(sequence), initialSequenceSize, ids.getCardinality(), count)
                     count += 1
                 elif item in toAvoid:
                     toAvoid.remove(item)
