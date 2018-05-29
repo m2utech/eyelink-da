@@ -1,5 +1,5 @@
 .ipynb_checkpoints/
-.idea/*
+.idea/
 *.ipynb
 eyelink/__pycache__/
 eyelink/jupyter_notebook/
