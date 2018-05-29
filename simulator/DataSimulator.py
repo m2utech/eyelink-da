@@ -176,7 +176,8 @@ class DataSimulator(object):
             "status_active_mode": int(data[32]) if data[32] is not '' else 0,
             "status_led_on_off_type": int(data[33]) if data[33] is not '' else 0,
             "reboot_time": data[34] if data[34] is not '' else 'NULL',
-            "event_remain": int(data[35]) if data[35] is not '' else 0
+            "event_remain": int(data[35]) if data[35] is not '' else 0,
+            "failfirmwareupdate": 0
         }
         return insertData
 
@@ -198,9 +199,9 @@ class DataSimulator(object):
             "mappings": {
                 "corecode": {
                     "properties": {
-                        "node_id": {"type": "text", "index": "true"},
-                        "event_type": {"type": "text", "index": "true"},
-                        "measure_time": {"type": "text"},
+                        "node_id": {"type": "string", "index": "not_analyzed"},
+                        "event_type": {"type": "string", "index": "not_analyzed"},
+                        "measure_time": {"type": "string"},
                         "event_time": {"type": "date"},
                         "voltage": {"type": "double"},
                         "ampere": {"type": "double"},
@@ -233,7 +234,7 @@ class DataSimulator(object):
                         "status_self_diagnostics_led_active": {"type": "integer"},
                         "status_active_mode": {"type": "integer"},
                         "status_led_on_off_type": {"type": "integer"},
-                        "reboot_time": {"type": "text"},
+                        "reboot_time": {"type": "string"},
                         "event_remain": {"type": "integer"},
                         "failfirmwareupdate": {"type": "integer"}
                     }

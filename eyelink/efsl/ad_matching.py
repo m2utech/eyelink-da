@@ -201,8 +201,8 @@ if __name__ == '__main__':
 
     esIndex = 'corecode'
     docType = 'corecode'
-    sDate = "2018-04-17T00:14:00Z"
-    eDate = "2018-04-17T02:14:00Z"
+    sDate = "2018-05-29T00:00:00Z"
+    eDate = "2018-05-29T02:00:00Z"
 
     masterID = config.AD_opt['masterID']
     query = es_query.getDataById(masterID)
