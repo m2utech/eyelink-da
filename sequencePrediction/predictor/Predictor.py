@@ -4,10 +4,14 @@ from multipledispatch import dispatch
 class Predictor():
     metaclass = ABCMeta
     TAG = None
-
+    @dispatch(str)
     def __init__(self, tag):
         self.__init__()
         self.TAG = tag
+
+    @dispatch()
+    def __init__(self):
+        pass
 
     def getTAG(self):
         return self.TAG
@@ -33,5 +37,5 @@ class Predictor():
 
 # test code
 if __name__ == '__main__':
-    test = Predictor()
+    test = Predictor('3')
     test.Predict(3)

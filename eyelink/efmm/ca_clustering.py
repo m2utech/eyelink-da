@@ -17,7 +17,7 @@ from common import converter as efmm_convert
 from common import learn_utils
 from config import config
 from consts import consts
-from common import utils
+from common import util as utils
 
 DA_INDEX = config.da_index
 logger = logging.getLogger(config.logger_name['efmm'])
@@ -179,4 +179,4 @@ if __name__ == '__main__':
     freeze_support()
     from common.logger import getStreamLogger
     logger = getStreamLogger()
-    main('stacking', 'status', '2017-12-24T23:50:00Z', '2017-12-25T00:00:00Z', 1, 'all', 5)
+    main('stacking', 'status', '2018-04-25T00:00:00Z', '2018-04-25T09:00:00Z', 1, 'all', 3)
