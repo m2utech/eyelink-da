@@ -2,6 +2,7 @@ from multipledispatch import dispatch
 from queue import Queue
 import math
 import sys
+import numpy as np
 
 from database.Item import Item
 from database.Sequence import Sequence
@@ -47,7 +48,7 @@ class CPTPlusPredictor(Predictor):
 
     @dispatch(str, str)
     def __init__(self, tag, params):
-        self.__init__()
+        self.__init__(tag)
         self.parameters.setParameter(params)
 
     def getTAG(self):
@@ -68,7 +69,7 @@ class CPTPlusPredictor(Predictor):
             itemsets = finder.findFrequentItemsets(trainingSequences, self.parameters.paramInt("CCFmin"), self.parameters.paramInt("CCFmax"), self.parameters.paramInt("CCFsup"))
 
             for itemset in itemsets:
-                print(list(itemset))
+                # print(list(itemset))
                 self.encoder.addEntry(itemset)
 
         for seq in trainingSequences:
@@ -120,13 +121,13 @@ class CPTPlusPredictor(Predictor):
         queue = Queue()  # linked list
         queue.put(target)
 
-        maxPredictionCount = 1 + int(target.size() * self.parameters.paramDouble("minPredictionRation"))
+        maxPredictionCount = 1 + int(target.size() * self.parameters.paramDouble("minPredictionRatio"))
         predictionCount = 0
-        noiseRatio = self.parameters.paramDouble("noiseRation")
+        noiseRatio = self.parameters.paramDouble("noiseRatio")
         initialTargetSize = target.size()
 
         ct = CountTable(self.helper)
-        ct.update(target.getItems().toArray(Item[0]), target.size())
+        ct.update(np.array(target.getItems()), target.size())
 
         predicted = ct.getBestSequence(1)
         if predicted.size() > 0:
@@ -143,13 +144,14 @@ class CPTPlusPredictor(Predictor):
 
                     for i in range(len(candidate.getItems())):
                         if candidate.getItems()[i] == noise:
-                            candidate.getItems().remove(i)
+                            # candidate.getItems().remove(i)
+                            candidate.getItems().pop(i)
                             break
 
                     if candidate.size() > 1:
                         queue.put(candidate)
 
-                    candidateItems = candidate.getItems().toArray(Item[0])
+                    candidateItems = np.array(candidate.getItems())
 
                     branches = ct.update(candidateItems, initialTargetSize)
 
@@ -158,27 +160,37 @@ class CPTPlusPredictor(Predictor):
                         if predicted.size() > 0:
                             predictionCount += 1
 
+            if queue.empty():
+                seq = None
+            else:
+                seq = queue.get()
+
         return ct
 
+    # {1 = {0, 2, 3}    cardinality: 3,
+    # 2 = {0, 1, 2, 3}    cardinality: 4,
+    # 3 = {0, 1, 2, 3}    cardinality: 4,
+    # 4 = {0, 1, 2, 3}    cardinality: 4,
+    # 5 = {1, 2, 3}    cardinality: 3,
+    # 6 = {0}    cardinality: 1,
+    # 7 = {3}    cardinality: 1}
 
     def getNoise(self, target, noiseRatio):
         noiseCount = int(math.floor(target.size() * noiseRatio))
-
         if noiseCount <= 0:
             minSup = int(sys.maxsize)
             itemVal = -1
             for item in target.getItems():
-                if self.II[item.val].cardinality() < minSup:
-                    minSup = self.II[item.val].cardinality()
+                if self.II[item.val].getCardinality() < minSup:
+                    minSup = self.II[item.val].getCardinality()
                     itemVal = item.val
 
             noises = []
-            noises.__add__(Item(itemVal))
+            noises.append(Item(itemVal))
             return noises
         else:
             ## TODO: sort the items of a sequence by frequency...
-            noises = target.getItems().stream().sorted()
-            ### ~~~~
+            noises = sorted(target.getItems(), key=lambda x: self.II.get(x.val).getCardinality(), reverse=True)
             return noises[(target.size() - noiseCount):target.size()]
 
 

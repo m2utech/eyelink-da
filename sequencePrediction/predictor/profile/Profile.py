@@ -1,7 +1,9 @@
+# from sequencePrediction.common.HashMap import HashMap
 
-class Profile(object):
+class Profile:
     def __init__(self):
         self.parameters = {}
+        # self.parameters = HashMap()
 
     def paramDouble(self, name):
         value = self.parameters.get(name)

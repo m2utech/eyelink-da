@@ -1,6 +1,7 @@
 import socket
 import insertPkgPath
 import daemon
+import time
 import logging
 import logging.handlers
 
@@ -51,6 +52,7 @@ def scheduler():
     with context:
         sched.start()
         while True:
+            time.sleep(0.5)
             pass
 
 def sendData(jobcode, esIndex, docType, sDate, eDate, tInterval, nCluster):
