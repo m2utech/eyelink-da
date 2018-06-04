@@ -5,6 +5,9 @@ import pandas as pd
 import numpy as np
 import heapq
 import logging
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from collections import OrderedDict
 
 import insertPkgPath
 from common import es_api
@@ -41,12 +44,26 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
     saveID = saveID.replace('Z', '')
     # saveID = eDate
     dataset = getDataset(sDate, eDate, esIndex, docType)
+    raw = dataset.resample('1T').mean()[-51:].reset_index()
+    raw.event_time = (pd.to_timedelta(raw.event_time).dt.total_seconds().astype(int) + 60) * 1000
+    rawValue = []
+    for i in range(len(raw)):
+        valDic = {}
+        valDic["event_time"] = int(raw['event_time'][i])
+        valDic["ampere"] = raw['ampere'][i]
+        valDic["voltage"] = raw['voltage'][i]
+        valDic["active_power"] = raw['active_power'][i]
+        valDic["power_factor"] = raw["power_factor"][i]
+        rawValue.append(valDic)
+
+    # raw = raw.to_dict(orient='records')
+    # pd.to_timedelta(df.date).dt.total_seconds().astype(int)
 
     if (dataset is not None) and (not dataset.empty):
         if masterData is not None:
             logger.debug("[AD] Dataset preprocessing ...")
             dataset = preprocessing(dataset, eDate, tInterval)
-
+            # print(dataset)
             logger.debug("[AD] Load pattern info[ID:{}]".format(MASTER_ID))
             query = es_query.getDataById(MASTER_ID)
             masterInfo = es_api.getDataById(
@@ -56,6 +73,8 @@ def main(esIndex, docType, sDate, eDate, masterData, tInterval):
                                     MASTER_ID)
             logger.debug("[AD] ### Start pattern matching ...")
             assign_result = patternMatching(dataset, masterData, masterInfo, saveID)
+            assign_result['raw'] = rawValue
+
             logger.debug("[AD] Save result of pattern matching ...")
             saveMatchingResult(assign_result, saveID, esIndex, docType)
         else:
@@ -102,6 +121,8 @@ def preprocessing(dataset, eDate, tInterval):
 def patternMatching(dataset, master_data, master_info, saveID):
     procs = []
     output, assign_result = {}, {}
+    ########33
+    test = []
     for col_name in factors:
         output[col_name] = Queue()
         procs.append(Process(
@@ -113,6 +134,7 @@ def patternMatching(dataset, master_data, master_info, saveID):
         p.start()
     for col_name in factors:
         assign_result[col_name] = output[col_name].get()
+        print(assign_result[col_name]['realValue'])
         output[col_name].close()
 
         if assign_result[col_name]['status']['status'] == 'anomaly':
@@ -201,8 +223,8 @@ if __name__ == '__main__':
 
     esIndex = 'corecode'
     docType = 'corecode'
-    sDate = "2018-05-29T00:00:00Z"
-    eDate = "2018-05-29T02:00:00Z"
+    sDate = "2018-06-04T00:00:00Z"
+    eDate = "2018-06-04T02:00:00Z"
 
     masterID = config.AD_opt['masterID']
     query = es_query.getDataById(masterID)

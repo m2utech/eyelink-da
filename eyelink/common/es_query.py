@@ -89,7 +89,7 @@ def getCorecodeTargetDataByRange(node_id, sDate, eDate):
                 ],
                 "filter": {
                     "range": {
-                        "event_time": {"gte": sDate, "lt": eDate}
+                        "event_time": {"gte": sDate, "lte": eDate}
                     }
                 }
             }
