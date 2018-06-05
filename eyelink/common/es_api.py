@@ -88,6 +88,10 @@ def getDataById(index, docType, body, masterId):
         logger.warn("dataset does not exist")
         return doc
 
+#** 기존에 corecode 인덱스가 존재하는지 체크한다. **#
+def checkIndex(index):
+    check = es.indices.exists(index=index)
+    return check
 ###
 def insertDataById(index, docType, sid, body):
     check = es.exists_source(index=index, doc_type=docType, id=sid)

@@ -65,9 +65,14 @@ def getDataset(sDate, eDate, esIndex, docType):
     logger.debug("[AD] INDEX : {} | QUERY: {}".format(idxList, body))
     dataset = pd.DataFrame()
     for idx in idxList:
-        logger.debug("[CA] get dataset about index [{}]".format(idx))
-        data = es_api.getCorecodeData(idx, docType, body, DataIndex)
-        dataset = dataset.append(data)
+        checkIndex = es_api.checkIndex(idx)
+        print(checkIndex)
+        if checkIndex:
+            logger.debug("[AD] get dataset about index [{}]".format(idx))
+            data = es_api.getCorecodeData(idx, docType, body, DataIndex)
+            dataset = dataset.append(data)
+        else:
+            logger.debug("[AD] ID [{}] does not exist. skips getting dataset for this ID".format(idx))
     dataset = dataset.sort_index()
     return dataset
 
@@ -290,8 +295,8 @@ if __name__ == '__main__':
     logger = getStreamLogger()
     esIndex = 'corecode'
     docType = 'corecode'
-    sDate = "2018-06-01T00:00:00Z"
-    eDate = "2018-06-04T23:59:59Z"
+    sDate = "2018-06-04T00:00:00Z"
+    eDate = "2018-06-05T23:59:59Z"
 
     # query = es_query.getDataById(config.AD_opt['masterID'])
     # masterData = es_api.getDataById(DA_INDEX[esIndex][docType]['PD']['INDEX'], DA_INDEX[esIndex][docType]['PD']['TYPE'], query, config.AD_opt['masterID'])

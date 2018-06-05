@@ -52,7 +52,7 @@ AD_opt = {
     'masterID': 'master',   ###
     'n_cluster': 30,        ### 30
     'top_k': 3,
-    'slide_len': 2,                             # 1m
+    'slide_len': 1,                             # 1m
     'win_len': 120,                             # 2h
     'match_len': 110,                           # 110m
     'value_range': {
@@ -61,7 +61,7 @@ AD_opt = {
         'power_factor': [0.0, 1.0],
         'voltage': [0.0, 240.0]
     },
-    'match_rate_threshold': 90.0,               # range of value [min, max]
+    'match_rate_threshold': 95.0,               # range of value [min, max]
     'timeUnit': 'minutes',      # seconds, minutes, hours ...
     'sched_cp': {'cycle': 0, 'range': 26},    ### sched opt for create pattern
     'sched_pm': {'cycle': '*/2', 'range': 120} ### sched opt for pattern matching
